@@ -3,8 +3,8 @@ import Base from "../layouts/Base.astro";
 ---
 
 <Base title="About | Sashreek Addanki" description="About Sashreek Addanki">
-  <section class="section stack">
-    <div class="panel fade-up">
+  <section class="section stack about-page">
+    <div class="panel fade-up about-intro">
       <div class="lead">
         I am Sashreek Addanki, a product-focused developer who enjoys quiet interfaces,
         clear typography, and thoughtful motion.
@@ -12,7 +12,7 @@ import Base from "../layouts/Base.astro";
       <div class="subtle">Currently exploring design systems, web performance, and human-friendly UX.</div>
     </div>
 
-    <div class="panel fade-up delay-1">
+    <div class="panel fade-up delay-1 about-timeline">
       <div class="subtle">Timeline</div>
       <div class="timeline">
         <div class="timeline-item">
@@ -30,7 +30,7 @@ import Base from "../layouts/Base.astro";
       </div>
     </div>
 
-    <div class="panel fade-up delay-2">
+    <div class="panel fade-up delay-2 about-activity">
       <div class="subtle">GitHub activity</div>
       <div class="github-graph">
         <img
@@ -38,6 +38,7 @@ import Base from "../layouts/Base.astro";
           alt="GitHub contributions graph"
         />
       </div>
+      <div class="subtle graph-hint">On mobile, swipe horizontally to view the full graph.</div>
     </div>
   </section>
 </Base>

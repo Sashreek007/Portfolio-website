@@ -1,390 +1,161 @@
 ---
 import Base from "../layouts/Base.astro";
 
-const repos = [
-  { repo: "Sashreek007/Streaks" },
-  { repo: "Sashreek007/fruit-ninja-hand-tracker" },
-  { repo: "Aarushb/NH25_flux_Atlas" },
-  { repo: "Sashreek007/Nathacks-2025-project", label: "Nathacks 2025 project" },
-  { repo: "UndergraduateArtificialIntelligenceClub/Spam-Detection-Discord-Bot" },
-  { repo: "UndergraduateArtificialIntelligenceClub/Clubmate-AI" },
-  { repo: "Sashreek007/Folder-Cleaner-MCP" },
-  { repo: "Sashreek007/Langchain_agent" },
+const projects = [
+  {
+    name: "Streaks",
+    description:
+      "Currently working on a social media productivity web app where people announce goals publicly and hold each other accountable to complete them.",
+    github: "https://github.com/Sashreek007/Streaks",
+    production: "https://streaks-cult-mode.vercel.app/dashboard",
+    stack: [],
+  },
+  {
+    name: "FluxAtlas - Economic Trading Engine",
+    description:
+      "Full-stack auction simulation platform modeling international resource trading with Vickrey auction mechanisms across 50+ simulated countries.",
+    github: "https://github.com/Aarushb/NH25_flux_Atlas",
+    stack: ["FastAPI", "React", "PostgreSQL", "Python", "TypeScript", "REST API"],
+  },
+  {
+    name: "Balloon Popper - Gesture-Controlled Game",
+    description:
+      "Gesture-controlled arcade game with webcam-based hand tracking at 60 FPS and dynamic difficulty scaling.",
+    github: "https://github.com/Sashreek007/fruit-ninja-hand-tracker",
+    stack: ["Python", "MediaPipe", "Pygame", "OpenCV"],
+  },
+  {
+    name: "LinkedIn Profile Summarizer",
+    description:
+      "Automated profile analysis pipeline combining web scraping and LLM processing to generate structured summaries.",
+    github: "https://github.com/Sashreek007/Langchain_agent",
+    stack: ["Python", "LangChain", "OpenAI API", "Scrapin API"],
+  },
+  {
+    name: "Spam Detection Discord Bot",
+    description:
+      "Deployed scam detection bot that identifies and removes malicious messages in real time with low-latency inference.",
+    github: "https://github.com/UndergraduateArtificialIntelligenceClub/Spam-Detection-Discord-Bot",
+    stack: ["Python", "Discord.py", "Hugging Face"],
+  },
+  {
+    name: "ClubMate AI",
+    description:
+      "Currently working on an open-source automation platform for club operations, focused on intelligent task scheduling and document workflows.",
+    github: "https://github.com/UndergraduateArtificialIntelligenceClub/Clubmate-AI",
+    stack: ["Python", "LangChain", "LangGraph", "MCP"],
+  },
 ];
+
+const iconMap = {
+  astro: "astro",
+  react: "react",
+  next: "nextdotjs",
+  nextjs: "nextdotjs",
+  "next.js": "nextdotjs",
+  tailwind: "tailwindcss",
+  tailwindcss: "tailwindcss",
+  vite: "vite",
+  node: "nodedotjs",
+  nodejs: "nodedotjs",
+  javascript: "javascript",
+  typescript: "typescript",
+  python: "python",
+  java: "java",
+  kotlin: "kotlin",
+  go: "go",
+  rust: "rust",
+  php: "php",
+  ruby: "ruby",
+  c: "c",
+  "c++": "cplusplus",
+  "c#": "csharp",
+  html: "html5",
+  css: "css3",
+  "jupyter notebook": "jupyter",
+  supabase: "supabase",
+  docker: "docker",
+  firebase: "firebase",
+  mongodb: "mongodb",
+  postgres: "postgresql",
+  postgresql: "postgresql",
+  langchain: "langchain",
+  openai: "openai",
+  fastapi: "fastapi",
+  flask: "flask",
+  django: "django",
+  express: "express",
+  tensorflow: "tensorflow",
+  pytorch: "pytorch",
+  opencv: "opencv",
+  mediapipe: "mediapipe",
+  pygame: "python",
+  "openaiapi": "openai",
+  "discord.py": "discord",
+  huggingface: "huggingface",
+};
+
+const toIconSlug = (name) => {
+  if (!name) return null;
+  const key = name.toLowerCase().replace(/\s+/g, "").replace(/_/g, "");
+  return iconMap[key] || iconMap[name.toLowerCase()] || null;
+};
+
+const iconUrl = (name) => {
+  const slug = toIconSlug(name);
+  if (!slug) return null;
+  return `https://cdn.simpleicons.org/${slug}/B6FFD9`;
+};
 ---
 
 <Base title="Projects | Sashreek Addanki" description="Selected projects by Sashreek Addanki">
   <section class="section stack">
     <div class="panel fade-up">
-      <div class="lead">Projects with a focus on clarity, speed, and a minimal visual tone.</div>
-      <div class="subtle">Live data pulled from GitHub.</div>
+      <div class="lead">Projects I worked on and am currently working on in my free time.</div>
+      <div class="subtle">Personal builds, experiments, and community projects.</div>
     </div>
 
     <div class="panel fade-up delay-1">
-      <div class="projects" id="projects" data-repos={JSON.stringify(repos)}>
-        <div class="subtle">Loading projects…</div>
+      <div class="projects">
+        {projects.map((project) => (
+          <article class="project-card">
+            <div class="project-header">
+              <div class="project-name">{project.name}</div>
+              <div class="project-links">
+                {project.production && (
+                  <a href={project.production} target="_blank" rel="noreferrer noopener">
+                    visit site
+                  </a>
+                )}
+                <a href={project.github} target="_blank" rel="noreferrer noopener">github</a>
+              </div>
+            </div>
+            <div class="subtle">{project.description}</div>
+            {project.stack.length > 0 && (
+              <div class="tech-stack">
+                {project.stack.map((item) => {
+                  const icon = iconUrl(item);
+                  return (
+                    <span class="tech-item">
+                      {icon && (
+                        <span class="tech-icon">
+                          <img
+                            src={icon}
+                            alt={`${item} icon`}
+                            loading="lazy"
+                            onerror="this.closest('.tech-icon')?.remove()"
+                          />
+                        </span>
+                      )}
+                      <span>{item}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </article>
+        ))}
       </div>
     </div>
   </section>
-
-  <script type="module">
-    const container = document.getElementById("projects");
-    if (!container) {
-      console.warn("Projects container not found.");
-    } else {
-      const repos = JSON.parse(container.dataset.repos || "[]");
-
-      const API_HEADERS = {
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      };
-
-      const iconMap = {
-        astro: "astro",
-        react: "react",
-        next: "nextdotjs",
-        nextjs: "nextdotjs",
-        "next.js": "nextdotjs",
-        tailwind: "tailwindcss",
-        tailwindcss: "tailwindcss",
-        vite: "vite",
-        node: "nodedotjs",
-        nodejs: "nodedotjs",
-        javascript: "javascript",
-        typescript: "typescript",
-        python: "python",
-        java: "java",
-        kotlin: "kotlin",
-        go: "go",
-        rust: "rust",
-        php: "php",
-        ruby: "ruby",
-        c: "c",
-        "c++": "cplusplus",
-        "c#": "csharp",
-        html: "html5",
-        css: "css3",
-        "jupyter notebook": "jupyter",
-        supabase: "supabase",
-        docker: "docker",
-        firebase: "firebase",
-        mongodb: "mongodb",
-        postgres: "postgresql",
-        postgresql: "postgresql",
-        langchain: "langchain",
-        openai: "openai",
-        fastapi: "fastapi",
-        flask: "flask",
-        django: "django",
-        express: "express",
-        tensorflow: "tensorflow",
-        pytorch: "pytorch",
-        opencv: "opencv",
-        mediapipe: "mediapipe",
-      };
-
-      const knownDeps = {
-        react: "React",
-        "react-dom": "React",
-        next: "Next.js",
-        astro: "Astro",
-        svelte: "Svelte",
-        sveltekit: "SvelteKit",
-        vue: "Vue",
-        nuxt: "Nuxt",
-        tailwindcss: "Tailwind",
-        express: "Express",
-        fastify: "Fastify",
-        flask: "Flask",
-        django: "Django",
-        fastapi: "FastAPI",
-        supabase: "Supabase",
-        mongodb: "MongoDB",
-        mongoose: "Mongoose",
-        prisma: "Prisma",
-        "react-native": "React Native",
-        expo: "Expo",
-        langchain: "LangChain",
-        openai: "OpenAI",
-        tensorflow: "TensorFlow",
-        pytorch: "PyTorch",
-        opencv: "OpenCV",
-        mediapipe: "MediaPipe",
-      };
-
-      const knownPyDeps = {
-        "opencv-python": "OpenCV",
-        opencv: "OpenCV",
-        mediapipe: "MediaPipe",
-        torch: "PyTorch",
-        pytorch: "PyTorch",
-        tensorflow: "TensorFlow",
-        langchain: "LangChain",
-        openai: "OpenAI",
-        fastapi: "FastAPI",
-        flask: "Flask",
-        django: "Django",
-      };
-
-      const normalizeKey = (value) =>
-        value
-          .toString()
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g, " ");
-
-      const unique = (items) => {
-        const map = new Map();
-        items
-          .filter(Boolean)
-          .forEach((item) => {
-            const key = normalizeKey(item);
-            if (!map.has(key)) {
-              map.set(key, item);
-            }
-          });
-        return Array.from(map.values());
-      };
-
-      const toIconSlug = (name) => {
-        if (!name) return null;
-        const key = normalizeKey(name).replace(/\s+/g, "").replace(/_/g, "");
-        return iconMap[key] || iconMap[name.toLowerCase()] || null;
-      };
-
-      const iconUrl = (name) => {
-        const slug = toIconSlug(name);
-        if (!slug) return null;
-        return `https://cdn.simpleicons.org/${slug}/B6FFD9`;
-      };
-
-      const fallbackDescription = (label) => label || "No description available yet.";
-
-      const extractDeps = (pkg) => {
-        if (!pkg) return [];
-        const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
-        return unique(
-          Object.keys(deps)
-            .filter((dep) => knownDeps[dep])
-            .map((dep) => knownDeps[dep])
-        );
-      };
-
-      const extractPythonDeps = (text) => {
-        if (!text) return [];
-        const deps = new Set();
-        text.split("\n").forEach((line) => {
-          const cleaned = line.split("#")[0].trim();
-          if (!cleaned) return;
-          const name = cleaned.split(/[<>=!~\[]/)[0].trim().toLowerCase();
-          if (!name) return;
-          if (knownPyDeps[name]) deps.add(knownPyDeps[name]);
-          if (name.startsWith("opencv")) deps.add("OpenCV");
-          if (name.startsWith("torch")) deps.add("PyTorch");
-        });
-        return Array.from(deps);
-      };
-
-      const fetchJson = async (url) => {
-        try {
-          const res = await fetch(url, { headers: API_HEADERS });
-          if (!res.ok) return null;
-          return await res.json();
-        } catch {
-          return null;
-        }
-      };
-
-      const fetchTextFile = async (url) => {
-        const data = await fetchJson(url);
-        if (!data || !data.content) return "";
-        try {
-          return atob(data.content.replace(/\n/g, ""));
-        } catch {
-          return "";
-        }
-      };
-
-      const fetchRepo = async ({ repo, label }) => {
-        const repoUrl = `https://api.github.com/repos/${repo}`;
-        const langUrl = `https://api.github.com/repos/${repo}/languages`;
-        const pkgUrl = `https://api.github.com/repos/${repo}/contents/package.json`;
-        const reqUrl = `https://api.github.com/repos/${repo}/contents/requirements.txt`;
-
-        const [repoData, languagesRaw, pkgData, reqText] = await Promise.all([
-          fetchJson(repoUrl),
-          fetchJson(langUrl),
-          fetchJson(pkgUrl),
-          fetchTextFile(reqUrl),
-        ]);
-
-        if (!repoData) {
-          return {
-            name: label || repo,
-            description: "Repo not found — check the repo name.",
-            html_url: `https://github.com/${repo}`,
-            topics: [],
-            languages: [],
-            stacks: [],
-            language: null,
-            label,
-+            repo,
-          };
-        }
-
-        const languages = Object.entries(languagesRaw || {})
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 4)
-          .map(([name]) => name);
-
-        let stacks = [];
-        if (pkgData && pkgData.content) {
-          try {
-            const decoded = atob(pkgData.content.replace(/\n/g, ""));
-            const pkgJson = JSON.parse(decoded);
-            stacks = extractDeps(pkgJson);
-          } catch {
-            stacks = [];
-          }
-        }
-
-        const pyStacks = extractPythonDeps(reqText);
-        stacks = unique([...stacks, ...pyStacks]);
-
-        return {
-          name: repoData.name,
-          description: repoData.description,
-          html_url: repoData.html_url,
-          topics: repoData.topics || [],
-          languages,
-          stacks,
-          language: repoData.language,
-          label,
-+          repo,
-        };
-      };
-
-      const storage = (() => {
-        try {
-          return window.localStorage;
-        } catch {
-          return null;
-        }
-      })();
-
-      const cacheKey = "github-projects-cache-v3";
-      const cacheTimeKey = "github-projects-cache-time-v3";
-      const cacheTtlMs = 1000 * 60 * 30;
-
-      const readCache = () => {
-        if (!storage) return null;
-        const cachedRaw = storage.getItem(cacheKey);
-        const cachedAt = Number(storage.getItem(cacheTimeKey) || 0);
-        if (!cachedRaw || Date.now() - cachedAt > cacheTtlMs) return null;
-        try {
-          return JSON.parse(cachedRaw);
-        } catch {
-          return null;
-        }
-      };
-
-      const writeCache = (data) => {
-        if (!storage) return;
-        storage.setItem(cacheKey, JSON.stringify(data));
-        storage.setItem(cacheTimeKey, String(Date.now()));
-      };
-
-      const collectTech = (project) => {
-        const techSource = [];
-        if (project.stacks && project.stacks.length) techSource.push(...project.stacks);
-        if (project.topics && project.topics.length) techSource.push(...project.topics);
-        if (project.languages && project.languages.length) techSource.push(...project.languages);
-        if (!techSource.length && project.language) techSource.push(project.language);
-        return unique(techSource).slice(0, 6);
-      };
-
-      const renderCard = (project) => {
-        const article = document.createElement("article");
-        article.className = "project-card";
-
-        const header = document.createElement("div");
-        header.className = "project-header";
-
-        const name = document.createElement("div");
-        name.className = "project-name";
-        name.textContent = project.name || project.label || "Untitled project";
-
-        const links = document.createElement("div");
-        links.className = "project-links";
-
-        const link = document.createElement("a");
-        link.href = project.html_url || `https://github.com/${project.repo}`;
-        link.target = "_blank";
-        link.rel = "noreferrer noopener";
-        link.textContent = "github";
-        links.appendChild(link);
-
-        header.appendChild(name);
-        header.appendChild(links);
-
-        const description = document.createElement("div");
-        description.className = "subtle";
-        description.textContent = project.description || fallbackDescription(project.label);
-
-        const tech = collectTech(project);
-        const stack = document.createElement("div");
-        stack.className = "tech-stack";
-        tech.forEach((item) => {
-          const techItem = document.createElement("span");
-          techItem.className = "tech-item";
-
-          const icon = iconUrl(item);
-          const iconWrap = document.createElement("span");
-          iconWrap.className = "tech-icon";
-          if (icon) {
-            const img = document.createElement("img");
-            img.src = icon;
-            img.alt = `${item} icon`;
-            img.loading = "lazy";
-            iconWrap.appendChild(img);
-          }
-
-          const label = document.createElement("span");
-          label.textContent = item;
-
-          techItem.appendChild(iconWrap);
-          techItem.appendChild(label);
-          stack.appendChild(techItem);
-        });
-
-        article.appendChild(header);
-        article.appendChild(description);
-        if (tech.length) {
-          article.appendChild(stack);
-        }
-
-        return article;
-      };
-
-      const renderProjects = (projects) => {
-        container.replaceChildren(...projects.map(renderCard));
-      };
-
-      const load = async () => {
-        const cached = readCache();
-        if (cached) {
-          renderProjects(cached);
-          return;
-        }
-
-        const results = await Promise.all(repos.map(fetchRepo));
-        renderProjects(results);
-        writeCache(results);
-      };
-
-      load().catch(() => {
-        container.innerHTML = "<div class=\"subtle\">Failed to load projects. Try again later.</div>";
-      });
-    }
-  </script>
 </Base>

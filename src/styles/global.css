@@ -161,6 +161,8 @@ a:hover {
 .subtle {
   color: var(--muted);
   font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
   font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -221,6 +223,8 @@ a:hover {
 .project-name {
   font-size: 18px;
   letter-spacing: 0.02em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .project-links {
@@ -291,6 +295,19 @@ a:hover {
   height: auto;
   display: block;
   opacity: 0.9;
+}
+
+.about-page .lead {
+  max-width: 34ch;
+}
+
+.about-timeline .timeline-item > :first-child {
+  line-height: 1.45;
+}
+
+.about-activity .graph-hint {
+  display: none;
+  margin-top: 10px;
 }
 
 .resume-wrap {
@@ -366,19 +383,206 @@ a:hover {
   .top {
     flex-direction: column;
     align-items: flex-start;
+    padding: 20px 8vw 0;
+    gap: 12px;
+  }
+
+  .wordmark {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+  }
+
+  .nav {
+    width: 100%;
+    gap: 10px 14px;
+    font-size: 12px;
   }
 
   .content {
-    padding: 64px 8vw 48px;
+    align-items: flex-start;
+    padding: 40px 8vw 44px;
   }
 
-  .hero::after {
-    width: 180px;
-    height: 180px;
+  .hero {
+    gap: 8px;
+  }
+
+  .hero .name {
+    font-size: clamp(24px, 8.5vw, 34px);
+    letter-spacing: 0.05em;
+  }
+
+  .hero .tagline {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .pill-list {
+    width: min(360px, 100%);
+    margin-top: 20px;
+    gap: 14px;
+  }
+
+  .pill {
+    padding: 11px 24px 11px 14px;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .pill .ext {
+    opacity: 0.75;
+    right: 4px;
+    transform: translateY(-50%);
+  }
+
+  .section {
+    width: 100%;
+  }
+
+  .stack {
+    gap: 18px;
+  }
+
+  .panel {
+    border-radius: 16px;
+    padding: 18px;
+  }
+
+  .lead {
+    font-size: clamp(19px, 6vw, 24px);
+    line-height: 1.4;
+  }
+
+  .project-card {
+    gap: 10px;
+    padding: 14px 0;
+  }
+
+  .project-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .project-name {
+    font-size: 17px;
+  }
+
+  .project-links {
+    gap: 12px;
+    font-size: 12px;
+  }
+
+  .tech-stack {
+    gap: 8px;
+  }
+
+  .tech-item {
+    font-size: 11px;
+    padding: 6px 9px;
+  }
+
+  .contact-card {
+    border-radius: 14px;
+    padding: 18px;
+    text-align: left;
+  }
+
+  .github-graph {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .github-graph img {
+    min-width: 420px;
+  }
+
+  .about-page .lead {
+    max-width: none;
+    font-size: clamp(18px, 6.2vw, 22px);
+    line-height: 1.45;
+  }
+
+  .about-page .subtle {
+    font-size: 13px;
+  }
+
+  .about-timeline .timeline {
+    gap: 12px;
+  }
+
+  .about-timeline .timeline-item {
+    gap: 4px;
+    padding-bottom: 12px;
+  }
+
+  .about-timeline .timeline-item > :first-child {
+    font-size: 14px;
+  }
+
+  .about-activity .github-graph {
+    padding: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .about-activity .github-graph img {
+    width: auto;
+    max-width: none;
+    min-width: 700px;
+  }
+
+  .about-activity .graph-hint {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .resume-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .resume-frame {
+    height: min(68vh, 560px);
   }
 
   .footer {
     flex-direction: column;
+    padding: 0 8vw 26px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 420px) {
+  .content {
+    padding: 34px 6vw 40px;
+  }
+
+  .hero .name {
+    font-size: clamp(22px, 10vw, 30px);
+  }
+
+  .pill-list {
+    gap: 12px;
+  }
+
+  .pill {
+    font-size: 14px;
+    padding: 10px 22px 10px 12px;
+  }
+
+  .project-links {
+    font-size: 11px;
+  }
+
+  .github-graph img {
+    min-width: 380px;
+  }
+
+  .about-activity .github-graph img {
+    min-width: 640px;
   }
 }
 
