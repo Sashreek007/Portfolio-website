@@ -599,6 +599,23 @@ body.style-five .hero .linklist a {
   background: rgba(12, 12, 12, 0.6);
 }
 
+.github-graph {
+  margin-top: 12px;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid var(--edge);
+  background: #0b0b0b;
+  padding: 12px;
+}
+
+.github-graph img {
+  width: 100%;
+  min-width: 520px;
+  height: auto;
+  display: block;
+  opacity: 0.9;
+}
+
 .resume-wrap {
   display: grid;
   gap: 14px;
