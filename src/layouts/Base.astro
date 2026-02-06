@@ -4,7 +4,6 @@ import "../styles/global.css";
 const {
   title = "Sashreek Addanki",
   description = "Portfolio of Sashreek Addanki",
-  bodyClass = "",
   showNav = true,
   showFooter = true,
 } = Astro.props;
@@ -23,7 +22,7 @@ const {
       rel="stylesheet"
     />
   </head>
-  <body class={bodyClass}>
+  <body>
     <div class="page">
       {showNav && (
         <header class="top">
@@ -31,7 +30,7 @@ const {
           <nav class="nav">
             <a href="/">home</a>
             <a href="/about">about</a>
-            <a href="/work">work</a>
+            <a href="/work">projects</a>
             <a href="/writing">writing</a>
             <a href="/contact">contact</a>
           </nav>

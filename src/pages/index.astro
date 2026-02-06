@@ -2,15 +2,33 @@
 import Base from "../layouts/Base.astro";
 ---
 
-<Base title="Sashreek Addanki" showNav={false} bodyClass="solid">
+<Base title="Sashreek Addanki" showNav={false}>
   <section class="section hero">
     <div class="name fade-up">sashreek addanki</div>
     <div class="tagline fade-up delay-1">minimal interfaces, thoughtful systems</div>
     <div class="pill-list fade-up delay-2">
       <a class="pill" href="/about">about me</a>
       <a class="pill" href="/work">my projects</a>
-      <a class="pill" href="https://github.com/Sashreek007" target="_blank" rel="noreferrer">github</a>
-      <a class="pill" href="https://www.linkedin.com/in/sashreek-addanki-121471257/" target="_blank" rel="noreferrer">linkedin</a>
+      <a class="pill" href="https://github.com/Sashreek007" target="_blank" rel="noreferrer noopener">
+        github
+        <span class="ext" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 5h5v5" />
+            <path d="M10 14L19 5" />
+            <path d="M19 14v5h-5" />
+          </svg>
+        </span>
+      </a>
+      <a class="pill" href="https://www.linkedin.com/in/sashreek-addanki-121471257/" target="_blank" rel="noreferrer noopener">
+        linkedin
+        <span class="ext" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 5h5v5" />
+            <path d="M10 14L19 5" />
+            <path d="M19 14v5h-5" />
+          </svg>
+        </span>
+      </a>
       <a class="pill" href="/resume">resume</a>
     </div>
   </section>
