@@ -1,0 +1,50 @@
+---
+import "../styles/global.css";
+
+const {
+  title = "Sashreek Addanki",
+  description = "Portfolio of Sashreek Addanki",
+  bodyClass = "",
+  showNav = true,
+  showFooter = true,
+} = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class={bodyClass}>
+    <div class="page">
+      {showNav && (
+        <header class="top">
+          <a class="wordmark" href="/">Sashreek Addanki</a>
+          <nav class="nav">
+            <a href="/">home</a>
+            <a href="/about">about</a>
+            <a href="/work">work</a>
+            <a href="/writing">writing</a>
+            <a href="/contact">contact</a>
+          </nav>
+        </header>
+      )}
+      <main class="content">
+        <slot />
+      </main>
+      {showFooter && (
+        <footer class="footer">
+          <span>© 2026 Sashreek Addanki</span>
+        </footer>
+      )}
+    </div>
+  </body>
+</html>
