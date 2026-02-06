@@ -1,106 +1,296 @@
 ---
 import Base from "../layouts/Base.astro";
+
+const repos = [
+  { repo: "Sashreek007/Streaks" },
+  { repo: "Sashreek007/fruit-ninja-hand-tracker" },
+  { repo: "Aarushb/NH25_flux_Atlas" },
+  { repo: "Sashreek007/Nathacks-2025-project", label: "Nathacks 2025 project" },
+  { repo: "UndergraduateArtificialIntelligenceClub/Spam-Detection-Discord-Bot" },
+  { repo: "UndergraduateArtificialIntelligenceClub/Clubmate-AI" },
+  { repo: "Sashreek007/Folder-Cleaner-MCP" },
+  { repo: "Sashreek007/Langchain_agent" },
+];
 ---
 
 <Base title="Work | Sashreek Addanki" description="Selected work by Sashreek Addanki" bodyClass="solid">
   <section class="section stack">
     <div class="panel fade-up">
       <div class="lead">Projects with a focus on clarity, speed, and a minimal visual tone.</div>
-      <div class="subtle">Template layout — swap in your real work later.</div>
+      <div class="subtle">Live data pulled from GitHub.</div>
     </div>
 
     <div class="panel fade-up delay-1">
-      <div class="projects">
-        <article class="project-card">
-          <div class="project-header">
-            <div class="project-name">Project Name One</div>
-            <div class="project-links">
-              <a href="#">github</a>
-            </div>
-          </div>
-          <div class="subtle">Short, one-line description of the project and the problem it solves.</div>
-          <div class="tech-stack">
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/astro/C4FFE9" alt="Astro" />
-              </span>
-              Astro
-            </span>
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/tailwindcss/C4FFE9" alt="Tailwind CSS" />
-              </span>
-              Tailwind
-            </span>
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/nodedotjs/C4FFE9" alt="Node.js" />
-              </span>
-              Node
-            </span>
-          </div>
-        </article>
-
-        <article class="project-card">
-          <div class="project-header">
-            <div class="project-name">Project Name Two</div>
-            <div class="project-links">
-              <a href="#">github</a>
-            </div>
-          </div>
-          <div class="subtle">A calm dashboard with real-time metrics and clean visual hierarchy.</div>
-          <div class="tech-stack">
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/react/C4FFE9" alt="React" />
-              </span>
-              React
-            </span>
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/vite/C4FFE9" alt="Vite" />
-              </span>
-              Vite
-            </span>
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/supabase/C4FFE9" alt="Supabase" />
-              </span>
-              Supabase
-            </span>
-          </div>
-        </article>
-
-        <article class="project-card">
-          <div class="project-header">
-            <div class="project-name">Project Name Three</div>
-            <div class="project-links">
-              <a href="#">github</a>
-            </div>
-          </div>
-          <div class="subtle">Minimal portfolio system optimized for quick updates.</div>
-          <div class="tech-stack">
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/nextdotjs/C4FFE9" alt="Next.js" />
-              </span>
-              Next
-            </span>
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/typescript/C4FFE9" alt="TypeScript" />
-              </span>
-              TypeScript
-            </span>
-            <span class="tech-item">
-              <span class="tech-icon">
-                <img src="https://cdn.simpleicons.org/framer/C4FFE9" alt="Framer" />
-              </span>
-              Framer
-            </span>
-          </div>
-        </article>
+      <div class="projects" id="projects" data-repos={JSON.stringify(repos)}>
+        <div class="subtle">Loading projects…</div>
       </div>
     </div>
   </section>
+
+  <script type="module">
+    const container = document.getElementById("projects");
+    if (!container) return;
+
+    const repos = JSON.parse(container.dataset.repos || "[]");
+
+    const iconMap = {
+      astro: "astro",
+      react: "react",
+      next: "nextdotjs",
+      "nextjs": "nextdotjs",
+      "next.js": "nextdotjs",
+      tailwind: "tailwindcss",
+      "tailwindcss": "tailwindcss",
+      vite: "vite",
+      node: "nodedotjs",
+      "nodejs": "nodedotjs",
+      javascript: "javascript",
+      typescript: "typescript",
+      python: "python",
+      java: "java",
+      kotlin: "kotlin",
+      go: "go",
+      rust: "rust",
+      php: "php",
+      ruby: "ruby",
+      "c": "c",
+      "c++": "cplusplus",
+      "c#": "csharp",
+      "html": "html5",
+      "css": "css3",
+      "jupyter notebook": "jupyter",
+      supabase: "supabase",
+      docker: "docker",
+      firebase: "firebase",
+      mongodb: "mongodb",
+      postgres: "postgresql",
+      postgresql: "postgresql",
+      langchain: "langchain",
+      openai: "openai",
+      fastapi: "fastapi",
+      flask: "flask",
+      django: "django",
+      express: "express",
+      tensorflow: "tensorflow",
+      pytorch: "pytorch",
+      opencv: "opencv",
+      mediapipe: "mediapipe",
+    };
+
+    const toIconSlug = (name) => {
+      if (!name) return null;
+      const key = name.toLowerCase().replace(/\s+/g, "").replace(/_/g, "");
+      return iconMap[key] || iconMap[name.toLowerCase()] || null;
+    };
+
+    const iconUrl = (name) => {
+      const slug = toIconSlug(name);
+      if (!slug) return null;
+      return `https://cdn.simpleicons.org/${slug}/C4FFE9`;
+    };
+
+    const fallbackDescription = (label) => label || "No description available yet.";
+
+    const knownDeps = {
+      react: "React",
+      "react-dom": "React",
+      next: "Next.js",
+      astro: "Astro",
+      svelte: "Svelte",
+      "sveltekit": "SvelteKit",
+      vue: "Vue",
+      nuxt: "Nuxt",
+      tailwindcss: "Tailwind",
+      express: "Express",
+      fastify: "Fastify",
+      flask: "Flask",
+      django: "Django",
+      fastapi: "FastAPI",
+      supabase: "Supabase",
+      mongodb: "MongoDB",
+      mongoose: "Mongoose",
+      prisma: "Prisma",
+      "react-native": "React Native",
+      expo: "Expo",
+      langchain: "LangChain",
+      openai: "OpenAI",
+      tensorflow: "TensorFlow",
+      pytorch: "PyTorch",
+      opencv: "OpenCV",
+      mediapipe: "MediaPipe",
+    };
+
+    const knownPyDeps = {
+      "opencv-python": "OpenCV",
+      opencv: "OpenCV",
+      mediapipe: "MediaPipe",
+      torch: "PyTorch",
+      pytorch: "PyTorch",
+      tensorflow: "TensorFlow",
+      langchain: "LangChain",
+      openai: "OpenAI",
+      fastapi: "FastAPI",
+      flask: "Flask",
+      django: "Django",
+    };
+
+    const extractDeps = (pkg) => {
+      if (!pkg) return [];
+      const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+      const names = Object.keys(deps);
+      const found = names
+        .filter((dep) => knownDeps[dep])
+        .map((dep) => knownDeps[dep]);
+      return Array.from(new Set(found));
+    };
+
+    const extractPythonDeps = (text) => {
+      if (!text) return [];
+      const deps = new Set();
+      text.split("\n").forEach((line) => {
+        const cleaned = line.split("#")[0].trim();
+        if (!cleaned) return;
+        const name = cleaned.split(/[<>=!~\[]/)[0].trim().toLowerCase();
+        if (!name) return;
+        if (knownPyDeps[name]) deps.add(knownPyDeps[name]);
+        if (name.startsWith("opencv")) deps.add("OpenCV");
+        if (name.startsWith("torch")) deps.add("PyTorch");
+      });
+      return Array.from(deps);
+    };
+
+    const renderCard = ({ name, description, html_url, topics, languages, stacks, language, label }) => {
+      const techSource = [];
+      if (stacks && stacks.length) techSource.push(...stacks);
+      if (topics && topics.length) techSource.push(...topics);
+      if (languages && languages.length) techSource.push(...languages);
+      if (!techSource.length && language) techSource.push(language);
+
+      const tech = Array.from(new Set(techSource));
+      const techItems = tech
+        .slice(0, 6)
+        .map((t) => {
+          const icon = iconUrl(t);
+          const iconHtml = icon
+            ? `<span class="tech-icon"><img src="${icon}" alt="${t} icon" /></span>`
+            : `<span class="tech-icon"></span>`;
+          return `<span class="tech-item">${iconHtml}${t}</span>`;
+        })
+        .join("");
+
+      return `
+        <article class="project-card">
+          <div class="project-header">
+            <div class="project-name">${name || label}</div>
+            <div class="project-links">
+              <a href="${html_url}" target="_blank" rel="noreferrer">github</a>
+            </div>
+          </div>
+          <div class="subtle">${description || fallbackDescription(label)}</div>
+          <div class="tech-stack">${techItems || ""}</div>
+        </article>
+      `;
+    };
+
+    const fetchTextFile = async (url) => {
+      const res = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
+      if (!res.ok) return "";
+      const data = await res.json();
+      if (data && data.content) {
+        try {
+          return atob(data.content.replace(/\n/g, ""));
+        } catch {
+          return "";
+        }
+      }
+      return "";
+    };
+
+    const fetchRepo = async ({ repo, label }) => {
+      const repoUrl = `https://api.github.com/repos/${repo}`;
+      const langUrl = `https://api.github.com/repos/${repo}/languages`;
+      const pkgUrl = `https://api.github.com/repos/${repo}/contents/package.json`;
+      const reqUrl = `https://api.github.com/repos/${repo}/contents/requirements.txt`;
+
+      const [repoRes, langRes, pkgRes, reqText] = await Promise.all([
+        fetch(repoUrl, { headers: { Accept: "application/vnd.github+json" } }),
+        fetch(langUrl, { headers: { Accept: "application/vnd.github+json" } }),
+        fetch(pkgUrl, { headers: { Accept: "application/vnd.github+json" } }),
+        fetchTextFile(reqUrl),
+      ]);
+
+      if (!repoRes.ok) {
+        return {
+          name: label || repo,
+          description: "Repo not found — check the repo name.",
+          html_url: `https://github.com/${repo}`,
+          topics: [],
+          languages: [],
+          stacks: [],
+          language: null,
+          label,
+        };
+      }
+
+      const data = await repoRes.json();
+      const languagesRaw = langRes.ok ? await langRes.json() : {};
+      const languages = Object.entries(languagesRaw)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(([name]) => name);
+
+      let stacks = [];
+      if (pkgRes.ok) {
+        const pkgData = await pkgRes.json();
+        if (pkgData && pkgData.content) {
+          try {
+            const decoded = atob(pkgData.content.replace(/\n/g, ""));
+            const pkgJson = JSON.parse(decoded);
+            stacks = extractDeps(pkgJson);
+          } catch {
+            stacks = [];
+          }
+        }
+      }
+
+      const pyStacks = extractPythonDeps(reqText);
+      stacks = Array.from(new Set([...stacks, ...pyStacks]));
+
+      return {
+        name: data.name,
+        description: data.description,
+        html_url: data.html_url,
+        topics: data.topics || [],
+        languages,
+        stacks,
+        language: data.language,
+        label,
+      };
+    };
+
+    const cacheKey = "github-projects-cache-v2";
+    const cacheTimeKey = "github-projects-cache-time-v2";
+    const cacheTtlMs = 1000 * 60 * 30;
+
+    const now = Date.now();
+    const cachedAt = Number(localStorage.getItem(cacheTimeKey) || 0);
+    const cachedRaw = localStorage.getItem(cacheKey);
+
+    const load = async () => {
+      if (cachedRaw && now - cachedAt < cacheTtlMs) {
+        const cached = JSON.parse(cachedRaw);
+        container.innerHTML = cached.map(renderCard).join("");
+        return;
+      }
+
+      const results = await Promise.all(repos.map(fetchRepo));
+      container.innerHTML = results.map(renderCard).join("");
+      localStorage.setItem(cacheKey, JSON.stringify(results));
+      localStorage.setItem(cacheTimeKey, String(now));
+    };
+
+    load().catch(() => {
+      container.innerHTML = "<div class=\"subtle\">Failed to load projects. Try again later.</div>";
+    });
+  </script>
 </Base>
