@@ -24,6 +24,7 @@ body {
   color: var(--ink);
   min-height: 100vh;
   letter-spacing: 0.01em;
+  overflow-x: hidden;
 }
 
 a {
@@ -301,6 +302,10 @@ a:hover {
   max-width: 34ch;
 }
 
+.about-page .panel {
+  overflow: hidden;
+}
+
 .about-timeline .timeline-item > :first-child {
   line-height: 1.45;
 }
@@ -499,8 +504,8 @@ a:hover {
 
   .about-page .lead {
     max-width: none;
-    font-size: clamp(18px, 6.2vw, 22px);
-    line-height: 1.45;
+    font-size: clamp(17px, 5.8vw, 21px);
+    line-height: 1.5;
   }
 
   .about-page .subtle {
@@ -517,11 +522,13 @@ a:hover {
   }
 
   .about-timeline .timeline-item > :first-child {
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   .about-activity .github-graph {
     padding: 8px;
+    max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -529,7 +536,7 @@ a:hover {
   .about-activity .github-graph img {
     width: auto;
     max-width: none;
-    min-width: 700px;
+    min-width: 560px;
   }
 
   .about-activity .graph-hint {
@@ -582,7 +589,7 @@ a:hover {
   }
 
   .about-activity .github-graph img {
-    min-width: 640px;
+    min-width: 520px;
   }
 }
 
