@@ -298,10 +298,6 @@ a:hover {
   opacity: 0.9;
 }
 
-.about-page .lead {
-  max-width: 34ch;
-}
-
 .about-page .panel {
   overflow: hidden;
 }
@@ -313,6 +309,25 @@ a:hover {
 .about-activity .graph-hint {
   display: none;
   margin-top: 10px;
+}
+
+.about-body {
+  margin-top: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.about-body p {
+  margin: 0 0 10px;
+}
+
+.about-body p:last-child {
+  margin-bottom: 0;
+}
+
+.about-secondary {
+  color: var(--muted);
 }
 
 .resume-wrap {
@@ -510,6 +525,11 @@ a:hover {
 
   .about-page .subtle {
     font-size: 13px;
+  }
+
+  .about-body {
+    font-size: 13px;
+    line-height: 1.55;
   }
 
   .about-timeline .timeline {

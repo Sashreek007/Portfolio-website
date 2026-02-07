@@ -6,39 +6,54 @@ import Base from "../layouts/Base.astro";
   <section class="section stack about-page">
     <div class="panel fade-up about-intro">
       <div class="lead">
-        I am Sashreek Addanki, a product-focused developer who enjoys quiet interfaces,
-        clear typography, and thoughtful motion.
+        I’m Sashreek Addanki, a University of Alberta student building software systems and applied AI.
       </div>
-      <div class="subtle">Currently exploring design systems, web performance, and human-friendly UX.</div>
+      <div class="about-body">
+        <p>
+          My work spans backend systems, low-level programming, and AI-driven features that move beyond research demos into
+          usable applications. I’m especially interested in the engineering needed to bridge AI research ideas with real
+          software systems.
+        </p>
+        <p class="about-secondary">
+          I test ideas by vibe coding, am currently building a social media productivity app called Streaks (see Projects),
+          and I’m currently grinding LeetCode because problem solving is genuinely fun. I’m aiming to get cracked by this
+          summer—check the blog for progress. I’m currently learning assembly with the RISC-V 32 architecture, and it’s
+          fun.
+        </p>
+      </div>
     </div>
 
     <div class="panel fade-up delay-1 about-timeline">
-      <div class="subtle">Timeline</div>
+      <div class="subtle">Experience</div>
       <div class="timeline">
         <div class="timeline-item">
-          <div>Building portfolio and personal products</div>
-          <div class="subtle">2024 to now</div>
+          <div>Software Engineer (Project Lead) — Undergraduate Artificial Intelligence Society</div>
+          <div class="subtle">Sept 2025 to Present · Edmonton, AB</div>
+          <div>Developed and deployed a scam detection Discord bot using a fine-tuned Hugging Face model.</div>
+          <div>Built the bot's message-processing pipeline with Python and Discord.py for reliable 24/7 operation.</div>
+          <div>Leading ClubMate AI with LangChain, LangGraph, and MCP to automate task scheduling and document workflows.</div>
         </div>
         <div class="timeline-item">
-          <div>Shipped UI kits and front-end systems</div>
-          <div class="subtle">2022 to 2024</div>
-        </div>
-        <div class="timeline-item">
-          <div>Studied full-stack development and interaction design</div>
-          <div class="subtle">2020 to 2022</div>
+          <div>Teaching Assistant — CMPUT 274, University of Alberta</div>
+          <div class="subtle">Sept 2025 to Dec 2025 · Edmonton, AB</div>
+          <div>Mentored 200+ students in Linux, bash, and Python data structures and algorithms.</div>
+          <div>Taught functional programming concepts in Python through labs and office hours.</div>
+          <div>Supported assignments and labs with office hours and code reviews.</div>
         </div>
       </div>
     </div>
 
-    <div class="panel fade-up delay-2 about-activity">
-      <div class="subtle">GitHub activity</div>
-      <div class="github-graph">
-        <img
-          src="https://gh-heat.anishroy.com/api/Sashreek007/svg?darkMode=true&transparent=true&showLegend=false&colors=0b100b,143018,1f5a2b,3aa255,9dffb5"
-          alt="GitHub contributions graph"
-        />
+    {/*
+      <div class="panel fade-up delay-2 about-activity">
+        <div class="subtle">GitHub activity</div>
+        <div class="github-graph">
+          <img
+            src="https://gh-heat.anishroy.com/api/Sashreek007/svg?darkMode=true&transparent=true&showLegend=false&colors=0b100b,143018,1f5a2b,3aa255,9dffb5"
+            alt="GitHub contributions graph"
+          />
+        </div>
+        <div class="subtle graph-hint">On mobile, swipe right to view the full graph.</div>
       </div>
-      <div class="subtle graph-hint">On mobile, swipe right to view the full graph.</div>
-    </div>
+    */}
   </section>
 </Base>
