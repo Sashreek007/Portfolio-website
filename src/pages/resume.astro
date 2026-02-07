@@ -3,21 +3,25 @@ import Base from "../layouts/Base.astro";
 ---
 
 <Base title="Resume | Sashreek Addanki" description="Resume of Sashreek Addanki">
-  <section class="section stack">
-    <div class="panel fade-up">
+  <section class="section stack resume-page">
+    <div class="resume-header fade-up">
       <div class="lead">Resume</div>
-      <div class="subtle">Please hire me :)</div>
+      <div class="subtle">Software Systems & Applied AI</div>
     </div>
 
     <div class="resume-wrap fade-up delay-1">
-      <div class="resume-toolbar">
-        <span>PDF viewer</span>
-        <a href="/Sashreek%20Addanki.pdf" target="_blank" rel="noreferrer noopener">open in new tab</a>
+      <div class="resume-actions">
+        <a class="resume-button" href="/Sashreek%20Addanki.pdf" download>
+          Download Resume (PDF)
+        </a>
+        <a class="resume-button secondary" href="/Sashreek%20Addanki.pdf" target="_blank" rel="noreferrer noopener">
+          Open in New Tab
+        </a>
       </div>
+      <div class="resume-divider"></div>
       <div class="resume-frame">
-        <iframe src="/Sashreek%20Addanki.pdf" title="Resume PDF"></iframe>
+        <iframe src="/Sashreek%20Addanki.pdf#zoom=125" title="Resume PDF"></iframe>
       </div>
-      <div class="subtle">If the PDF does not load, download it <a href="/Sashreek%20Addanki.pdf">here</a>.</div>
     </div>
   </section>
 </Base>

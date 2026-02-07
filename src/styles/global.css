@@ -202,6 +202,36 @@ a:hover {
   gap: 16px;
 }
 
+.project-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filter-button {
+  border: 1px solid var(--edge);
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  cursor: pointer;
+  transition: border-color 200ms ease, color 200ms ease, transform 200ms ease;
+}
+
+.filter-button:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.filter-button.active {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
 .project-card {
   display: grid;
   gap: 12px;
@@ -281,6 +311,35 @@ a:hover {
   background: #0f0f0f;
 }
 
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 15px;
+  justify-content: center;
+  text-align: center;
+}
+
+.contact-link:hover {
+  color: var(--accent);
+}
+
+.contact-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+.contact-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
 .github-graph {
   margin-top: 12px;
   overflow: auto;
@@ -335,31 +394,66 @@ a:hover {
   gap: 14px;
 }
 
-.resume-toolbar {
+.resume-page {
+  width: min(1100px, 92vw);
+}
+
+.resume-header {
+  display: grid;
+  gap: 6px;
+}
+
+.resume-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
-  font-size: 12px;
-  color: var(--muted);
+}
+
+.resume-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--edge);
+  background: #0f0f0f;
+  color: var(--ink);
   font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  text-decoration: none;
+  transition: border-color 200ms ease, color 200ms ease, transform 200ms ease;
+}
+
+.resume-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.resume-button.secondary {
+  background: transparent;
+}
+
+.resume-divider {
+  height: 1px;
+  background: var(--edge);
 }
 
 .resume-frame {
   width: 100%;
-  height: min(80vh, 920px);
+  height: min(85vh, 980px);
   border: 1px solid var(--edge);
   border-radius: 16px;
   background: #0b0b0b;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
-.resume-frame iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  border-radius: 16px;
-}
+  .resume-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 16px;
+  }
 
 .footer {
   padding: 0 6vw 32px;
@@ -493,6 +587,10 @@ a:hover {
     font-size: 12px;
   }
 
+  .project-filters {
+    margin-bottom: 14px;
+  }
+
   .tech-stack {
     gap: 8px;
   }
@@ -506,6 +604,10 @@ a:hover {
     border-radius: 14px;
     padding: 18px;
     text-align: left;
+  }
+
+  .contact-link {
+    font-size: 14px;
   }
 
   .github-graph {
@@ -565,14 +667,13 @@ a:hover {
     font-size: 12px;
   }
 
-  .resume-toolbar {
+  .resume-actions {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+    align-items: stretch;
   }
 
   .resume-frame {
-    height: min(68vh, 560px);
+    height: min(72vh, 640px);
   }
 
   .footer {

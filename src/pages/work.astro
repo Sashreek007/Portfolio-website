@@ -8,6 +8,8 @@ const projects = [
       "Currently working on a social media productivity web app where people announce goals publicly and hold each other accountable to complete them.",
     github: "https://github.com/Sashreek007/Streaks",
     production: "https://streaks-cult-mode.vercel.app/dashboard",
+    best: true,
+    current: true,
     stack: [],
   },
   {
@@ -15,13 +17,23 @@ const projects = [
     description:
       "Full-stack auction simulation platform modeling international resource trading with Vickrey auction mechanisms across 50+ simulated countries.",
     github: "https://github.com/Aarushb/NH25_flux_Atlas",
+    best: true,
     stack: ["FastAPI", "React", "PostgreSQL", "Python", "TypeScript", "REST API"],
+  },
+  {
+    name: "Spam Detection Discord Bot",
+    description:
+      "Deployed scam detection bot that identifies and removes malicious messages in real time with low-latency inference.",
+    github: "https://github.com/UndergraduateArtificialIntelligenceClub/Spam-Detection-Discord-Bot",
+    best: true,
+    stack: ["Python", "Discord.py", "Hugging Face"],
   },
   {
     name: "Balloon Popper - Gesture-Controlled Game",
     description:
       "Gesture-controlled arcade game with webcam-based hand tracking at 60 FPS and dynamic difficulty scaling.",
     github: "https://github.com/Sashreek007/fruit-ninja-hand-tracker",
+    best: true,
     stack: ["Python", "MediaPipe", "Pygame", "OpenCV"],
   },
   {
@@ -32,17 +44,11 @@ const projects = [
     stack: ["Python", "LangChain", "OpenAI API", "Scrapin API"],
   },
   {
-    name: "Spam Detection Discord Bot",
-    description:
-      "Deployed scam detection bot that identifies and removes malicious messages in real time with low-latency inference.",
-    github: "https://github.com/UndergraduateArtificialIntelligenceClub/Spam-Detection-Discord-Bot",
-    stack: ["Python", "Discord.py", "Hugging Face"],
-  },
-  {
     name: "ClubMate AI",
     description:
       "Currently working on an open-source automation platform for club operations, focused on intelligent task scheduling and document workflows.",
     github: "https://github.com/UndergraduateArtificialIntelligenceClub/Clubmate-AI",
+    current: true,
     stack: ["Python", "LangChain", "LangGraph", "MCP"],
   },
 ];
@@ -116,9 +122,24 @@ const iconUrl = (name) => {
     </div>
 
     <div class="panel fade-up delay-1">
-      <div class="projects">
+      <div class="project-filters" role="tablist" aria-label="Project filters">
+        <button class="filter-button active" type="button" data-filter="best" role="tab" aria-selected="true">
+          Best Work
+        </button>
+        <button class="filter-button" type="button" data-filter="all" role="tab" aria-selected="false">
+          All
+        </button>
+        <button class="filter-button" type="button" data-filter="current" role="tab" aria-selected="false">
+          In Progress
+        </button>
+      </div>
+      <div class="projects" id="projectList">
         {projects.map((project) => (
-          <article class="project-card">
+          <article
+            class="project-card"
+            data-best={project.best ? "true" : "false"}
+            data-current={project.current ? "true" : "false"}
+          >
             <div class="project-header">
               <div class="project-name">{project.name}</div>
               <div class="project-links">
@@ -158,4 +179,47 @@ const iconUrl = (name) => {
       </div>
     </div>
   </section>
+
+  <script type="module">
+    const list = document.getElementById("projectList");
+    const buttons = document.querySelectorAll(".filter-button");
+    if (list && buttons.length) {
+      const setActive = (target) => {
+        buttons.forEach((btn) => {
+          const isActive = btn === target;
+          btn.classList.toggle("active", isActive);
+          btn.setAttribute("aria-selected", String(isActive));
+        });
+      };
+
+      const applyFilter = (filter) => {
+        const cards = list.querySelectorAll(".project-card");
+        cards.forEach((card) => {
+          if (filter === "best") {
+            card.style.display = card.dataset.best === "true" ? "" : "none";
+          } else if (filter === "current") {
+            card.style.display = card.dataset.current === "true" ? "" : "none";
+          } else {
+            card.style.display = "";
+          }
+        });
+      };
+
+      const defaultButton = document.querySelector(".filter-button[data-filter=\"best\"]");
+      if (defaultButton) {
+        setActive(defaultButton);
+        applyFilter("best");
+      } else {
+        applyFilter("all");
+      }
+
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const filter = btn.dataset.filter || "all";
+          setActive(btn);
+          applyFilter(filter);
+        });
+      });
+    }
+  </script>
 </Base>
