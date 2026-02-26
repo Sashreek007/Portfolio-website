@@ -3,6 +3,22 @@ import Base from "../layouts/Base.astro";
 
 const projects = [
   {
+    name: "Career Co-Pilot",
+    description:
+      "AI-assisted job workflow platform that matches roles to your profile, generates tailored resumes, and supports browser-assisted applications while keeping the user in control.",
+    github: "https://github.com/Sashreek007/career-savers_CareerCo-Pilot",
+    best: true,
+    stack: ["React", "TypeScript", "FastAPI", "Python", "Playwright", "SQLite", "Gemini API"],
+  },
+  {
+    name: "DoomScroller",
+    description:
+      "Chrome extension that converts doomscrolling into measurable distance, coins, and multiplayer battles with local-first tracking, Supabase sync, and personalized AI feedback.",
+    github: "https://github.com/Sashreek007/Doom-Scroller-by-Commit-and-Pray",
+    best: true,
+    stack: ["TypeScript", "React", "TailwindCSS", "Supabase", "PostgreSQL", "Chrome Extension"],
+  },
+  {
     name: "Streaks",
     description:
       "Currently working on a social media productivity web app where people announce goals publicly and hold each other accountable to complete them.",
@@ -35,22 +51,6 @@ const projects = [
     github: "https://github.com/Sashreek007/fruit-ninja-hand-tracker",
     best: true,
     stack: ["Python", "MediaPipe", "Pygame", "OpenCV"],
-  },
-  {
-    name: "Career Co-Pilot",
-    description:
-      "AI-assisted job workflow platform that matches roles to your profile, generates tailored resumes, and supports browser-assisted applications while keeping the user in control.",
-    github: "https://github.com/Sashreek007/career-savers_CareerCo-Pilot",
-    best: true,
-    stack: ["React", "TypeScript", "FastAPI", "Python", "Playwright", "SQLite"],
-  },
-  {
-    name: "DoomScroller",
-    description:
-      "Chrome extension that converts doomscrolling into measurable distance, coins, and multiplayer battles with local-first tracking, Supabase sync, and personalized AI feedback.",
-    github: "https://github.com/Sashreek007/Doom-Scroller-by-Commit-and-Pray",
-    best: true,
-    stack: ["TypeScript", "React", "TailwindCSS", "Supabase", "PostgreSQL", "Chrome Extension"],
   },
   {
     name: "LinkedIn Profile Summarizer",
@@ -118,6 +118,7 @@ const iconMap = {
   playwright: "playwright",
   sqlite: "sqlite",
   chromeextension: "googlechrome",
+  geminiapi: "googlegemini",
 };
 
 const toIconSlug = (name) => {
