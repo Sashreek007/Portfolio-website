@@ -63,14 +63,8 @@ export default async function BlogPostPage({ params }: Props) {
       {/* Back */}
       <Link
         href="/blog"
-        className="font-mono text-[12px] inline-flex items-center gap-2 mb-10 transition-colors duration-150"
+        className="font-mono text-[12px] inline-flex items-center gap-2 mb-10 transition-colors duration-150 hover:text-[var(--text-secondary)]"
         style={{ color: "var(--text-muted)" }}
-        onMouseOver={(e) =>
-          ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-secondary)")
-        }
-        onMouseOut={(e) =>
-          ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)")
-        }
       >
         ← writing
       </Link>
