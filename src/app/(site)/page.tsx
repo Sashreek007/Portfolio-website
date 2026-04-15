@@ -136,7 +136,7 @@ export default async function HomePage() {
       <section
         id="work"
         className="section-hidden px-[6vw] py-24"
-        style={{ background: "var(--bg-surface)", borderTop: "1px solid var(--gray-800)" }}
+        style={{ borderTop: "1px solid var(--gray-800)" }}
       >
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
@@ -228,7 +228,6 @@ export default async function HomePage() {
       <section
         id="writing"
         className="section-hidden px-[6vw] py-24"
-        style={{ background: "var(--bg-surface)" }}
       >
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>

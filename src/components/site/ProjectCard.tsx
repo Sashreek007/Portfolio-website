@@ -60,7 +60,7 @@ export default function ProjectCard({ project }: { project: Project }) {
       ref={cardRef}
       className="relative flex flex-col gap-3 p-5 cursor-default overflow-hidden"
       style={{
-        background: "var(--bg-surface)",
+        background: "var(--bg-elevated)",
         border: "1px solid color-mix(in srgb, var(--gray-800) 60%, transparent)",
         borderRadius: "6px",
         transition: "transform 400ms cubic-bezier(0.23, 1, 0.32, 1), border-color 200ms",
