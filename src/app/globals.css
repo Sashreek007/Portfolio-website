@@ -1,19 +1,4 @@
 @import "tailwindcss";
-
-/* ─── Syntax highlighting (lowlight / hljs) ─────────────────────────── */
-.hljs-keyword,.hljs-selector-tag,.hljs-deletion { color: #c678dd; }
-.hljs-number,.hljs-literal { color: #EF9F27; }
-.hljs-string,.hljs-addition,.hljs-doctag,.hljs-regexp { color: #5DCAA5; }
-.hljs-title,.hljs-section,.hljs-built_in,.hljs-type,.hljs-class .hljs-title { color: #61afef; }
-.hljs-comment,.hljs-meta,.hljs-quote { color: #5c6372; font-style: italic; }
-.hljs-attr,.hljs-attribute { color: #e5c07b; }
-.hljs-name,.hljs-tag { color: #7F77DD; }
-.hljs-variable,.hljs-template-variable,.hljs-selector-id,.hljs-selector-class { color: #e06c75; }
-.hljs-symbol,.hljs-bullet,.hljs-subst { color: #56b6c2; }
-.hljs-operator,.hljs-punctuation { color: #abb2bf; }
-.hljs-params { color: #E8E6DF; }
-.hljs-emphasis { font-style: italic; }
-.hljs-strong { font-weight: bold; }
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -216,6 +201,24 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ─── Syntax highlighting (lowlight / hljs) ─────────────────────────── */
+/* Applied to both the editor and the public blog post page */
+.hljs-keyword, .hljs-selector-tag, .hljs-deletion   { color: #c678dd; }
+.hljs-number, .hljs-literal                          { color: #EF9F27; }
+.hljs-string, .hljs-addition, .hljs-doctag, .hljs-regexp { color: #5DCAA5; }
+.hljs-title, .hljs-section, .hljs-built_in, .hljs-type   { color: #61afef; }
+.hljs-class .hljs-title                              { color: #61afef; }
+.hljs-comment, .hljs-meta, .hljs-quote               { color: #5c6372; font-style: italic; }
+.hljs-attr, .hljs-attribute                          { color: #e5c07b; }
+.hljs-name, .hljs-tag                                { color: #7F77DD; }
+.hljs-variable, .hljs-template-variable              { color: #e06c75; }
+.hljs-selector-id, .hljs-selector-class              { color: #e06c75; }
+.hljs-symbol, .hljs-bullet, .hljs-subst              { color: #56b6c2; }
+.hljs-operator, .hljs-punctuation                    { color: #abb2bf; }
+.hljs-params                                         { color: #E8E6DF; }
+.hljs-emphasis                                       { font-style: italic; }
+.hljs-strong                                         { font-weight: bold; }
 
 /* ─── Scrollbar ─────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }

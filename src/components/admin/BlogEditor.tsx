@@ -125,9 +125,10 @@ function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
           padding: "16px 20px",
           overflowX: "auto",
           margin: 0,
+          color: "var(--text-primary)",
         }}
       >
-        <NodeViewContent style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "1.7", color: "var(--text-primary)", display: "block" }} />
+        <NodeViewContent style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "1.7", display: "block" }} />
       </pre>
     </NodeViewWrapper>
   );
