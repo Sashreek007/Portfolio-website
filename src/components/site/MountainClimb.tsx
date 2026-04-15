@@ -5,23 +5,23 @@ import { useEffect, useRef, useState } from 'react'
 // ─── Mountain slope ────────────────────────────────────────────────────────────
 // ViewBox "0 0 160 800" — fixed right side, spans full viewport height.
 // Path BASE → SUMMIT so getPointAtLength(0) = foot of mountain.
-// BASE at lower-right of the strip (near screen's right edge, bottom).
-// SUMMIT at upper-left of the strip (upper area, well inside the strip).
-// Single organic slope — no symmetric angles, bezier curves only.
+// Horizontally mirrored from the previous version (left↔right swapped).
+// BASE now at lower-LEFT of strip → stickman starts at the bottom on page load.
+// SUMMIT at upper-RIGHT of strip (near screen's right edge, top).
 const CLIMB_D = [
-  'M 136 788',
-  'C 124 752, 120 716, 114 678',  // lower slope
-  'C 108 640, 120 612, 112 574',  // bump right
-  'C 104 536, 90 512, 100 474',   // lean back left
-  'C 110 436, 124 410, 114 372',  // rocky rightward section
-  'C 103 334, 86 310, 96 272',    // back left
-  'C 106 234, 120 208, 108 168',  // upper section
-  'C 95 128, 78 106, 88 68',      // near-summit rocky
-  'C 92 42, 56 38, 22 92',        // final push — summit at (22, 92)
+  'M 24 788',
+  'C 36 752, 40 716, 46 678',   // lower slope
+  'C 52 640, 40 612, 48 574',   // bump left
+  'C 56 536, 70 512, 60 474',   // lean right
+  'C 50 436, 36 410, 46 372',   // rocky leftward section
+  'C 57 334, 74 310, 64 272',   // back right
+  'C 54 234, 40 208, 52 168',   // upper section
+  'C 65 128, 82 106, 72 68',    // near-summit rocky
+  'C 68 42, 104 38, 138 92',    // final push — summit at (138, 92)
 ].join(' ')
 
-const BASE   = { x: 136, y: 788 }  // lower-right → near screen's right edge, bottom
-const SUMMIT = { x: 22,  y: 92  }  // upper-left of strip, y=92 → ~11.5% from top
+const BASE   = { x: 24,  y: 788 }  // lower-left of strip, bottom of screen on load
+const SUMMIT = { x: 138, y: 92  }  // upper-right, y=92 → ~11.5% from top
 
 const GRIND_MSGS = [
   { from: 0.04, text: 'grinding...' },
@@ -71,7 +71,7 @@ function Stickman({ angle, progress, tumble }: {
 function Laptop({ visible }: { visible: boolean }) {
   return (
     <g
-      transform={`translate(${SUMMIT.x + 18}, ${SUMMIT.y - 38})`}
+      transform={`translate(${SUMMIT.x - 14}, ${SUMMIT.y - 40})`}
       style={{ opacity: visible ? 1 : 0, transition: 'opacity 1s ease' }}
     >
       <rect x="-20" y="-26" width="40" height="24" rx="2"
