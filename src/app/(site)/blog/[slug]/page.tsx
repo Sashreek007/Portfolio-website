@@ -104,7 +104,7 @@ export default async function BlogPostPage({ params }: Props) {
   const readTime = estimateReadingTime(html);
 
   return (
-    <div className="px-[6vw] py-16 max-w-[720px] mx-auto w-full">
+    <div className="px-[6vw] py-16 w-full max-w-[860px]">
       {/* Back */}
       <Link
         href="/blog"

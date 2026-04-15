@@ -44,7 +44,7 @@ export default async function BlogPage() {
   }
 
   return (
-    <div className="px-[6vw] py-16 max-w-[760px] mx-auto w-full">
+    <div className="px-[6vw] py-16 w-full">
       <SectionLabel>Writing</SectionLabel>
       <h1
         className="text-[28px] font-medium leading-[1.3] mb-4"
