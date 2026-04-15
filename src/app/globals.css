@@ -217,6 +217,17 @@
   transform: translateY(0);
 }
 
+/* ─── Blog post list hover ───────────────────────────────────────────── */
+.post-item {
+  border-left: 2px solid transparent;
+  padding-left: 0;
+  transition: border-left-color 200ms, padding-left 200ms;
+}
+.post-item:hover {
+  border-left-color: var(--violet-mid);
+  padding-left: 12px;
+}
+
 /* ─── Gradient section divider ───────────────────────────────────────── */
 .gradient-divider {
   height: 1px;

@@ -259,16 +259,9 @@ export default async function HomePage() {
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
-                className="group flex items-start justify-between gap-6 py-6 transition-all duration-200 hover:pl-3"
+                className="post-item group flex items-start justify-between gap-6 py-6"
                 style={{
                   borderBottom: i < recentPosts.length - 1 ? "1px solid var(--gray-800)" : "none",
-                  borderLeft: "2px solid transparent",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.borderLeftColor = "var(--violet-mid)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.borderLeftColor = "transparent";
                 }}
               >
                 <div className="flex flex-col gap-1">
