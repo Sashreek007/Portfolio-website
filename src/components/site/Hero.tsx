@@ -107,6 +107,33 @@ export default function Hero() {
           available for internships
         </div>
 
+        {/* Stats strip */}
+        <div
+          className="fade-up fade-up-3 flex items-center gap-6 mt-4 font-mono text-[11px]"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {[
+            { value: "4+", label: "shipped projects" },
+            { value: "6", label: "languages" },
+            { value: "2y", label: "building" },
+          ].map(({ value, label }, i, arr) => (
+            <span key={label} className="flex items-center gap-6">
+              <span className="flex flex-col items-center gap-[2px]">
+                <span
+                  className="font-mono text-[18px] font-medium leading-none"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {value}
+                </span>
+                <span className="tracking-[0.08em] uppercase text-[10px]">{label}</span>
+              </span>
+              {i < arr.length - 1 && (
+                <span style={{ color: "var(--gray-800)" }}>|</span>
+              )}
+            </span>
+          ))}
+        </div>
+
         {/* CTA links */}
         <div className="fade-up fade-up-3 flex flex-wrap justify-center gap-3 mt-6">
           {[

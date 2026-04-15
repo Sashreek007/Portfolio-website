@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { TechBadge } from "./TechBadge";
 
 export type Project = {
   id: string;
@@ -122,18 +123,7 @@ export default function ProjectCard({ project }: { project: Project }) {
       {project.stack.length > 0 && (
         <div className="relative flex flex-wrap gap-2 mt-1">
           {project.stack.map((tech) => (
-            <span
-              key={tech}
-              className="font-mono text-[10px] font-medium tracking-[0.08em] uppercase px-2 py-1"
-              style={{
-                color: "var(--text-muted)",
-                border: "1px solid var(--gray-800)",
-                borderRadius: "3px",
-                background: "var(--bg-elevated)",
-              }}
-            >
-              {tech}
-            </span>
+            <TechBadge key={tech} label={tech} />
           ))}
         </div>
       )}

@@ -93,9 +93,7 @@ function formatDate(iso: string) {
   });
 }
 
-const divider = (
-  <div style={{ height: "1px", background: "var(--gray-800)" }} />
-);
+const divider = <div className="gradient-divider" />;
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default async function HomePage() {
@@ -138,7 +136,7 @@ export default async function HomePage() {
       <section
         id="work"
         className="section-hidden px-[6vw] py-24"
-        style={{ borderTop: "1px solid var(--gray-800)" }}
+        style={{ background: "var(--bg-surface)", borderTop: "1px solid var(--gray-800)" }}
       >
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
@@ -230,6 +228,7 @@ export default async function HomePage() {
       <section
         id="writing"
         className="section-hidden px-[6vw] py-24"
+        style={{ background: "var(--bg-surface)" }}
       >
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
@@ -260,14 +259,21 @@ export default async function HomePage() {
               <Link
                 key={post.id}
                 href={`/blog/${post.slug}`}
-                className="group flex items-start justify-between gap-6 py-6 transition-colors duration-150"
+                className="group flex items-start justify-between gap-6 py-6 transition-all duration-200 hover:pl-3"
                 style={{
                   borderBottom: i < recentPosts.length - 1 ? "1px solid var(--gray-800)" : "none",
+                  borderLeft: "2px solid transparent",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.borderLeftColor = "var(--violet-mid)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.borderLeftColor = "transparent";
                 }}
               >
                 <div className="flex flex-col gap-1">
                   <span
-                    className="text-[16px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-150"
+                    className="text-[16px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-200"
                     style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
                   >
                     {post.title}

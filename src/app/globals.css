@@ -217,6 +217,19 @@
   transform: translateY(0);
 }
 
+/* ─── Gradient section divider ───────────────────────────────────────── */
+.gradient-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--gray-800) 20%,
+    color-mix(in srgb, var(--violet-dim) 30%, var(--gray-800)) 50%,
+    var(--gray-800) 80%,
+    transparent
+  );
+}
+
 /* ─── Syntax highlighting (lowlight / hljs) ─────────────────────────── */
 /* Applied to both the editor and the public blog post page */
 .hljs-keyword, .hljs-selector-tag, .hljs-deletion   { color: #c678dd; }
