@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import Hero from "@/components/site/Hero";
+import MountainClimb from "@/components/site/MountainClimb";
 import SectionLabel from "@/components/site/SectionLabel";
 import SkillsTable from "@/components/site/SkillsTable";
 import ProjectCard, { type Project } from "@/components/site/ProjectCard";
@@ -131,6 +132,9 @@ export default async function HomePage() {
     <>
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <Hero />
+
+      {/* ── Mountain Climb ────────────────────────────────────────────────── */}
+      <MountainClimb />
 
       {/* ── Selected Work ─────────────────────────────────────────────────── */}
       <section
