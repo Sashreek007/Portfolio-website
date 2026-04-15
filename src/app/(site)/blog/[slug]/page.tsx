@@ -1,16 +1,41 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { generateHTML } from "@tiptap/html";
+import { generateHTML } from "@tiptap/html/server";
 import StarterKit from "@tiptap/starter-kit";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import TiptapImage from "@tiptap/extension-image";
-import TiptapUnderline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
-import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { common, createLowlight } from "lowlight";
+import hljs from "highlight.js";
 
 const lowlight = createLowlight(common);
+
+// Post-process HTML to apply hljs syntax highlighting to code blocks.
+// generateHTML renders code blocks as plain <pre><code class="language-X">...</code></pre>
+// (no token spans) — we have to run hljs over the decoded code ourselves.
+function applyCodeHighlighting(html: string): string {
+  return html.replace(
+    /<pre><code(?:\s+class="language-([^"]*)")?>([\s\S]*?)<\/code><\/pre>/g,
+    (_, lang: string | undefined, escapedCode: string) => {
+      const code = escapedCode
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+      try {
+        const result = lang && hljs.getLanguage(lang)
+          ? hljs.highlight(code, { language: lang, ignoreIllegals: true })
+          : hljs.highlightAuto(code);
+        const langClass = lang ? ` class="language-${lang}"` : "";
+        return `<pre><code${langClass}>${result.value}</code></pre>`;
+      } catch {
+        return _;
+      }
+    }
+  );
+}
 import type { Database } from "@/lib/supabase/types";
 
 type Post = Database["public"]["Tables"]["posts"]["Row"];
@@ -57,8 +82,9 @@ export default async function BlogPostPage({ params }: Props) {
   let html = "";
   if (typedPost.content) {
     try {
+      // StarterKit already includes: underline, horizontalRule — don't add separately
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      html = generateHTML(typedPost.content as any, [
+      const raw = generateHTML(typedPost.content as any, [
         StarterKit.configure({ codeBlock: false }),
         CodeBlockLowlight.configure({ lowlight }),
         TiptapImage.extend({
@@ -66,11 +92,11 @@ export default async function BlogPostPage({ params }: Props) {
             return { ...this.parent?.(), width: { default: null, renderHTML: (a: Record<string, unknown>) => a.width ? { width: a.width } : {} } };
           },
         }),
-        TiptapUnderline,
         Highlight,
-        HorizontalRule,
       ] as any);
-    } catch {
+      html = applyCodeHighlighting(raw);
+    } catch (e) {
+      console.error("[blog] generateHTML failed:", e);
       html = "<p>Content could not be rendered.</p>";
     }
   }
