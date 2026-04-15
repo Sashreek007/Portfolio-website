@@ -51,6 +51,15 @@ const LANGUAGES = [
 // ── Code block node view ───────────────────────────────────────────────────────
 function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
   const language = (node.attrs as { language?: string }).language ?? "";
+  const [copied, setCopied] = useState(false);
+
+  const copyCode = () => {
+    const text = node.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
 
   return (
     <NodeViewWrapper style={{ position: "relative", margin: "1em 0" }}>
@@ -68,29 +77,44 @@ function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
         <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
           code
         </span>
-        <select
-          value={language}
-          onChange={(e) => updateAttributes({ language: e.target.value })}
-          contentEditable={false}
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "11px",
-            color: language ? "var(--violet-soft)" : "var(--text-muted)",
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            cursor: "pointer",
-            appearance: "none",
-            WebkitAppearance: "none",
-            paddingRight: "4px",
-          }}
-        >
-          {LANGUAGES.map((l) => (
-            <option key={l.value} value={l.value} style={{ background: "var(--bg-elevated)", color: "var(--text-primary)" }}>
-              {l.label}
-            </option>
-          ))}
-        </select>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }} contentEditable={false}>
+          <select
+            value={language}
+            onChange={(e) => updateAttributes({ language: e.target.value })}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              color: language ? "var(--violet-soft)" : "var(--text-muted)",
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              cursor: "pointer",
+              appearance: "none",
+              WebkitAppearance: "none",
+            }}
+          >
+            {LANGUAGES.map((l) => (
+              <option key={l.value} value={l.value} style={{ background: "var(--bg-elevated)", color: "var(--text-primary)" }}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+          <button
+            onMouseDown={(e) => { e.preventDefault(); copyCode(); }}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: copied ? "var(--green-bright)" : "var(--text-muted)",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: "0 2px",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {copied ? "copied!" : "copy"}
+          </button>
+        </div>
       </div>
       <pre
         style={{
@@ -105,6 +129,67 @@ function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
       >
         <NodeViewContent style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "1.7", color: "var(--text-primary)", display: "block" }} />
       </pre>
+    </NodeViewWrapper>
+  );
+}
+
+// ── Resizable image node view ──────────────────────────────────────────────────
+function ImageView({ node, updateAttributes, selected }: ReactNodeViewProps) {
+  const attrs = node.attrs as { src: string; alt?: string; title?: string; width?: number };
+  const imgRef = useRef<HTMLImageElement>(null);
+  const startX = useRef(0);
+  const startW = useRef(0);
+
+  const onResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    startX.current = e.clientX;
+    startW.current = imgRef.current?.offsetWidth ?? (attrs.width ?? 600);
+
+    const onMouseMove = (ev: MouseEvent) => {
+      const newW = Math.max(80, startW.current + (ev.clientX - startX.current));
+      updateAttributes({ width: Math.round(newW) });
+    };
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  return (
+    <NodeViewWrapper style={{ display: "block", position: "relative", lineHeight: 0 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        ref={imgRef}
+        src={attrs.src}
+        alt={attrs.alt ?? ""}
+        style={{
+          width: attrs.width ? `${attrs.width}px` : "100%",
+          maxWidth: "100%",
+          borderRadius: "6px",
+          border: (selected as boolean) ? "2px solid var(--violet-soft)" : "1px solid var(--gray-800)",
+          display: "block",
+          margin: "1em 0",
+        }}
+      />
+      {(selected as boolean) && (
+        <div
+          onMouseDown={onResizeMouseDown}
+          style={{
+            position: "absolute",
+            bottom: "calc(1em + 4px)",
+            right: "4px",
+            width: "14px",
+            height: "14px",
+            background: "var(--violet-soft)",
+            borderRadius: "3px",
+            cursor: "ew-resize",
+            zIndex: 10,
+          }}
+          title="Drag to resize"
+        />
+      )}
     </NodeViewWrapper>
   );
 }
@@ -321,16 +406,22 @@ const SlashCommandExtension = Extension.create({
 // ── Slash popup (positioned near cursor) ──────────────────────────────────────
 function SlashPopup({ editorEl }: { editorEl: HTMLDivElement | null }) {
   const [state, setState] = useState<SlashState>(null);
+  const stateRef = useRef<SlashState>(null);
   const menuRef = useRef<SlashMenuRef | null>(null);
 
+  const setSlashState = useCallback((s: SlashState) => {
+    stateRef.current = s;
+    setState(s);
+  }, []);
+
   useEffect(() => {
-    slashRegistry.setState = setState;
+    slashRegistry.setState = setSlashState;
     slashRegistry.menuRef = menuRef;
     return () => {
       slashRegistry.setState = null;
       slashRegistry.menuRef = null;
     };
-  }, []);
+  }, [setSlashState]);
 
   if (!state || !state.clientRect) return null;
 
@@ -347,15 +438,10 @@ function SlashPopup({ editorEl }: { editorEl: HTMLDivElement | null }) {
         ref={menuRef}
         items={state.items}
         command={(item) => {
-          // re-fetch latest range from state atom before running
-          setState((prev) => {
-            if (prev) item.command(
-              // We need the editor — get it from the extension's stored ref
-              (window as any).__tiptapEditorRef?.current,
-              prev.range,
-            );
-            return null;
-          });
+          const editor = (window as any).__tiptapEditorRef?.current;
+          const range = stateRef.current?.range;
+          setSlashState(null);
+          if (editor && range) item.command(editor, range);
         }}
       />
     </div>
@@ -445,7 +531,15 @@ export default function BlogEditor({ post, mode }: Props) {
           return ReactNodeViewRenderer(CodeBlockView);
         },
       }).configure({ lowlight }),
-      TiptapImage.configure({ inline: false, allowBase64: false }),
+      TiptapImage.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            width: { default: null, renderHTML: (a) => a.width ? { width: a.width } : {} },
+          };
+        },
+        addNodeView() { return ReactNodeViewRenderer(ImageView); },
+      }).configure({ inline: false, allowBase64: false }),
       TiptapUnderline,
       Highlight.configure({ multicolor: false }),
       HorizontalRule,
@@ -529,7 +623,18 @@ export default function BlogEditor({ post, mode }: Props) {
     if (content) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const html = generateHTML(content, [StarterKit, TiptapImage, HorizontalRule] as any);
+        const html = generateHTML(content, [
+          StarterKit.configure({ codeBlock: false }),
+          CodeBlockLowlight.configure({ lowlight }),
+          TiptapImage.extend({
+            addAttributes() {
+              return { ...this.parent?.(), width: { default: null, renderHTML: (a) => a.width ? { width: a.width } : {} } };
+            },
+          }),
+          TiptapUnderline,
+          Highlight,
+          HorizontalRule,
+        ] as any);
         setPreviewHtml(html);
       } catch {
         setPreviewHtml("<p>Could not render preview.</p>");

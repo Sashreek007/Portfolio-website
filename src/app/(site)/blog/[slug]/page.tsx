@@ -4,6 +4,10 @@ import Link from "next/link";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import TiptapImage from "@tiptap/extension-image";
+import TiptapUnderline from "@tiptap/extension-underline";
+import Highlight from "@tiptap/extension-highlight";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { common, createLowlight } from "lowlight";
 
 const lowlight = createLowlight(common);
@@ -57,6 +61,14 @@ export default async function BlogPostPage({ params }: Props) {
       html = generateHTML(typedPost.content as any, [
         StarterKit.configure({ codeBlock: false }),
         CodeBlockLowlight.configure({ lowlight }),
+        TiptapImage.extend({
+          addAttributes() {
+            return { ...this.parent?.(), width: { default: null, renderHTML: (a: Record<string, unknown>) => a.width ? { width: a.width } : {} } };
+          },
+        }),
+        TiptapUnderline,
+        Highlight,
+        HorizontalRule,
       ] as any);
     } catch {
       html = "<p>Content could not be rendered.</p>";
@@ -123,6 +135,29 @@ export default async function BlogPostPage({ params }: Props) {
           lineHeight: "1.8",
         }}
       />
+      {/* Copy buttons for code blocks — injected client-side */}
+      <script dangerouslySetInnerHTML={{ __html: `
+        (function() {
+          document.querySelectorAll('.prose-content pre').forEach(function(pre) {
+            var wrap = document.createElement('div');
+            wrap.style.cssText = 'position:relative;';
+            pre.parentNode.insertBefore(wrap, pre);
+            wrap.appendChild(pre);
+            var btn = document.createElement('button');
+            btn.textContent = 'copy';
+            btn.style.cssText = 'position:absolute;top:8px;right:10px;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);background:var(--bg-base);border:1px solid var(--gray-800);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:0.05em;';
+            btn.addEventListener('click', function() {
+              var code = pre.querySelector('code');
+              navigator.clipboard.writeText(code ? code.innerText : pre.innerText).then(function() {
+                btn.textContent = 'copied!';
+                btn.style.color = 'var(--green-bright)';
+                setTimeout(function() { btn.textContent = 'copy'; btn.style.color = 'var(--text-muted)'; }, 1500);
+              });
+            });
+            wrap.appendChild(btn);
+          });
+        })();
+      ` }} />
 
       <style>{`
         .prose-content h1,
