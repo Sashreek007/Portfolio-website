@@ -5,7 +5,8 @@ import {
   useImperativeHandle,
 } from "react";
 import { useRouter } from "next/navigation";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from "@tiptap/react";
+import type { ReactNodeViewProps } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -24,6 +25,89 @@ import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/utils";
 
 const lowlight = createLowlight(common);
+
+// ── Code block languages ───────────────────────────────────────────────────────
+const LANGUAGES = [
+  { value: "", label: "auto-detect" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "python", label: "Python" },
+  { value: "rust", label: "Rust" },
+  { value: "go", label: "Go" },
+  { value: "cpp", label: "C++" },
+  { value: "c", label: "C" },
+  { value: "java", label: "Java" },
+  { value: "bash", label: "Bash / Shell" },
+  { value: "sql", label: "SQL" },
+  { value: "json", label: "JSON" },
+  { value: "yaml", label: "YAML" },
+  { value: "html", label: "HTML" },
+  { value: "css", label: "CSS" },
+  { value: "markdown", label: "Markdown" },
+  { value: "docker", label: "Dockerfile" },
+  { value: "xml", label: "XML" },
+];
+
+// ── Code block node view ───────────────────────────────────────────────────────
+function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
+  const language = (node.attrs as { language?: string }).language ?? "";
+
+  return (
+    <NodeViewWrapper style={{ position: "relative", margin: "1em 0" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "6px 12px",
+          background: "var(--bg-base)",
+          borderBottom: "1px solid var(--gray-800)",
+          borderRadius: "6px 6px 0 0",
+        }}
+      >
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          code
+        </span>
+        <select
+          value={language}
+          onChange={(e) => updateAttributes({ language: e.target.value })}
+          contentEditable={false}
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "11px",
+            color: language ? "var(--violet-soft)" : "var(--text-muted)",
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            cursor: "pointer",
+            appearance: "none",
+            WebkitAppearance: "none",
+            paddingRight: "4px",
+          }}
+        >
+          {LANGUAGES.map((l) => (
+            <option key={l.value} value={l.value} style={{ background: "var(--bg-elevated)", color: "var(--text-primary)" }}>
+              {l.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <pre
+        style={{
+          background: "var(--bg-elevated)",
+          border: "1px solid var(--gray-800)",
+          borderTop: "none",
+          borderRadius: "0 0 6px 6px",
+          padding: "16px 20px",
+          overflowX: "auto",
+          margin: 0,
+        }}
+      >
+        <NodeViewContent style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "1.7", color: "var(--text-primary)", display: "block" }} />
+      </pre>
+    </NodeViewWrapper>
+  );
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Post = {
@@ -356,7 +440,11 @@ export default function BlogEditor({ post, mode }: Props) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ codeBlock: false }),
-      CodeBlockLowlight.configure({ lowlight }),
+      CodeBlockLowlight.extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockView);
+        },
+      }).configure({ lowlight }),
       TiptapImage.configure({ inline: false, allowBase64: false }),
       TiptapUnderline,
       Highlight.configure({ multicolor: false }),
@@ -544,14 +632,7 @@ export default function BlogEditor({ post, mode }: Props) {
           background:var(--bg-elevated);color:var(--amber-bright);
           padding:2px 6px;border-radius:3px;border:1px solid var(--gray-800);
         }
-        .blog-editor-content pre{
-          background:var(--bg-elevated);border:1px solid var(--gray-800);
-          border-radius:6px;padding:16px 20px;overflow-x:auto;margin-bottom:1em;
-        }
-        .blog-editor-content pre code{
-          background:transparent;border:none;padding:0;
-          color:var(--text-primary);font-size:13px;line-height:1.7;
-        }
+        /* pre/code handled by CodeBlockView node view */
         .blog-editor-content blockquote{
           border-left:2px solid var(--violet-mid);padding-left:1.25em;
           color:var(--text-secondary);font-style:italic;margin:1.25em 0;

@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { common, createLowlight } from "lowlight";
+
+const lowlight = createLowlight(common);
 import type { Database } from "@/lib/supabase/types";
 
 type Post = Database["public"]["Tables"]["posts"]["Row"];
@@ -50,7 +54,10 @@ export default async function BlogPostPage({ params }: Props) {
   if (typedPost.content) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      html = generateHTML(typedPost.content as any, [StarterKit]);
+      html = generateHTML(typedPost.content as any, [
+        StarterKit.configure({ codeBlock: false }),
+        CodeBlockLowlight.configure({ lowlight }),
+      ] as any);
     } catch {
       html = "<p>Content could not be rendered.</p>";
     }
