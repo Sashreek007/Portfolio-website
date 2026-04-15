@@ -256,16 +256,18 @@ export default function MountainClimb() {
         </span>
       </div>
 
-      {/* ── "never give up." — center screen on fall ────────────────────── */}
+      {/* ── "never give up." — left of mountain, at stickman's position ── */}
       <div style={{
-        position: 'fixed', inset: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        position: 'fixed',
+        right: 'calc(20vh + 16px)',
+        top: `calc(${manVh}vh - 7px)`,
         pointerEvents: 'none', zIndex: 20,
         opacity: showNgu ? 1 : 0,
         transition: 'opacity 0.35s ease',
+        textAlign: 'right',
       }}>
         <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: '13px',
+          fontFamily: 'var(--font-mono)', fontSize: '11px',
           color: 'var(--text-secondary)',
           letterSpacing: '0.08em',
         }}>
