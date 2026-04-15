@@ -318,7 +318,7 @@ export default async function HomePage() {
           style={{ border: "1px solid var(--gray-800)", borderRadius: "6px" }}
         >
           {[
-            { label: "email", value: "sashreekaddanki@gmail.com", href: "mailto:sashreekaddanki@gmail.com", external: false },
+            { label: "email", value: "sashreek.addanki@gmail.com", href: "mailto:sashreek.addanki@gmail.com", external: false },
             { label: "github", value: "Sashreek007", href: "https://github.com/Sashreek007", external: true },
             { label: "linkedin", value: "sashreek-addanki", href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", external: true },
           ].map(({ label, value, href, external }, i, arr) => (
