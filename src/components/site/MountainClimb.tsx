@@ -2,24 +2,24 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-// ─── Mountain slope path ───────────────────────────────────────────────────────
-// ViewBox: "0 0 160 800"   (tall and narrow — spans the full left side)
-// Path defined bottom → summit so getPointAtLength(0) = base, (totalLen) = peak.
-// Curves go generally up-left with organic bumps — no symmetric triangle.
+// ─── Mountain slope ────────────────────────────────────────────────────────────
+// ViewBox "0 0 160 800" — fixed right side, spans full viewport height.
+// Path defined BASE → SUMMIT so getPointAtLength(0) = foot of mountain.
+// Shape: organic single slope, lower-left → upper-right, bezier curves only.
 const CLIMB_D = [
-  'M 135 785',
-  'C 122 748, 118 712, 112 675',  // lower slope
-  'C 106 638, 118 608, 110 570',  // first bump right
-  'C 102 532, 88  508,  97 470',  // curves left then slight right
-  'C 106 432, 120 406, 110 368',  // another rightward lean (rocky)
-  'C  99 330,  84 307,  92 268',  // back left
-  'C 101 229, 116 204, 104 165',  // upper section, rightward lean
-  'C  91 126,  76 102,  84  63',  // near-summit rocky
-  'C  88  34,  54  16,  16  12',  // final push to summit
+  'M 20 786',
+  'C 30 750, 38 716, 48 680',   // lower slope
+  'C 58 644, 46 616, 56 580',   // subtle bump left
+  'C 66 544, 80 520, 68 484',   // lean right
+  'C 56 448, 42 422, 54 385',   // back left (rocky)
+  'C 66 348, 82 322, 70 284',   // lean right again
+  'C 58 246, 44 220, 58 180',   // upper section
+  'C 72 140, 88 116, 76 76',    // near-summit rocky
+  'C 86 46, 116 44, 144 90',    // final push — summit at (144, 90)
 ].join(' ')
 
-const BASE   = { x: 135, y: 785 }
-const SUMMIT = { x: 16,  y: 12  }
+const BASE   = { x: 20,  y: 786 }
+const SUMMIT = { x: 144, y: 90  }   // y=90 → 11.25% from top, laptop clearly visible
 
 const GRIND_MSGS = [
   { from: 0.04, text: 'grinding...' },
@@ -32,47 +32,53 @@ const GRIND_MSGS = [
 ]
 
 // ─── Stickman ─────────────────────────────────────────────────────────────────
+// Feet at (0,0) local space. Proportions scaled up so it reads at small sizes.
 function Stickman({ angle, progress, tumble }: {
   angle: number; progress: number; tumble: number
 }) {
   const ph     = progress * 55
-  const lFootX = -5 + Math.sin(ph) * 5.5
-  const rFootX =  5 - Math.sin(ph) * 5.5
-  const lArmX  = -8 - Math.sin(ph) * 3
-  const rArmX  =  8 + Math.sin(ph) * 3
+  const lFootX = -6 + Math.sin(ph) * 6
+  const rFootX =  6 - Math.sin(ph) * 6
+  const lArmX  = -10 - Math.sin(ph) * 3.5
+  const rArmX  =  10 + Math.sin(ph) * 3.5
 
   return (
     <g transform={`rotate(${angle + tumble})`}>
-      <circle cx="0" cy="-30" r="5.5"
-        fill="none" stroke="white" strokeWidth="1.8" />
-      <line x1="0" y1="-24" x2="0" y2="-10"
-        stroke="white" strokeWidth="1.8" />
-      <line x1="0" y1="-18" x2={lArmX} y2="-12"
-        stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="0" y1="-18" x2={rArmX} y2="-12"
-        stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="0" y1="-10" x2={lFootX} y2="2"
-        stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="0" y1="-10" x2={rFootX} y2="2"
-        stroke="white" strokeWidth="1.6" strokeLinecap="round" />
+      {/* head */}
+      <circle cx="0" cy="-44" r="7.5"
+        fill="none" stroke="white" strokeWidth="2" />
+      {/* body */}
+      <line x1="0" y1="-36" x2="0" y2="-14"
+        stroke="white" strokeWidth="2" />
+      {/* arms */}
+      <line x1="0" y1="-28" x2={lArmX} y2="-20"
+        stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="0" y1="-28" x2={rArmX} y2="-20"
+        stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      {/* legs */}
+      <line x1="0" y1="-14" x2={lFootX} y2="2"
+        stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="0" y1="-14" x2={rFootX} y2="2"
+        stroke="white" strokeWidth="1.8" strokeLinecap="round" />
     </g>
   )
 }
 
-// ─── Laptop at summit ─────────────────────────────────────────────────────────
+// ─── Laptop reward ────────────────────────────────────────────────────────────
+// Positioned above & left of summit so it's clearly in the viewBox
 function Laptop({ visible }: { visible: boolean }) {
   return (
     <g
-      transform={`translate(${SUMMIT.x + 24}, ${SUMMIT.y + 4})`}
+      transform={`translate(${SUMMIT.x - 10}, ${SUMMIT.y - 42})`}
       style={{ opacity: visible ? 1 : 0, transition: 'opacity 1s ease' }}
     >
-      <rect x="-18" y="-28" width="36" height="22" rx="2"
-        fill="none" stroke="white" strokeWidth="1.4" />
-      <line x1="-13" y1="-22" x2=" 4" y2="-22" stroke="white" strokeWidth="0.8" opacity="0.4" />
-      <line x1="-13" y1="-17" x2="10" y2="-17" stroke="white" strokeWidth="0.8" opacity="0.4" />
-      <line x1="-13" y1="-12" x2=" 7" y2="-12" stroke="white" strokeWidth="0.8" opacity="0.4" />
-      <rect x="-21" y="-6" width="42" height="5" rx="1.5"
-        fill="none" stroke="white" strokeWidth="1.4" />
+      <rect x="-20" y="-26" width="40" height="24" rx="2"
+        fill="none" stroke="white" strokeWidth="1.5" />
+      <line x1="-14" y1="-20" x2=" 4" y2="-20" stroke="white" strokeWidth="0.8" opacity="0.45" />
+      <line x1="-14" y1="-15" x2="12" y2="-15" stroke="white" strokeWidth="0.8" opacity="0.45" />
+      <line x1="-14" y1="-10" x2=" 8" y2="-10" stroke="white" strokeWidth="0.8" opacity="0.45" />
+      <rect x="-23" y="-2" width="46" height="5" rx="1.5"
+        fill="none" stroke="white" strokeWidth="1.5" />
     </g>
   )
 }
@@ -89,30 +95,37 @@ export default function MountainClimb() {
   const [showNgu, setShowNgu]   = useState(false)
   const [grindMsg, setGrindMsg] = useState<string | null>(null)
 
-  const isFalling       = useRef(false)
-  const baselineScroll  = useRef(0)
-  const lastRaw         = useRef(0)
-  const initAngle       = useRef(0)
-  const fallRaf         = useRef<number | undefined>(undefined)
-  const nguTimer        = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const isFalling      = useRef(false)
+  const baselineScroll = useRef(0)
+  const lastRaw        = useRef(0)
+  const initAngle      = useRef(0)
+  const maxScrollRef   = useRef(0)   // cached so resize keeps it accurate
+  const fallRaf        = useRef<number | undefined>(undefined)
+  const nguTimer       = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     const path = pathRef.current
     if (!path) return
     const len = path.getTotalLength()
 
-    // Slope angle at base
-    const p0 = path.getPointAtLength(0)
-    const p1 = path.getPointAtLength(6)
-    initAngle.current = Math.atan2(p1.y - p0.y, p1.x - p0.x) * (180 / Math.PI)
-    setMan(m => ({ ...m, angle: initAngle.current }))
+    // Keep max scroll accurate on resize (dynamic content can change page height)
+    const syncMaxScroll = () => {
+      maxScrollRef.current = document.documentElement.scrollHeight - window.innerHeight
+    }
+    syncMaxScroll()
+    window.addEventListener('resize', syncMaxScroll)
 
+    // Slope angle at any path position
     const slopeAngle = (t: number) => {
-      const d = 6
+      const d = 7
       const a = path.getPointAtLength(Math.max(0, t - d))
       const b = path.getPointAtLength(Math.min(len, t + d))
       return Math.atan2(b.y - a.y, b.x - a.x) * (180 / Math.PI)
     }
+
+    // Prime initial angle
+    initAngle.current = slopeAngle(0)
+    setMan(m => ({ ...m, angle: initAngle.current }))
 
     const applyProgress = (cp: number) => {
       const t  = cp * len
@@ -135,26 +148,25 @@ export default function MountainClimb() {
       const pt0  = path.getPointAtLength(t0)
       const ang0 = slopeAngle(t0)
       const t1   = performance.now()
-      const DUR  = 600
 
       const tick = (now: number) => {
-        const p    = Math.min(1, (now - t1) / DUR)
-        const ease = p * p   // accelerate like gravity
+        const p    = Math.min(1, (now - t1) / 620)
+        const ease = p * p        // quadratic ease-in = accelerating fall
         setMan({
           x:        pt0.x + (BASE.x - pt0.x) * ease,
           y:        pt0.y + (BASE.y - pt0.y) * ease,
           angle:    ang0,
           progress: fromCP * (1 - ease),
-          tumble:   ease * 540,
+          tumble:   ease * 540,   // 1.5 rotations while falling
         })
         if (p < 1) {
           fallRaf.current = requestAnimationFrame(tick)
         } else {
           isFalling.current = false
-          // New baseline = where user currently is — they must scroll the rest to re-summit
+          // New baseline: stickman must re-climb from current scroll position
           baselineScroll.current = Math.min(rawAtFall, 0.75)
           setMan({ x: BASE.x, y: BASE.y, angle: initAngle.current, progress: 0, tumble: 0 })
-          nguTimer.current = setTimeout(() => setShowNgu(false), 900)
+          nguTimer.current = setTimeout(() => setShowNgu(false), 950)
         }
       }
       cancelAnimationFrame(fallRaf.current!)
@@ -162,14 +174,16 @@ export default function MountainClimb() {
     }
 
     const onScroll = () => {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+      const maxScroll = maxScrollRef.current
       if (maxScroll <= 0) return
+
       const raw = Math.max(0, Math.min(1, window.scrollY / maxScroll))
-
       const span = 1 - baselineScroll.current
-      const cp   = span > 0 ? Math.max(0, Math.min(1, (raw - baselineScroll.current) / span)) : 0
+      const cp   = span > 0
+        ? Math.max(0, Math.min(1, (raw - baselineScroll.current) / span))
+        : 0
 
-      // Scroll-up with meaningful climb progress → fall
+      // Scrolling back up by > 1.2% of total page → trigger fall
       if (!isFalling.current && raw < lastRaw.current - 0.012 && cp > 0.08) {
         triggerFall(cp, raw)
       }
@@ -179,60 +193,61 @@ export default function MountainClimb() {
 
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
+
     return () => {
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', syncMaxScroll)
       clearTimeout(nguTimer.current)
       cancelAnimationFrame(fallRaf.current!)
     }
   }, [])
 
-  // Map stickman SVG y (0-800) to a vh percentage for HTML overlay positioning
-  const manTopVh = (man.y / 800) * 100
+  // Map stickman SVG y (0–800) → vh percentage for HTML overlay alignment
+  const manVh = (man.y / 800) * 100
 
   return (
     <>
-      {/* ── Mountain + stickman (fixed, left edge) ──────────────────────── */}
+      {/* ── Mountain + stickman (fixed right edge) ──────────────────────── */}
       <div style={{
-        position: 'fixed', left: 0, top: 0,
+        position: 'fixed', right: 0, top: 0,
         height: '100vh', width: 'auto',
         pointerEvents: 'none', zIndex: 10,
+        overflow: 'visible',
       }}>
         <svg
           viewBox="0 0 160 800"
           style={{ height: '100vh', width: 'auto', display: 'block', overflow: 'visible' }}
         >
-          {/* Mountain slope — subtle white outline */}
-          <path
-            d={CLIMB_D}
-            fill="none" stroke="white" strokeWidth="1.5" opacity="0.18"
-          />
+          {/* Mountain slope — faint so it reads as background */}
+          <path d={CLIMB_D} fill="none" stroke="white" strokeWidth="1.5" opacity="0.18" />
 
-          {/* Hidden path used only for getPointAtLength() math */}
+          {/* Hidden path for getPointAtLength() math */}
           <path ref={pathRef} d={CLIMB_D} fill="none" stroke="none" />
 
           {/* Laptop at summit */}
           <Laptop visible={atTop} />
 
-          {/* Stickman — full opacity so it pops against the faint mountain */}
+          {/* Stickman */}
           <g transform={`translate(${man.x}, ${man.y})`}>
             <Stickman angle={man.angle} progress={man.progress} tumble={man.tumble} />
           </g>
         </svg>
       </div>
 
-      {/* ── Grind message — floats just right of the mountain ───────────── */}
-      {/* left: 20vh matches the SVG width (160/800 * 100vh = 20vh)         */}
+      {/* ── Grind message — floats just left of the mountain ────────────── */}
+      {/* "20vh" matches SVG width (160/800 × 100vh)                        */}
       <div style={{
         position: 'fixed',
-        left: 'calc(20vh + 10px)',
-        top: `calc(${manTopVh}vh - 8px)`,
+        right: 'calc(20vh + 14px)',
+        top: `calc(${manVh}vh - 7px)`,
         pointerEvents: 'none', zIndex: 10,
         opacity: grindMsg && !showNgu ? 0.45 : 0,
         transition: 'opacity 0.45s ease',
+        textAlign: 'right',
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '11px',
-          color: 'white', letterSpacing: '0.05em', whiteSpace: 'nowrap',
+          color: 'white', letterSpacing: '0.04em', whiteSpace: 'nowrap',
         }}>
           {grindMsg}
         </span>
@@ -254,13 +269,16 @@ export default function MountainClimb() {
         </span>
       </div>
 
-      {/* ── "got the internship." — appears when stickman summits ───────── */}
+      {/* ── "got the internship." — near the summit ─────────────────────── */}
+      {/* Positioned left of mountain, vertically near the summit area       */}
       <div style={{
-        position: 'fixed', top: '10%', left: '50%',
-        transform: 'translateX(-50%)',
+        position: 'fixed',
+        top: '16%',
+        right: 'calc(20vh + 14px)',
         pointerEvents: 'none', zIndex: 20,
         opacity: atTop ? 1 : 0,
         transition: 'opacity 1s ease',
+        textAlign: 'right',
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '12px',
