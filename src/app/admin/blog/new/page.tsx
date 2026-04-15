@@ -1,0 +1,19 @@
+import BlogEditor from "@/components/admin/BlogEditor";
+
+export const metadata = { title: "New Post | Admin" };
+
+export default function NewPostPage() {
+  return (
+    <div className="max-w-[900px]">
+      <div className="mb-8">
+        <p className="font-mono text-[11px] tracking-[0.12em] uppercase mb-1" style={{ color: "var(--text-muted)" }}>
+          Admin / Blog / New
+        </p>
+        <h1 className="text-[22px] font-medium" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>
+          New post
+        </h1>
+      </div>
+      <BlogEditor mode="new" />
+    </div>
+  );
+}
