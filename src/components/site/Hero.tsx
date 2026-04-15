@@ -22,6 +22,7 @@ export default function Hero() {
 
   return (
     <section
+      id="hero"
       ref={containerRef}
       className="relative flex flex-col items-center justify-center min-h-[calc(100vh-73px)] px-[6vw] py-20 text-center"
       style={
@@ -98,8 +99,8 @@ export default function Hero() {
         {/* CTA links */}
         <div className="fade-up fade-up-3 flex flex-wrap justify-center gap-3 mt-6">
           {[
-            { href: "/work", label: "projects" },
-            { href: "/about", label: "about" },
+            { href: "#work", label: "projects" },
+            { href: "#about", label: "about" },
             {
               href: "https://github.com/Sashreek007",
               label: "github ↗",
