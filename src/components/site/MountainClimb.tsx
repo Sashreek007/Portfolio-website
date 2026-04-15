@@ -4,22 +4,24 @@ import { useEffect, useRef, useState } from 'react'
 
 // ─── Mountain slope ────────────────────────────────────────────────────────────
 // ViewBox "0 0 160 800" — fixed right side, spans full viewport height.
-// Path defined BASE → SUMMIT so getPointAtLength(0) = foot of mountain.
-// Shape: organic single slope, lower-left → upper-right, bezier curves only.
+// Path BASE → SUMMIT so getPointAtLength(0) = foot of mountain.
+// BASE at lower-right of the strip (near screen's right edge, bottom).
+// SUMMIT at upper-left of the strip (upper area, well inside the strip).
+// Single organic slope — no symmetric angles, bezier curves only.
 const CLIMB_D = [
-  'M 20 786',
-  'C 30 750, 38 716, 48 680',   // lower slope
-  'C 58 644, 46 616, 56 580',   // subtle bump left
-  'C 66 544, 80 520, 68 484',   // lean right
-  'C 56 448, 42 422, 54 385',   // back left (rocky)
-  'C 66 348, 82 322, 70 284',   // lean right again
-  'C 58 246, 44 220, 58 180',   // upper section
-  'C 72 140, 88 116, 76 76',    // near-summit rocky
-  'C 86 46, 116 44, 144 90',    // final push — summit at (144, 90)
+  'M 136 788',
+  'C 124 752, 120 716, 114 678',  // lower slope
+  'C 108 640, 120 612, 112 574',  // bump right
+  'C 104 536, 90 512, 100 474',   // lean back left
+  'C 110 436, 124 410, 114 372',  // rocky rightward section
+  'C 103 334, 86 310, 96 272',    // back left
+  'C 106 234, 120 208, 108 168',  // upper section
+  'C 95 128, 78 106, 88 68',      // near-summit rocky
+  'C 92 42, 56 38, 22 92',        // final push — summit at (22, 92)
 ].join(' ')
 
-const BASE   = { x: 20,  y: 786 }
-const SUMMIT = { x: 144, y: 90  }   // y=90 → 11.25% from top, laptop clearly visible
+const BASE   = { x: 136, y: 788 }  // lower-right → near screen's right edge, bottom
+const SUMMIT = { x: 22,  y: 92  }  // upper-left of strip, y=92 → ~11.5% from top
 
 const GRIND_MSGS = [
   { from: 0.04, text: 'grinding...' },
@@ -69,7 +71,7 @@ function Stickman({ angle, progress, tumble }: {
 function Laptop({ visible }: { visible: boolean }) {
   return (
     <g
-      transform={`translate(${SUMMIT.x - 10}, ${SUMMIT.y - 42})`}
+      transform={`translate(${SUMMIT.x + 18}, ${SUMMIT.y - 38})`}
       style={{ opacity: visible ? 1 : 0, transition: 'opacity 1s ease' }}
     >
       <rect x="-20" y="-26" width="40" height="24" rx="2"
@@ -235,19 +237,20 @@ export default function MountainClimb() {
       </div>
 
       {/* ── Grind message — floats just left of the mountain ────────────── */}
-      {/* "20vh" matches SVG width (160/800 × 100vh)                        */}
+      {/* right: 20vh matches SVG width (160/800 × 100vh = 20vh)            */}
       <div style={{
         position: 'fixed',
-        right: 'calc(20vh + 14px)',
+        right: 'calc(20vh + 16px)',
         top: `calc(${manVh}vh - 7px)`,
         pointerEvents: 'none', zIndex: 10,
-        opacity: grindMsg && !showNgu ? 0.45 : 0,
+        opacity: grindMsg && !showNgu ? 1 : 0,
         transition: 'opacity 0.45s ease',
         textAlign: 'right',
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '11px',
-          color: 'white', letterSpacing: '0.04em', whiteSpace: 'nowrap',
+          color: 'var(--violet-soft)',
+          letterSpacing: '0.04em', whiteSpace: 'nowrap',
         }}>
           {grindMsg}
         </span>
@@ -263,18 +266,18 @@ export default function MountainClimb() {
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '13px',
-          color: 'white', letterSpacing: '0.08em',
+          color: 'var(--text-secondary)',
+          letterSpacing: '0.08em',
         }}>
           never give up.
         </span>
       </div>
 
       {/* ── "got the internship." — near the summit ─────────────────────── */}
-      {/* Positioned left of mountain, vertically near the summit area       */}
       <div style={{
         position: 'fixed',
-        top: '16%',
-        right: 'calc(20vh + 14px)',
+        top: '13%',
+        right: 'calc(20vh + 16px)',
         pointerEvents: 'none', zIndex: 20,
         opacity: atTop ? 1 : 0,
         transition: 'opacity 1s ease',
@@ -282,7 +285,8 @@ export default function MountainClimb() {
       }}>
         <span style={{
           fontFamily: 'var(--font-mono)', fontSize: '12px',
-          color: 'white', letterSpacing: '0.06em', whiteSpace: 'nowrap',
+          color: 'var(--amber-bright)',
+          letterSpacing: '0.06em', whiteSpace: 'nowrap',
         }}>
           got the internship.
         </span>
