@@ -3,6 +3,7 @@ import Hero from "@/components/site/Hero";
 import SectionLabel from "@/components/site/SectionLabel";
 import SkillsTable from "@/components/site/SkillsTable";
 import ProjectCard, { type Project } from "@/components/site/ProjectCard";
+import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -358,21 +359,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Section reveal observer ───────────────────────────────────────── */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              var io = new IntersectionObserver(function(entries) {
-                entries.forEach(function(e) {
-                  if (e.isIntersecting) { e.target.classList.add('section-visible'); io.unobserve(e.target); }
-                });
-              }, { threshold: 0.08 });
-              document.querySelectorAll('.section-hidden').forEach(function(el) { io.observe(el); });
-            })();
-          `,
-        }}
-      />
+      {/* ── Section reveal observer (client component — re-runs on every mount) ── */}
+      <RevealSections />
     </>
   );
 }
