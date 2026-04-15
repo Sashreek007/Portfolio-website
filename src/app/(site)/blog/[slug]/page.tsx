@@ -29,7 +29,8 @@ function applyCodeHighlighting(html: string): string {
           ? hljs.highlight(code, { language: lang, ignoreIllegals: true })
           : hljs.highlightAuto(code);
         const langClass = lang ? ` class="language-${lang}"` : "";
-        return `<pre><code${langClass}>${result.value}</code></pre>`;
+        const langLabel = lang || "";
+        return `<div class="code-block-wrap"><div class="code-block-header"><span class="code-lang">${langLabel}</span><button class="copy-btn" data-code="">copy</button></div><pre><code${langClass}>${result.value}</code></pre></div>`;
       } catch {
         return _;
       }
@@ -104,7 +105,7 @@ export default async function BlogPostPage({ params }: Props) {
   const readTime = estimateReadingTime(html);
 
   return (
-    <div className="px-[6vw] py-16 w-full max-w-[860px]">
+    <div className="px-[6vw] py-16 w-full max-w-[860px] mx-auto">
       {/* Back */}
       <Link
         href="/blog"
@@ -161,28 +162,18 @@ export default async function BlogPostPage({ params }: Props) {
           lineHeight: "1.8",
         }}
       />
-      {/* Copy buttons for code blocks — injected client-side */}
+      {/* Copy button wiring — buttons are already in the HTML, just attach handlers */}
       <script dangerouslySetInnerHTML={{ __html: `
-        (function() {
-          document.querySelectorAll('.prose-content pre').forEach(function(pre) {
-            var wrap = document.createElement('div');
-            wrap.style.cssText = 'position:relative;';
-            pre.parentNode.insertBefore(wrap, pre);
-            wrap.appendChild(pre);
-            var btn = document.createElement('button');
-            btn.textContent = 'copy';
-            btn.style.cssText = 'position:absolute;top:8px;right:10px;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);background:var(--bg-base);border:1px solid var(--gray-800);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:0.05em;';
-            btn.addEventListener('click', function() {
-              var code = pre.querySelector('code');
-              navigator.clipboard.writeText(code ? code.innerText : pre.innerText).then(function() {
-                btn.textContent = 'copied!';
-                btn.style.color = 'var(--green-bright)';
-                setTimeout(function() { btn.textContent = 'copy'; btn.style.color = 'var(--text-muted)'; }, 1500);
-              });
+        document.querySelectorAll('.copy-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var code = btn.closest('.code-block-wrap').querySelector('code');
+            navigator.clipboard.writeText(code ? code.innerText : '').then(function() {
+              btn.textContent = 'copied!';
+              btn.classList.add('copied');
+              setTimeout(function() { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1500);
             });
-            wrap.appendChild(btn);
           });
-        })();
+        });
       ` }} />
 
       <style>{`
@@ -212,12 +203,50 @@ export default async function BlogPostPage({ params }: Props) {
           border-radius: 3px;
           border: 1px solid var(--gray-800);
         }
-        .prose-content pre {
-          background: var(--bg-elevated);
+        .prose-content .code-block-wrap {
+          margin-bottom: 1.25em;
           border: 1px solid var(--gray-800);
           border-radius: 6px;
-          padding: 20px;
+          overflow: hidden;
+        }
+        .prose-content .code-block-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 6px 14px;
+          background: var(--bg-base);
+          border-bottom: 1px solid var(--gray-800);
+        }
+        .prose-content .code-lang {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--text-muted);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .prose-content .copy-btn {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--text-muted);
+          background: transparent;
+          border: 1px solid var(--gray-800);
+          border-radius: 3px;
+          padding: 2px 8px;
+          cursor: pointer;
+          letter-spacing: 0.05em;
+          transition: color 120ms, border-color 120ms;
+        }
+        .prose-content .copy-btn:hover { color: var(--text-secondary); border-color: var(--gray-400); }
+        .prose-content .copy-btn.copied { color: var(--green-bright); border-color: var(--green-bright); }
+        .prose-content pre {
+          background: var(--bg-elevated);
+          padding: 18px 20px;
           overflow-x: auto;
+          margin: 0;
+        }
+        .prose-content > pre {
+          border: 1px solid var(--gray-800);
+          border-radius: 6px;
           margin-bottom: 1.25em;
         }
         .prose-content pre code {
