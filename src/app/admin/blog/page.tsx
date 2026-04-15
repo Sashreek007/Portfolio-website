@@ -34,13 +34,22 @@ export default async function AdminBlogPage() {
             Posts
           </h1>
         </div>
-        <Link
-          href="/admin/blog/new"
-          className="font-mono text-[12px] px-4 py-2 transition-all duration-200 hover:-translate-y-[1px]"
-          style={{ color: "var(--violet-pale)", background: "var(--violet-mid)", borderRadius: "4px" }}
-        >
-          + new post
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/blog/help"
+            className="font-mono text-[12px] px-3 py-2 transition-colors duration-150"
+            style={{ color: "var(--text-muted)", border: "1px solid var(--gray-800)", borderRadius: "4px" }}
+          >
+            ? help
+          </Link>
+          <Link
+            href="/admin/blog/new"
+            className="font-mono text-[12px] px-4 py-2 transition-all duration-200 hover:-translate-y-[1px]"
+            style={{ color: "var(--violet-pale)", background: "var(--violet-mid)", borderRadius: "4px" }}
+          >
+            + new post
+          </Link>
+        </div>
       </div>
 
       {posts.length === 0 ? (

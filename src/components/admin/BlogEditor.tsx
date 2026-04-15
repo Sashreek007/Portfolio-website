@@ -602,9 +602,19 @@ export default function BlogEditor({ post, mode }: Props) {
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <label style={labelStyle}>Content</label>
-          <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
-            type <kbd style={{ background: "var(--bg-elevated)", padding: "1px 4px", borderRadius: "3px", border: "1px solid var(--gray-800)" }}>/</kbd> for commands
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+              type <kbd style={{ background: "var(--bg-elevated)", padding: "1px 4px", borderRadius: "3px", border: "1px solid var(--gray-800)" }}>/</kbd> for commands
+            </span>
+            <a
+              href="/admin/blog/help"
+              target="_blank"
+              className="font-mono text-[11px] transition-colors duration-150"
+              style={{ color: "var(--text-muted)", textDecoration: "none" }}
+            >
+              ? reference
+            </a>
+          </div>
         </div>
         <div
           className="novel-editor-wrapper rounded-[6px] overflow-visible"
