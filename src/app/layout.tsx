@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Syne } from "next/font/google";
 import "./globals.css";
+import CursorGlow from "@/components/site/CursorGlow";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -36,6 +37,7 @@ export default function RootLayout({
       className={`${geistMono.variable} ${syne.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-bg-base text-text-primary">
+        <CursorGlow />
         {children}
       </body>
     </html>

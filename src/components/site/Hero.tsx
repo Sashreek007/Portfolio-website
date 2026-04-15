@@ -50,6 +50,17 @@ export default function Hero() {
         }}
       />
 
+      {/* Scroll cue */}
+      <div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
+        style={{ animation: "bounceCue 2s ease-in-out infinite" }}
+      >
+        <span className="font-mono text-[10px] tracking-[0.12em] uppercase" style={{ color: "var(--text-muted)" }}>scroll</span>
+        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" style={{ color: "var(--text-muted)" }}>
+          <path d="M1 1L6 7L11 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+
       <div className="relative z-10 flex flex-col items-center gap-4 max-w-[760px]">
         {/* Name */}
         <h1
