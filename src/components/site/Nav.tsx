@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 const homeLinks = [
   { href: "#work",    label: "work",    id: "work" },
   { href: "#about",   label: "about",   id: "about" },
-  { href: "#writing", label: "writing", id: "writing" },
+  { href: "/blog",    label: "writing", id: "" },
   { href: "#contact", label: "contact", id: "contact" },
 ];
 
@@ -67,9 +67,11 @@ export default function Nav() {
       <nav className="flex items-center gap-6">
         {isHome
           ? homeLinks.map(({ href, label, id }) => {
-              const active = activeSection === id;
+              const isPage = href.startsWith("/");
+              const active = !isPage && activeSection === id;
+              const Tag = isPage ? Link : "a";
               return (
-                <a
+                <Tag
                   key={href}
                   href={href}
                   className="relative font-mono text-[13px] transition-colors duration-200"
@@ -82,7 +84,7 @@ export default function Nav() {
                       style={{ background: "var(--violet-mid)" }}
                     />
                   )}
-                </a>
+                </Tag>
               );
             })
           : pageLinks.map(({ href, label }) => {
