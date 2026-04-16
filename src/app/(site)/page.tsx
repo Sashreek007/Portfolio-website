@@ -4,6 +4,9 @@ import SectionLabel from "@/components/site/SectionLabel";
 import SkillsTable from "@/components/site/SkillsTable";
 import ProjectCard, { type Project } from "@/components/site/ProjectCard";
 import RevealSections from "@/components/site/RevealSections";
+import NeuralNetwork from "@/components/site/NeuralNetwork";
+import ServerRack from "@/components/site/ServerRack";
+import NetworkGraph from "@/components/site/NetworkGraph";
 import Link from "next/link";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -172,7 +175,7 @@ export default async function HomePage() {
         className="section-hidden px-[6vw] py-24"
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start max-w-[1200px]">
-          {/* Left — text */}
+          {/* Left — text + server rack */}
           <div>
             <SectionLabel>About</SectionLabel>
             <h2
@@ -207,10 +210,49 @@ export default async function HomePage() {
                 full bio →
               </Link>
             </div>
+
+            {/* Server rack — anchors the "systems" half of the bio */}
+            <div className="mt-12 flex items-end gap-5">
+              <ServerRack
+                style={{
+                  width: "112px",
+                  height: "auto",
+                  color: "var(--text-primary)",
+                  opacity: 0.55,
+                }}
+              />
+              <div className="pb-3">
+                <p
+                  className="font-mono text-[10px] tracking-[0.16em] uppercase"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  fleet · 6 nodes
+                </p>
+                <p
+                  className="font-mono text-[10px] mt-1"
+                  style={{ color: "var(--gray-600)" }}
+                >
+                  uptime 99.94%
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Right — skills */}
+          {/* Right — neural net + skills */}
           <div>
+            {/* Neural net — frames the "AI" half */}
+            <div className="mb-10">
+              <NeuralNetwork
+                style={{
+                  width: "100%",
+                  maxWidth: "320px",
+                  height: "auto",
+                  color: "var(--text-primary)",
+                  opacity: 0.55,
+                }}
+              />
+            </div>
+
             <p
               className="font-mono text-[11px] tracking-[0.12em] uppercase mb-5"
               style={{ color: "var(--text-muted)" }}
@@ -306,54 +348,75 @@ export default async function HomePage() {
           Get in touch
         </h2>
         <p
-          className="text-[15px] leading-[1.7] mb-10 max-w-[480px]"
+          className="text-[15px] leading-[1.7] mb-10 max-w-[520px]"
           style={{ color: "var(--text-secondary)" }}
         >
           Open to internship opportunities in backend, MLOps, and AI systems.
           If you&apos;re working on something interesting, reach out.
         </p>
 
-        <div
-          className="flex flex-col gap-0 max-w-[480px]"
-          style={{ border: "1px solid var(--gray-800)", borderRadius: "6px" }}
-        >
-          {[
-            { label: "email", value: "sashreek.addanki@gmail.com", href: "mailto:sashreek.addanki@gmail.com", external: false },
-            { label: "github", value: "Sashreek007", href: "https://github.com/Sashreek007", external: true },
-            { label: "linkedin", value: "sashreek-addanki", href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", external: true },
-          ].map(({ label, value, href, external }, i, arr) => (
-            <a
-              key={label}
-              href={href}
-              target={external ? "_blank" : undefined}
-              rel={external ? "noreferrer noopener" : undefined}
-              className="group flex items-center justify-between px-5 py-4 transition-colors duration-150"
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,520px)_1fr] gap-x-16 gap-y-10 items-center max-w-[1100px]">
+          {/* Contact list */}
+          <div
+            className="flex flex-col gap-0"
+            style={{ border: "1px solid var(--gray-800)", borderRadius: "6px" }}
+          >
+            {[
+              { label: "email", value: "sashreek.addanki@gmail.com", href: "mailto:sashreek.addanki@gmail.com", external: false },
+              { label: "github", value: "Sashreek007", href: "https://github.com/Sashreek007", external: true },
+              { label: "linkedin", value: "sashreek-addanki", href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", external: true },
+            ].map(({ label, value, href, external }, i, arr) => (
+              <a
+                key={label}
+                href={href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noreferrer noopener" : undefined}
+                className="group flex items-center justify-between px-5 py-4 transition-colors duration-150"
+                style={{
+                  borderBottom: i < arr.length - 1 ? "1px solid var(--gray-800)" : "none",
+                }}
+              >
+                <span
+                  className="font-mono text-[11px] tracking-[0.10em] uppercase"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {label}
+                </span>
+                <span
+                  className="text-[14px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-150"
+                  style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+                >
+                  {value}
+                  {external && (
+                    <span
+                      className="ml-2 font-mono text-[11px] opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                      style={{ color: "var(--violet-soft)" }}
+                    >
+                      ↗
+                    </span>
+                  )}
+                </span>
+              </a>
+            ))}
+          </div>
+
+          {/* Network graph — visual metaphor for "let's connect" */}
+          <div className="hidden lg:flex flex-col items-center gap-3 pointer-events-none">
+            <NetworkGraph
               style={{
-                borderBottom: i < arr.length - 1 ? "1px solid var(--gray-800)" : "none",
+                width: "min(280px, 100%)",
+                height: "auto",
+                color: "var(--text-primary)",
+                opacity: 0.55,
               }}
+            />
+            <p
+              className="font-mono text-[10px] tracking-[0.18em] uppercase"
+              style={{ color: "var(--text-muted)" }}
             >
-              <span
-                className="font-mono text-[11px] tracking-[0.10em] uppercase"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {label}
-              </span>
-              <span
-                className="text-[14px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-150"
-                style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-              >
-                {value}
-                {external && (
-                  <span
-                    className="ml-2 font-mono text-[11px] opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-                    style={{ color: "var(--violet-soft)" }}
-                  >
-                    ↗
-                  </span>
-                )}
-              </span>
-            </a>
-          ))}
+              ping me · always one hop away
+            </p>
+          </div>
         </div>
       </section>
 
