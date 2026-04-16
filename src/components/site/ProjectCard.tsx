@@ -20,15 +20,21 @@ export type Project = {
 };
 
 const statusConfig = {
-  active:   { label: "active",   color: "var(--green-bright)" },
-  shipped:  { label: "shipped",  color: "var(--text-muted)" },
-  building: { label: "building", color: "var(--amber-bright)" },
+  active:   { label: "active",   color: "var(--green-bright)", dot: "var(--green-mid)" },
+  shipped:  { label: "shipped",  color: "var(--text-muted)",   dot: "var(--gray-600)" },
+  building: { label: "building", color: "var(--amber-bright)", dot: "var(--amber-mid)" },
 };
 
-export default function ProjectCard({ project }: { project: Project }) {
+type Props = {
+  project: Project;
+  index?: number;
+};
+
+export default function ProjectCard({ project, index }: Props) {
   const cardRef = useRef<HTMLElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const status = statusConfig[project.status] ?? statusConfig.shipped;
+  const primaryHref = project.demo_url ?? project.github_url ?? null;
 
   const onMove = (e: React.MouseEvent<HTMLElement>) => {
     const card = cardRef.current;
@@ -37,10 +43,10 @@ export default function ProjectCard({ project }: { project: Project }) {
     const r = card.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width;
     const y = (e.clientY - r.top) / r.height;
-    card.style.transform = `perspective(900px) rotateX(${(0.5 - y) * 7}deg) rotateY(${(x - 0.5) * 7}deg) translateY(-4px)`;
+    card.style.transform = `perspective(900px) rotateX(${(0.5 - y) * 5}deg) rotateY(${(x - 0.5) * 5}deg) translateY(-3px)`;
     card.style.borderColor = "color-mix(in srgb, var(--violet-soft) 50%, transparent)";
     if (glow) {
-      glow.style.background = `radial-gradient(180px circle at ${x * 100}% ${y * 100}%, color-mix(in srgb, var(--violet-soft) 10%, transparent), transparent 70%)`;
+      glow.style.background = `radial-gradient(220px circle at ${x * 100}% ${y * 100}%, color-mix(in srgb, var(--violet-soft) 11%, transparent), transparent 70%)`;
       glow.style.opacity = "1";
     }
   };
@@ -58,11 +64,11 @@ export default function ProjectCard({ project }: { project: Project }) {
   return (
     <article
       ref={cardRef}
-      className="relative flex flex-col gap-3 p-5 cursor-default overflow-hidden"
+      className="project-card group relative flex flex-col gap-4 p-6 cursor-default overflow-hidden"
       style={{
         background: "var(--bg-elevated)",
         border: "1px solid color-mix(in srgb, var(--gray-800) 60%, transparent)",
-        borderRadius: "6px",
+        borderRadius: "8px",
         transition: "transform 400ms cubic-bezier(0.23, 1, 0.32, 1), border-color 200ms",
         willChange: "transform",
       }}
@@ -72,20 +78,55 @@ export default function ProjectCard({ project }: { project: Project }) {
       {/* Spotlight inner glow */}
       <div
         ref={glowRef}
-        className="pointer-events-none absolute inset-0 rounded-[6px]"
+        className="pointer-events-none absolute inset-0 rounded-[8px]"
         style={{ opacity: 0, transition: "opacity 300ms", background: "transparent" }}
       />
 
-      {/* Top row: status + year */}
-      <div className="relative flex items-center justify-between">
+      {/* Faint corner index number */}
+      {typeof index === "number" && (
         <span
-          className="font-mono text-[11px] font-medium tracking-[0.08em] uppercase"
+          className="pointer-events-none absolute right-5 top-3 font-mono select-none"
+          style={{
+            fontSize: "44px",
+            lineHeight: 1,
+            color: "var(--gray-800)",
+            letterSpacing: "-0.04em",
+            fontWeight: 500,
+          }}
+        >
+          {String(index + 1).padStart(2, "0")}
+        </span>
+      )}
+
+      {/* ── Header row: filename-style breadcrumb ──────────────────── */}
+      <div className="relative flex items-center gap-2">
+        <span
+          className="w-[7px] h-[7px] rounded-full flex-shrink-0"
+          style={{
+            background: status.dot,
+            boxShadow:
+              project.status === "active"
+                ? `0 0 8px ${status.dot}`
+                : "none",
+          }}
+        />
+        <span
+          className="font-mono text-[11px] tracking-[0.08em] uppercase"
           style={{ color: status.color }}
         >
           {status.label}
         </span>
+        <span
+          className="font-mono text-[11px]"
+          style={{ color: "var(--gray-800)" }}
+        >
+          /
+        </span>
         {project.year && (
-          <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+          <span
+            className="font-mono text-[11px]"
+            style={{ color: "var(--text-muted)" }}
+          >
             {project.year}
           </span>
         )}
@@ -94,8 +135,12 @@ export default function ProjectCard({ project }: { project: Project }) {
       {/* Media */}
       {(project.video_url || project.image_url) && (
         <div
-          className="relative overflow-hidden rounded-[4px] w-full"
-          style={{ aspectRatio: "16/9", background: "var(--bg-elevated)" }}
+          className="relative overflow-hidden rounded-[6px] w-full"
+          style={{
+            aspectRatio: "16/9",
+            background: "var(--bg-base)",
+            border: "1px solid var(--gray-800)",
+          }}
         >
           {project.video_url ? (
             <video src={project.video_url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
@@ -106,13 +151,41 @@ export default function ProjectCard({ project }: { project: Project }) {
         </div>
       )}
 
-      {/* Name */}
-      <h3
-        className="relative text-[18px] font-medium leading-[1.3]"
-        style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)", cursor: "crosshair" }}
-      >
-        {project.name}
-      </h3>
+      {/* Title + arrow */}
+      <div className="relative flex items-start justify-between gap-3">
+        <h3
+          className="text-[20px] font-medium leading-[1.25]"
+          style={{
+            color: "var(--text-primary)",
+            fontFamily: "var(--font-body)",
+            cursor: "crosshair",
+          }}
+        >
+          {project.name}
+        </h3>
+        {primaryHref && (
+          <a
+            href={primaryHref}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label={`open ${project.name}`}
+            className="shrink-0 mt-1 transition-all duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--violet-soft)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)")}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </a>
+        )}
+      </div>
+
+      {/* Subtle divider under title */}
+      <div
+        className="relative h-px w-8"
+        style={{ background: "var(--violet-mid)" }}
+      />
 
       {/* Description */}
       <p className="relative text-[14px] leading-[1.65]" style={{ color: "var(--text-secondary)" }}>
@@ -128,9 +201,12 @@ export default function ProjectCard({ project }: { project: Project }) {
         </div>
       )}
 
-      {/* Links */}
+      {/* Footer links */}
       {(project.github_url || project.demo_url) && (
-        <div className="relative flex gap-4 mt-auto pt-1">
+        <div
+          className="relative flex items-center gap-5 mt-auto pt-3"
+          style={{ borderTop: "1px solid color-mix(in srgb, var(--gray-800) 70%, transparent)" }}
+        >
           {project.demo_url && (
             <a
               href={project.demo_url}
@@ -141,7 +217,7 @@ export default function ProjectCard({ project }: { project: Project }) {
               onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--violet-pale)")}
               onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--violet-soft)")}
             >
-              ↗ visit
+              ↗ live
             </a>
           )}
           {project.github_url && (
@@ -154,7 +230,7 @@ export default function ProjectCard({ project }: { project: Project }) {
               onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-secondary)")}
               onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)")}
             >
-              github
+              source
             </a>
           )}
         </div>

@@ -1,6 +1,5 @@
 import { createServerClient } from "@/lib/supabase/server";
 import Hero from "@/components/site/Hero";
-import MountainClimb from "@/components/site/MountainClimb";
 import SectionLabel from "@/components/site/SectionLabel";
 import SkillsTable from "@/components/site/SkillsTable";
 import ProjectCard, { type Project } from "@/components/site/ProjectCard";
@@ -133,9 +132,6 @@ export default async function HomePage() {
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <Hero />
 
-      {/* ── Mountain Climb ────────────────────────────────────────────────── */}
-      <MountainClimb />
-
       {/* ── Selected Work ─────────────────────────────────────────────────── */}
       <section
         id="work"
@@ -161,9 +157,9 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {bestProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {bestProjects.map((project, i) => (
+            <ProjectCard key={project.id} project={project} index={i} />
           ))}
         </div>
       </section>
