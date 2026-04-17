@@ -7,14 +7,16 @@
 //                       realistic mechanical keyboard (front)
 //                                                       gaming mouse (front-right)
 //
-// All animations are real:
-//   - Code lines type in character-by-character via requestAnimationFrame
-//   - Editor mode block flips between INSERT (green) and NORMAL (violet)
-//   - Cursor switches between thin line (insert) and block (normal)
-//   - Three steam wisps rise continuously from the mug
-//   - Plant leaves gently sway
-//   - Soft violet glow pulses behind the laptop screen
-//   - Mouse RGB and keyboard underglow subtly pulse
+// All animations are real. The editor cycles through a full vim sequence:
+//   1. INSERT — types out an agent-harness module character-by-character
+//   2. NORMAL — cursor parks as a block, lualine mode flips violet
+//   3. V-LINE — a target comment line gets highlighted in amber
+//   4. DELETE — the selection flashes red and the line collapses out
+//   5. NORMAL — editor rests with the tidied buffer before looping
+//
+// Other ambient bits: steam wisps rise from the mug, plant leaves sway, a
+// soft violet glow pulses behind the screen, mouse RGB and keyboard
+// underglow pulse gently.
 
 import { useEffect, useState } from "react";
 
@@ -23,26 +25,102 @@ type Props = { className?: string; style?: React.CSSProperties };
 type Seg = { t: string; k: "kw" | "fn" | "var" | "str" | "num" | "punct" | "cm" | "type" };
 type Line = { indent: number; segs: Seg[] };
 
-// Realistic small build script for the typing animation.
+// Agent harness module for the typing animation.
 const CODE: Line[] = [
-  { indent: 0, segs: [{ t: "import ", k: "kw" }, { t: "{ compile, deploy }", k: "punct" }, { t: " from ", k: "kw" }, { t: '"./pipeline"', k: "str" }] },
+  // import { Agent, tool } from "./core"
+  { indent: 0, segs: [
+    { t: "import ", k: "kw" },
+    { t: "{ Agent, tool }", k: "punct" },
+    { t: " from ", k: "kw" },
+    { t: '"./core"', k: "str" },
+  ]},
   { indent: 0, segs: [] }, // blank
-  { indent: 0, segs: [{ t: "export ", k: "kw" }, { t: "const ", k: "kw" }, { t: "build", k: "fn" }, { t: " = ", k: "punct" }, { t: "async ", k: "kw" }, { t: "() => {", k: "punct" }] },
-  { indent: 1, segs: [{ t: "const ", k: "kw" }, { t: "ctx", k: "var" }, { t: " = ", k: "punct" }, { t: "await ", k: "kw" }, { t: "init", k: "fn" }, { t: "()", k: "punct" }] },
-  { indent: 1, segs: [{ t: "const ", k: "kw" }, { t: "out", k: "var" }, { t: " = ", k: "punct" }, { t: "compile", k: "fn" }, { t: "(", k: "punct" }, { t: "ctx", k: "var" }, { t: ", ", k: "punct" }, { t: '"./src"', k: "str" }, { t: ")", k: "punct" }] },
-  { indent: 1, segs: [{ t: "if ", k: "kw" }, { t: "(", k: "punct" }, { t: "out", k: "var" }, { t: ".errors > ", k: "punct" }, { t: "0", k: "num" }, { t: ") ", k: "punct" }, { t: "throw ", k: "kw" }, { t: "out", k: "var" }] },
-  { indent: 1, segs: [{ t: "// ship to prod", k: "cm" }] },
-  { indent: 1, segs: [{ t: "return ", k: "kw" }, { t: "deploy", k: "fn" }, { t: "(", k: "punct" }, { t: "out", k: "var" }, { t: ", { ", k: "punct" }, { t: "env", k: "var" }, { t: ": ", k: "punct" }, { t: '"prod"', k: "str" }, { t: " })", k: "punct" }] },
-  { indent: 0, segs: [{ t: "}", k: "punct" }] },
+  // const shell = tool("shell", (run) => exec(run.cmd))
+  { indent: 0, segs: [
+    { t: "const ", k: "kw" },
+    { t: "shell", k: "var" },
+    { t: " = ", k: "punct" },
+    { t: "tool", k: "fn" },
+    { t: "(", k: "punct" },
+    { t: '"shell"', k: "str" },
+    { t: ", (", k: "punct" },
+    { t: "run", k: "var" },
+    { t: ") => ", k: "punct" },
+    { t: "exec", k: "fn" },
+    { t: "(", k: "punct" },
+    { t: "run", k: "var" },
+    { t: ".cmd))", k: "punct" },
+  ]},
+  // const read  = tool("read",  (run) => open(run.path))
+  { indent: 0, segs: [
+    { t: "const ", k: "kw" },
+    { t: "read", k: "var" },
+    { t: "  = ", k: "punct" },
+    { t: "tool", k: "fn" },
+    { t: "(", k: "punct" },
+    { t: '"read"', k: "str" },
+    { t: ", (", k: "punct" },
+    { t: "run", k: "var" },
+    { t: ") => ", k: "punct" },
+    { t: "open", k: "fn" },
+    { t: "(", k: "punct" },
+    { t: "run", k: "var" },
+    { t: ".path))", k: "punct" },
+  ]},
+  // // TODO: retry on tool error
+  { indent: 0, segs: [{ t: "// TODO: retry on tool error", k: "cm" }] },
+  // export const agent = new Agent({
+  { indent: 0, segs: [
+    { t: "export ", k: "kw" },
+    { t: "const ", k: "kw" },
+    { t: "agent", k: "fn" },
+    { t: " = ", k: "punct" },
+    { t: "new ", k: "kw" },
+    { t: "Agent", k: "type" },
+    { t: "({", k: "punct" },
+  ]},
+  //   model: "claude-opus-4-7",
+  { indent: 1, segs: [
+    { t: "model", k: "var" },
+    { t: ": ", k: "punct" },
+    { t: '"claude-opus-4-7"', k: "str" },
+    { t: ",", k: "punct" },
+  ]},
+  //   tools: [shell, read],
+  { indent: 1, segs: [
+    { t: "tools", k: "var" },
+    { t: ": [", k: "punct" },
+    { t: "shell", k: "var" },
+    { t: ", ", k: "punct" },
+    { t: "read", k: "var" },
+    { t: "],", k: "punct" },
+  ]},
+  // })
+  { indent: 0, segs: [{ t: "})", k: "punct" }] },
 ];
 
+// Line that gets visual-selected and deleted each loop (the TODO comment).
+const DELETE_LINE_IDX = 4;
+
 const CHAR_MS = 26;
-const POST_LINE_MS = 200;
-const RESET_PAUSE_MS = 4500;
+const POST_LINE_MS = 180;
+const NORMAL_HOLD_MS = 1400;   // pause after typing finishes
+const VISUAL_MS = 1100;        // V-LINE selection pulse
+const DELETE_FLASH_MS = 360;   // red flash on the targeted line
+const POST_DELETE_MS = 1500;   // editor rests with the line gone
+const RESET_PAUSE_MS = 1600;   // blank pause before looping
 
 const TOTAL_CHARS = CODE.reduce((n, ln) => n + ln.segs.reduce((m, s) => m + s.t.length, 0), 0);
 const LINE_CHARS = CODE.map(ln => ln.segs.reduce((m, s) => m + s.t.length, 0));
 const TOTAL_TYPE_MS = TOTAL_CHARS * CHAR_MS + (CODE.length - 1) * POST_LINE_MS;
+
+// Phase boundaries (cumulative ms from loop start).
+const T_TYPE    = TOTAL_TYPE_MS;
+const T_NORMAL  = T_TYPE + NORMAL_HOLD_MS;
+const T_VISUAL  = T_NORMAL + VISUAL_MS;
+const T_DELETE  = T_VISUAL + DELETE_FLASH_MS;
+const T_POST    = T_DELETE + POST_DELETE_MS;
+const T_LOOP    = T_POST + RESET_PAUSE_MS;
 
 function colorFor(kind: Seg["k"]): string {
   switch (kind) {
@@ -61,15 +139,14 @@ function colorFor(kind: Seg["k"]): string {
 type FT = { type: "folder" | "file"; name: string; depth: number; open?: boolean; active?: boolean; ext?: string; modified?: boolean; gitNew?: boolean };
 const FILE_TREE: FT[] = [
   { type: "folder", name: "src",         depth: 0, open: true },
-  { type: "folder", name: "app",         depth: 1, open: true },
-  { type: "folder", name: "components",  depth: 2, open: true },
-  { type: "file",   name: "Hero.tsx",    depth: 3, ext: "tsx", modified: true },
-  { type: "file",   name: "Workspace.tsx", depth: 3, ext: "tsx" },
-  { type: "file",   name: "page.tsx",    depth: 2, ext: "tsx" },
-  { type: "folder", name: "lib",         depth: 1, open: true },
-  { type: "file",   name: "build.ts",    depth: 2, ext: "ts", active: true },
-  { type: "file",   name: "pipeline.ts", depth: 2, ext: "ts", gitNew: true },
-  { type: "folder", name: "public",      depth: 0, open: false },
+  { type: "folder", name: "core",        depth: 1, open: true },
+  { type: "file",   name: "agent.ts",    depth: 2, ext: "ts", active: true },
+  { type: "file",   name: "schema.ts",   depth: 2, ext: "ts" },
+  { type: "file",   name: "runner.ts",   depth: 2, ext: "ts", modified: true },
+  { type: "folder", name: "tools",       depth: 1, open: true },
+  { type: "file",   name: "shell.ts",    depth: 2, ext: "ts" },
+  { type: "file",   name: "fs.ts",       depth: 2, ext: "ts", gitNew: true },
+  { type: "folder", name: "app",         depth: 0, open: false },
   { type: "file",   name: "tsconfig.json", depth: 0, ext: "json" },
   { type: "file",   name: "package.json",  depth: 0, ext: "json" },
   { type: "file",   name: "README.md",     depth: 0, ext: "md" },
@@ -85,10 +162,10 @@ const EXT_COLOR: Record<string, string> = {
 // Buffer tabs at top of editor
 type Buf = { num: number; name: string; active?: boolean; modified?: boolean; errors?: number };
 const BUFFERS: Buf[] = [
-  { num: 1, name: "build.ts",  active: true, modified: true },
-  { num: 2, name: "hero.tsx",  errors: 1 },
-  { num: 3, name: "page.tsx" },
-  { num: 4, name: "pipeline.ts" },
+  { num: 1, name: "agent.ts",  active: true, modified: true },
+  { num: 2, name: "schema.ts", errors: 1 },
+  { num: 3, name: "runner.ts" },
+  { num: 4, name: "shell.ts" },
   { num: 5, name: ".env" },
 ];
 
@@ -206,24 +283,51 @@ function KeyCap({
   );
 }
 
+type Phase = "typing" | "normal" | "visual" | "delete" | "post" | "reset";
+type Mode  = "INSERT" | "NORMAL" | "V-LINE";
+
 export default function WorkspaceAnimation({ className, style }: Props) {
   const [typed, setTyped] = useState(0);
-  const [insertMode, setInsertMode] = useState(true);
+  const [phase, setPhase] = useState<Phase>("typing");
+  const [flash, setFlash] = useState(0); // 0–1 opacity for delete-line red flash
 
   useEffect(() => {
     let raf = 0;
     let start = performance.now();
     const tick = (now: number) => {
       const elapsed = now - start;
-      if (elapsed > TOTAL_TYPE_MS + RESET_PAUSE_MS) {
+
+      if (elapsed > T_LOOP) {
         start = now;
         setTyped(0);
-        setInsertMode(true);
-      } else if (elapsed > TOTAL_TYPE_MS) {
+        setPhase("typing");
+        setFlash(0);
+      } else if (elapsed > T_POST) {
         setTyped(TOTAL_CHARS);
-        setInsertMode(false);
+        setPhase("reset");
+        setFlash(0);
+      } else if (elapsed > T_DELETE) {
+        setTyped(TOTAL_CHARS);
+        setPhase("post");
+        setFlash(0);
+      } else if (elapsed > T_VISUAL) {
+        // delete flash — fade red highlight out as the line "collapses"
+        const p = (elapsed - T_VISUAL) / DELETE_FLASH_MS;
+        setTyped(TOTAL_CHARS);
+        setPhase("delete");
+        setFlash(1 - p);
+      } else if (elapsed > T_NORMAL) {
+        setTyped(TOTAL_CHARS);
+        setPhase("visual");
+        setFlash(0);
+      } else if (elapsed > T_TYPE) {
+        setTyped(TOTAL_CHARS);
+        setPhase("normal");
+        setFlash(0);
       } else {
-        setInsertMode(true);
+        // typing phase
+        setPhase("typing");
+        setFlash(0);
         let remaining = elapsed;
         let chars = 0;
         for (let i = 0; i < CODE.length; i++) {
@@ -245,12 +349,24 @@ export default function WorkspaceAnimation({ className, style }: Props) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  const insertMode = phase === "typing";
+  const visualActive = phase === "visual" || phase === "delete";
+  const lineHidden   = phase === "post" || phase === "reset";
+  const mode: Mode =
+    phase === "typing"          ? "INSERT" :
+    phase === "visual"          ? "V-LINE" :
+                                  "NORMAL";
+
+  // Cursor location: last typed line during insert, delete-target during
+  // visual/delete, and the line just above the deleted line afterward.
   let acc = 0;
   let cursorLineIdx = CODE.length - 1;
   for (let i = 0; i < CODE.length; i++) {
     acc += LINE_CHARS[i];
     if (typed < acc) { cursorLineIdx = i; break; }
   }
+  if (visualActive) cursorLineIdx = DELETE_LINE_IDX;
+  else if (lineHidden) cursorLineIdx = Math.max(0, DELETE_LINE_IDX - 1);
   const currentLineNumber = cursorLineIdx + 1;
 
   // ── KEYBOARD GEOMETRY ──────────────────────────────────────────────
@@ -530,12 +646,20 @@ export default function WorkspaceAnimation({ className, style }: Props) {
               {(() => {
                 let used = 0;
                 const out: React.ReactNode[] = [];
+                let displayRow = 0; // renumber after a line is deleted
                 for (let i = 0; i < CODE.length; i++) {
                   const ln = CODE[i];
                   const lnChars = LINE_CHARS[i];
                   const startUsed = used;
                   const visibleInLine = Math.max(0, Math.min(lnChars, typed - used));
                   used += lnChars;
+
+                  // During post-delete / reset, the target line is gone entirely.
+                  const skipLine = lineHidden && i === DELETE_LINE_IDX;
+                  if (skipLine) {
+                    if (typed <= startUsed && i > 0) break;
+                    continue;
+                  }
 
                   let consumed = 0;
                   const segNodes: React.ReactNode[] = [];
@@ -550,22 +674,36 @@ export default function WorkspaceAnimation({ className, style }: Props) {
                   }
 
                   const isCursorLine = i === cursorLineIdx;
-                  const lineNum = i + 1;
-                  // Relative line numbers
+                  const isVisualLine = visualActive && i === DELETE_LINE_IDX;
+                  const isDeleteLine = phase === "delete" && i === DELETE_LINE_IDX;
+                  displayRow += 1;
+                  // Relative line numbers off the current visible row
                   const displayed = isCursorLine
-                    ? String(lineNum).padStart(2)
-                    : String(Math.abs(lineNum - currentLineNumber)).padStart(2);
-                  // Git sign in gutter (some lines)
-                  const gitSign = i === 0 ? "+" : (i === 6 ? "~" : "");
+                    ? String(displayRow).padStart(2)
+                    : String(Math.abs(displayRow - (cursorLineIdx === i ? displayRow : currentLineNumber))).padStart(2);
+                  // Git sign in gutter: new import (+), modified Agent ctor (~)
+                  const gitSign = i === 0 ? "+" : (i === 5 ? "~" : "");
                   const gitColor = gitSign === "+" ? "#5DCAA5" : "#FFC079";
+
+                  // Line background: visual-selection amber, delete red flash, cursor hint
+                  let lineBg = "transparent";
+                  if (isDeleteLine) {
+                    lineBg = `rgba(229,91,91,${0.35 * flash + 0.1})`;
+                  } else if (isVisualLine) {
+                    lineBg = "rgba(255,192,121,0.18)";
+                  } else if (isCursorLine && !visualActive) {
+                    lineBg = "rgba(193,143,255,0.06)";
+                  }
 
                   out.push(
                     <div key={i} style={{
                       display: "flex",
                       alignItems: "center",
                       gap: "3px",
-                      background: isCursorLine ? "rgba(193,143,255,0.06)" : "transparent",
+                      background: lineBg,
                       paddingLeft: "3px",
+                      position: "relative",
+                      transition: "background 180ms ease",
                     }}>
                       {/* Git sign */}
                       <span style={{ color: gitColor, width: "8px", textAlign: "center", fontSize: "10px" }}>
@@ -573,8 +711,8 @@ export default function WorkspaceAnimation({ className, style }: Props) {
                       </span>
                       {/* Line number */}
                       <span style={{
-                        color: isCursorLine ? "#FFC079" : "#5F5E5A",
-                        opacity: isCursorLine ? 0.95 : 0.55,
+                        color: isVisualLine ? "#FFC079" : (isCursorLine ? "#FFC079" : "#5F5E5A"),
+                        opacity: (isCursorLine || isVisualLine) ? 0.95 : 0.55,
                         width: "18px",
                         textAlign: "right",
                         fontSize: "9.5px",
@@ -593,7 +731,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
                         )}
                         <span>{"  ".repeat(ln.indent)}</span>
                         {segNodes}
-                        {isCursorLine && (
+                        {isCursorLine && !isVisualLine && (
                           <span style={{
                             display: "inline-block",
                             width: insertMode ? "2px" : "6px",
@@ -605,6 +743,17 @@ export default function WorkspaceAnimation({ className, style }: Props) {
                             animation: "ws-cursor 1s steps(2) infinite",
                           }} />
                         )}
+                        {isVisualLine && phase === "visual" && (
+                          <span style={{
+                            display: "inline-block",
+                            width: "6px",
+                            height: "13px",
+                            background: "#FFC079",
+                            verticalAlign: "text-bottom",
+                            marginLeft: "1px",
+                            opacity: 0.9,
+                          }} />
+                        )}
                       </span>
                     </div>,
                   );
@@ -612,6 +761,28 @@ export default function WorkspaceAnimation({ className, style }: Props) {
                 }
                 return out;
               })()}
+
+              {/* Vim command hint — shows keys pressed during the cycle */}
+              {phase !== "typing" && (
+                <div style={{
+                  position: "absolute",
+                  right: "8px",
+                  bottom: "6px",
+                  fontSize: "8.5px",
+                  color: "#5F5E5A",
+                  letterSpacing: "0.06em",
+                  background: "rgba(14,14,12,0.7)",
+                  padding: "2px 5px",
+                  borderRadius: "2px",
+                  border: "1px solid #1F1F1D",
+                }}>
+                  {phase === "normal" && "esc"}
+                  {phase === "visual" && "V"}
+                  {phase === "delete" && "Vd"}
+                  {phase === "post"   && "1 fewer line"}
+                  {phase === "reset"  && ":w"}
+                </div>
+              )}
 
               {/* LSP completion popup (shows briefly when typing) */}
               {insertMode && typed > 80 && typed < TOTAL_CHARS - 10 && (
@@ -657,13 +828,17 @@ export default function WorkspaceAnimation({ className, style }: Props) {
           }}>
             {/* Mode block */}
             <div style={{
-              background: insertMode ? "#5DCAA5" : "#7F77DD",
+              background:
+                mode === "INSERT" ? "#5DCAA5" :
+                mode === "V-LINE" ? "#FFC079" :
+                                    "#7F77DD",
               color: "#0E0E0C",
               fontWeight: 700,
               padding: "0 8px",
               letterSpacing: "0.06em",
+              transition: "background 160ms ease",
             }}>
-              {insertMode ? " INSERT " : " NORMAL "}
+              {` ${mode} `}
             </div>
             {/* Branch */}
             <div style={{
@@ -689,7 +864,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
             }}>
-              ~/portfolio/src/lib/build.ts
+              ~/portfolio/src/core/agent.ts
             </div>
             {/* Diagnostics */}
             <div style={{
@@ -720,10 +895,14 @@ export default function WorkspaceAnimation({ className, style }: Props) {
             </div>
             {/* Line:col + percent */}
             <div style={{
-              background: insertMode ? "#5DCAA5" : "#7F77DD",
+              background:
+                mode === "INSERT" ? "#5DCAA5" :
+                mode === "V-LINE" ? "#FFC079" :
+                                    "#7F77DD",
               color: "#0E0E0C",
               fontWeight: 700,
               padding: "0 8px",
+              transition: "background 160ms ease",
             }}>
               {currentLineNumber}:{Math.min(typed, 80)}  {Math.round((cursorLineIdx + 1) / CODE.length * 100)}%
             </div>
