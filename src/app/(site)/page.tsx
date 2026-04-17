@@ -2,7 +2,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import Hero from "@/components/site/Hero";
 import SectionLabel from "@/components/site/SectionLabel";
 import { type Project } from "@/components/site/ProjectCard";
-import SpecimenCard from "@/components/site/SpecimenCard";
+import ProjectMediaCard from "@/components/site/ProjectMediaCard";
 import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
 
@@ -344,8 +344,23 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {bestProjects.slice(0, 4).map((project, i) => (
-              <SpecimenCard key={project.id} project={project} index={i} />
+              <ProjectMediaCard key={project.id} project={project} index={i} />
             ))}
+          </div>
+
+          <div className="flex justify-center mt-12">
+            <Link
+              href="/work"
+              className="font-mono text-[13px] px-5 py-[10px] transition-all duration-200 hover:-translate-y-[1px]"
+              style={{
+                border: "1px solid var(--violet-mid)",
+                color: "var(--violet-pale)",
+                background: "color-mix(in srgb, var(--violet-dim) 30%, transparent)",
+                borderRadius: "4px",
+              }}
+            >
+              view all projects →
+            </Link>
           </div>
         </div>
       </section>
