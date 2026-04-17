@@ -116,6 +116,13 @@ export const SEED_PROJECTS: Project[] = [
   },
 ];
 
+export function projectSlug(p: Project) {
+  return p.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export function projectHref(p: Project) {
-  return `/projects/${p.id}`;
+  return `/blog/${projectSlug(p)}`;
 }
