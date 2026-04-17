@@ -8,6 +8,9 @@ import TiptapImage from "@tiptap/extension-image";
 import Highlight from "@tiptap/extension-highlight";
 import { common, createLowlight } from "lowlight";
 import hljs from "highlight.js";
+import ProjectBlogView from "./ProjectBlogView";
+import { projectSlug } from "@/lib/projects";
+import type { Project } from "@/components/site/ProjectCard";
 
 const lowlight = createLowlight(common);
 
@@ -78,7 +81,41 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!data) notFound();
 
-  const typedPost = data as Post;
+  const typedPost = data as Post & { project_id?: string | null };
+
+  // Project-linked post → render the case-file layout sourced from the
+  // project row. We don't use Tiptap content for these; the admin
+  // manages project fields in /admin/projects and the blog page renders
+  // from that data directly.
+  if (typedPost.project_id) {
+    const { data: projectData } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("id", typedPost.project_id)
+      .single();
+    if (!projectData) notFound();
+
+    const { data: allProjects } = await supabase
+      .from("projects")
+      .select("id, name, sort_order")
+      .order("sort_order", { ascending: true });
+    const projects = (allProjects ?? []) as Array<{ id: string; name: string; sort_order: number }>;
+    const index = projects.findIndex((p) => p.id === projectData.id);
+    const prev = index > 0 ? projects[index - 1] : null;
+    const next = index < projects.length - 1 ? projects[index + 1] : null;
+
+    return (
+      <ProjectBlogView
+        project={projectData as Project}
+        index={Math.max(0, index)}
+        total={projects.length}
+        prevSlug={prev ? projectSlug(prev as unknown as Project) : null}
+        prevName={prev?.name ?? null}
+        nextSlug={next ? projectSlug(next as unknown as Project) : null}
+        nextName={next?.name ?? null}
+      />
+    );
+  }
 
   let html = "";
   if (typedPost.content) {

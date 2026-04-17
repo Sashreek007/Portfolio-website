@@ -1,10 +1,11 @@
 import type { Project } from "@/components/site/ProjectCard";
 import { projectSlug } from "@/lib/projects";
 
-// Empty stub created when a project is added via the admin. Links the
-// post to the project (so sync/edit flows find it), but leaves the
-// content, excerpt, and publish state untouched — the admin writes
-// the blog themselves. Defaults to draft + hidden from /writing.
+// Metadata stub created when a project is added via the admin. The
+// /blog/<slug> page renders the case-file layout directly from project
+// fields, so the post row just exists to carry the slug + visibility
+// flags — its content field is unused. Published by default (content
+// always renders from project data) and hidden from /writing.
 export function buildProjectPostPayload(project: Project) {
   return {
     project_id: project.id,
@@ -13,8 +14,8 @@ export function buildProjectPostPayload(project: Project) {
     content: null,
     excerpt: null,
     cover_image_url: project.image_url ?? null,
-    is_published: false,
-    published_at: null,
+    is_published: true,
+    published_at: new Date().toISOString(),
     show_on_writing: false,
   };
 }

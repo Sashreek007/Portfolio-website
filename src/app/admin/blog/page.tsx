@@ -114,13 +114,24 @@ export default async function AdminBlogPage() {
                     view ↗
                   </Link>
                 )}
-                <Link
-                  href={`/admin/blog/${post.id}`}
-                  className="font-mono text-[12px] px-3 py-1 transition-colors duration-150"
-                  style={{ color: "var(--text-muted)", border: "1px solid var(--gray-800)", borderRadius: "4px" }}
-                >
-                  edit
-                </Link>
+                {post.project_id ? (
+                  <Link
+                    href={`/admin/projects/${post.project_id}`}
+                    className="font-mono text-[12px] px-3 py-1 transition-colors duration-150"
+                    style={{ color: "var(--text-muted)", border: "1px solid var(--gray-800)", borderRadius: "4px" }}
+                    title="Project posts are rendered from project fields — edit the project to update them."
+                  >
+                    edit project
+                  </Link>
+                ) : (
+                  <Link
+                    href={`/admin/blog/${post.id}`}
+                    className="font-mono text-[12px] px-3 py-1 transition-colors duration-150"
+                    style={{ color: "var(--text-muted)", border: "1px solid var(--gray-800)", borderRadius: "4px" }}
+                  >
+                    edit
+                  </Link>
+                )}
               </div>
             </div>
           ))}
