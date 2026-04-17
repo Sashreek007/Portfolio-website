@@ -363,126 +363,127 @@ export default function WorkspaceAnimation({ className, style }: Props) {
       </defs>
 
       {/* Ambient glow */}
-      <ellipse cx="300" cy="240" rx="290" ry="200" fill="url(#ws-glow)" />
+      <ellipse cx="300" cy="200" rx="290" ry="190" fill="url(#ws-glow)" />
 
-      {/* ─── DESK ─────────────────────────────────────────────── */}
-      <path d="M30,440 L570,440 L595,720 L5,720 Z" fill="url(#ws-desk)" />
+      {/* ─── DESK (moved up to meet the shorter laptop) ─────────── */}
+      <path d="M30,360 L570,360 L595,720 L5,720 Z" fill="url(#ws-desk)" />
       <rect x="0" y="720" width="600" height="40" fill="#08080A" />
       <line x1="5" y1="720" x2="595" y2="720" stroke="#2C2C2A" strokeWidth="1" />
-      {/* Desk grain */}
-      <line x1="80"  y1="510" x2="200" y2="510" stroke="#3D3025" strokeWidth="0.4" opacity="0.5" />
-      <line x1="380" y1="525" x2="520" y2="525" stroke="#3D3025" strokeWidth="0.4" opacity="0.5" />
-      <line x1="100" y1="690" x2="280" y2="690" stroke="#3D3025" strokeWidth="0.4" opacity="0.4" />
-      <line x1="320" y1="700" x2="500" y2="700" stroke="#3D3025" strokeWidth="0.4" opacity="0.4" />
+      {/* Desk grain hints (only in the strips not covered by the deskpad) */}
+      <line x1="80"  y1="400" x2="220" y2="400" stroke="#3D3025" strokeWidth="0.4" opacity="0.45" />
+      <line x1="380" y1="420" x2="520" y2="420" stroke="#3D3025" strokeWidth="0.4" opacity="0.45" />
+      <line x1="40"  y1="455" x2="160" y2="455" stroke="#3D3025" strokeWidth="0.4" opacity="0.4" />
+      <line x1="430" y1="465" x2="560" y2="465" stroke="#3D3025" strokeWidth="0.4" opacity="0.4" />
+      <line x1="60"  y1="708" x2="540" y2="708" stroke="#3D3025" strokeWidth="0.4" opacity="0.35" />
 
-      {/* ═══ PLANT (back-left, more realistic leaf shapes) ════════ */}
+      {/* ═══ PLANT (back-left of new desk) ══════════════════════════ */}
       <g>
         {/* Pot */}
-        <path d="M28,420 L120,420 L113,478 Q113,484 107,484 L41,484 Q35,484 35,478 Z" fill="url(#ws-pot)" />
+        <path d="M28,350 L120,350 L113,408 Q113,414 107,414 L41,414 Q35,414 35,408 Z" fill="url(#ws-pot)" />
         {/* Pot rim band */}
-        <ellipse cx="74" cy="420" rx="46" ry="5" fill="#7E4810" />
-        <ellipse cx="74" cy="418.5" rx="44" ry="3.5" fill="#E8A052" />
-        <rect x="29" y="425" width="91" height="3" fill="#7E4810" opacity="0.4" />
+        <ellipse cx="74" cy="350" rx="46" ry="5" fill="#7E4810" />
+        <ellipse cx="74" cy="348.5" rx="44" ry="3.5" fill="#E8A052" />
+        <rect x="29" y="355" width="91" height="3" fill="#7E4810" opacity="0.4" />
         {/* Soil */}
-        <ellipse cx="74" cy="419" rx="40" ry="2.5" fill="#2A1408" />
+        <ellipse cx="74" cy="349" rx="40" ry="2.5" fill="#2A1408" />
         {/* Pot vertical ridges */}
-        <line x1="50" y1="430" x2="48" y2="478" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
-        <line x1="74" y1="430" x2="74" y2="481" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
-        <line x1="98" y1="430" x2="100" y2="478" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
+        <line x1="50" y1="360" x2="48" y2="408" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
+        <line x1="74" y1="360" x2="74" y2="411" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
+        <line x1="98" y1="360" x2="100" y2="408" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
 
         {/* Leaves — leaf-shaped paths with vein details */}
-        <g style={{ transformOrigin: "74px 418px", animation: "ws-leaf-sway 4.5s ease-in-out infinite" }}>
+        <g style={{ transformOrigin: "74px 348px", animation: "ws-leaf-sway 4.5s ease-in-out infinite" }}>
           {/* Back-left leaf */}
-          <path d="M48,418 Q26,390 32,355 Q44,330 56,355 Q60,395 50,418 Z"
-                fill="url(#ws-leaf)" transform="rotate(-20 48 400)" />
-          <path d="M44,415 Q38,388 40,360" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(-20 48 400)" />
+          <path d="M48,348 Q26,320 32,285 Q44,260 56,285 Q60,325 50,348 Z"
+                fill="url(#ws-leaf)" transform="rotate(-20 48 330)" />
+          <path d="M44,345 Q38,318 40,290" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(-20 48 330)" />
           {/* Center-tall leaf */}
-          <path d="M74,418 Q56,380 62,335 Q74,310 86,335 Q92,380 74,418 Z" fill="url(#ws-leaf)" />
-          <path d="M74,418 Q72,380 74,338" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" />
+          <path d="M74,348 Q56,310 62,265 Q74,240 86,265 Q92,310 74,348 Z" fill="url(#ws-leaf)" />
+          <path d="M74,348 Q72,310 74,268" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" />
           {/* Back-right leaf */}
-          <path d="M100,418 Q122,390 116,355 Q104,330 92,355 Q88,395 98,418 Z"
-                fill="url(#ws-leaf)" transform="rotate(20 100 400)" />
-          <path d="M104,415 Q110,388 108,360" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(20 100 400)" />
+          <path d="M100,348 Q122,320 116,285 Q104,260 92,285 Q88,325 98,348 Z"
+                fill="url(#ws-leaf)" transform="rotate(20 100 330)" />
+          <path d="M104,345 Q110,318 108,290" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(20 100 330)" />
         </g>
         {/* Front leaf (different sway) */}
-        <g style={{ transformOrigin: "85px 418px", animation: "ws-leaf-sway-r 5.2s ease-in-out infinite" }}>
-          <path d="M86,418 Q78,395 82,365 Q90,348 96,368 Q98,398 92,418 Z"
-                fill="#1D9E75" transform="rotate(28 86 410)" />
-          <path d="M88,418 Q86,395 90,370" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(28 86 410)" />
+        <g style={{ transformOrigin: "85px 348px", animation: "ws-leaf-sway-r 5.2s ease-in-out infinite" }}>
+          <path d="M86,348 Q78,325 82,295 Q90,278 96,298 Q98,328 92,348 Z"
+                fill="#1D9E75" transform="rotate(28 86 340)" />
+          <path d="M88,348 Q86,325 90,300" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(28 86 340)" />
         </g>
       </g>
 
-      {/* ═══ COFFEE MUG (back-right, more realistic shading) ══════ */}
+      {/* ═══ COFFEE MUG (back-right of new desk) ════════════════════ */}
       <g>
         {/* Steam */}
         <g>
-          <path d="M495,355 Q491,335 495,315 Q499,295 495,275" fill="none"
+          <path d="M495,290 Q491,270 495,250 Q499,230 495,210" fill="none"
                 stroke="#E8E6DF" strokeWidth="2.4" strokeLinecap="round"
-                style={{ animation: "ws-steam-a 2.8s ease-out infinite", transformOrigin: "495px 355px" }} />
-          <path d="M515,355 Q511,335 515,315 Q519,295 515,275" fill="none"
+                style={{ animation: "ws-steam-a 2.8s ease-out infinite", transformOrigin: "495px 290px" }} />
+          <path d="M515,290 Q511,270 515,250 Q519,230 515,210" fill="none"
                 stroke="#E8E6DF" strokeWidth="2.4" strokeLinecap="round"
-                style={{ animation: "ws-steam-b 2.8s ease-out 0.9s infinite", transformOrigin: "515px 355px" }} />
-          <path d="M535,355 Q531,335 535,315 Q539,295 535,275" fill="none"
+                style={{ animation: "ws-steam-b 2.8s ease-out 0.9s infinite", transformOrigin: "515px 290px" }} />
+          <path d="M535,290 Q531,270 535,250 Q539,230 535,210" fill="none"
                 stroke="#E8E6DF" strokeWidth="2.4" strokeLinecap="round"
-                style={{ animation: "ws-steam-c 2.8s ease-out 1.8s infinite", transformOrigin: "535px 355px" }} />
+                style={{ animation: "ws-steam-c 2.8s ease-out 1.8s infinite", transformOrigin: "535px 290px" }} />
         </g>
         {/* Mug body */}
-        <path d="M470,357 L470,478 Q470,488 482,488 L548,488 Q560,488 560,478 L560,357 Z" fill="url(#ws-mug)" />
+        <path d="M470,292 L470,408 Q470,418 482,418 L548,418 Q560,418 560,408 L560,292 Z" fill="url(#ws-mug)" />
         {/* Right shadow */}
-        <path d="M540,360 L540,478 Q540,488 552,488 L548,488 Q560,488 560,478 L560,360 Z"
+        <path d="M540,295 L540,408 Q540,418 552,418 L548,418 Q560,418 560,408 L560,295 Z"
               fill="#5C2F08" opacity="0.55" />
         {/* Rim */}
-        <ellipse cx="515" cy="357" rx="45" ry="9" fill="#5C2F08" />
-        <ellipse cx="515" cy="354" rx="44" ry="7" fill="#E8A052" />
-        <ellipse cx="515" cy="357" rx="42" ry="6" fill="#7E4810" />
+        <ellipse cx="515" cy="292" rx="45" ry="9" fill="#5C2F08" />
+        <ellipse cx="515" cy="289" rx="44" ry="7" fill="#E8A052" />
+        <ellipse cx="515" cy="292" rx="42" ry="6" fill="#7E4810" />
         {/* Coffee */}
-        <ellipse cx="515" cy="358" rx="40" ry="5.5" fill="#1F0E04" />
-        <ellipse cx="515" cy="357" rx="34" ry="2.5" fill="#5C3018" opacity="0.7" />
+        <ellipse cx="515" cy="293" rx="40" ry="5.5" fill="#1F0E04" />
+        <ellipse cx="515" cy="292" rx="34" ry="2.5" fill="#5C3018" opacity="0.7" />
         {/* Foam ring (subtle) */}
-        <ellipse cx="515" cy="356" rx="36" ry="2" fill="none" stroke="#E8C9A0" strokeWidth="0.6" opacity="0.55" />
+        <ellipse cx="515" cy="291" rx="36" ry="2" fill="none" stroke="#E8C9A0" strokeWidth="0.6" opacity="0.55" />
         {/* Handle */}
-        <path d="M560,372 Q588,372 588,398 Q588,422 560,422"
+        <path d="M560,307 Q588,307 588,333 Q588,357 560,357"
               fill="none" stroke="#C97A24" strokeWidth="11" strokeLinecap="round" />
-        <path d="M560,372 Q588,372 588,398 Q588,422 560,422"
+        <path d="M560,307 Q588,307 588,333 Q588,357 560,357"
               fill="none" stroke="#5C2F08" strokeWidth="11" strokeLinecap="round" opacity="0.45" />
         {/* Highlight stripe */}
-        <path d="M478,372 L478,470" stroke="#FFC079" strokeWidth="3" strokeLinecap="round" opacity="0.85" />
+        <path d="M478,307 L478,400" stroke="#FFC079" strokeWidth="3" strokeLinecap="round" opacity="0.85" />
         {/* Bottom shadow */}
-        <ellipse cx="515" cy="488" rx="42" ry="3" fill="#000" opacity="0.6" />
+        <ellipse cx="515" cy="418" rx="42" ry="3" fill="#000" opacity="0.6" />
       </g>
 
       {/* ═══ LAPTOP STAND ════════════════════════════════════════ */}
-      <path d="M170,470 L430,470 L450,495 L150,495 Z" fill="url(#ws-stand)" opacity="0.9" />
-      <line x1="170" y1="470" x2="430" y2="470" stroke="#0A0A09" strokeWidth="0.6" />
+      <path d="M170,340 L430,340 L450,360 L150,360 Z" fill="url(#ws-stand)" opacity="0.9" />
+      <line x1="170" y1="340" x2="430" y2="340" stroke="#0A0A09" strokeWidth="0.6" />
 
-      {/* ═══ LAPTOP BASE ═════════════════════════════════════════ */}
-      <path d="M150,455 L450,455 L482,495 L118,495 Z" fill="url(#ws-laptop-side)" />
-      <line x1="150" y1="455" x2="450" y2="455" stroke="#3C3C3A" strokeWidth="0.6" />
+      {/* ═══ LAPTOP BASE (compact hinge area) ════════════════════ */}
+      <path d="M150,310 L450,310 L482,345 L118,345 Z" fill="url(#ws-laptop-side)" />
+      <line x1="150" y1="310" x2="450" y2="310" stroke="#3C3C3A" strokeWidth="0.6" />
       {/* Speaker grilles */}
       <g opacity="0.4">
         {[155, 165, 175, 185, 195, 205, 215].map(x => (
-          <circle key={`l${x}`} cx={x} cy={465} r="0.5" fill="#5F5E5A" />
+          <circle key={`l${x}`} cx={x} cy={325} r="0.5" fill="#5F5E5A" />
         ))}
         {[395, 405, 415, 425, 435, 445].map(x => (
-          <circle key={`r${x}`} cx={x} cy={465} r="0.5" fill="#5F5E5A" />
+          <circle key={`r${x}`} cx={x} cy={325} r="0.5" fill="#5F5E5A" />
         ))}
       </g>
       {/* Trackpad */}
-      <rect x="262" y="470" width="76" height="6" rx="2" fill="#0E0E0C" opacity="0.7" />
+      <rect x="262" y="325" width="76" height="6" rx="2" fill="#0E0E0C" opacity="0.7" />
 
-      {/* ═══ LAPTOP SCREEN LID ═══════════════════════════════════ */}
-      <rect x="115" y="55" width="370" height="402" rx="8" fill="url(#ws-laptop-top)" />
-      <rect x="125" y="65" width="350" height="382" rx="5" fill="url(#ws-screen)" />
-      <rect x="125" y="65" width="350" height="382" rx="5" fill="url(#ws-glow)" opacity="0.45"
+      {/* ═══ LAPTOP SCREEN LID — proper 16:10 aspect ratio ═══════ */}
+      <rect x="115" y="80" width="370" height="230" rx="8" fill="url(#ws-laptop-top)" />
+      <rect x="125" y="90" width="350" height="210" rx="5" fill="url(#ws-screen)" />
+      <rect x="125" y="90" width="350" height="210" rx="5" fill="url(#ws-glow)" opacity="0.45"
             style={{ animation: "ws-glow-pulse 5s ease-in-out infinite" }} />
       {/* Webcam */}
-      <rect x="290" y="55" width="20" height="3" rx="1.5" fill="#0E0E0C" />
-      <circle cx="300" cy="56.5" r="0.8" fill="#3A3A38" />
-      {/* Subtle Apple-style logo on lid bottom (just a mark) */}
-      <circle cx="300" cy="450" r="2.8" fill="none" stroke="#3A3A38" strokeWidth="0.5" opacity="0.55" />
+      <rect x="290" y="80" width="20" height="3" rx="1.5" fill="#0E0E0C" />
+      <circle cx="300" cy="81.5" r="0.8" fill="#3A3A38" />
+      {/* Subtle logo mark on lid bottom (just a stroke) */}
+      <circle cx="300" cy="303" r="2.4" fill="none" stroke="#3A3A38" strokeWidth="0.5" opacity="0.55" />
 
       {/* ═══ NEOVIM EDITOR (full HTML inside foreignObject) ══════ */}
-      <foreignObject x="125" y="65" width="350" height="382">
+      <foreignObject x="125" y="90" width="350" height="210">
         <div
           {...{ xmlns: "http://www.w3.org/1999/xhtml" }}
           style={{
@@ -806,10 +807,39 @@ export default function WorkspaceAnimation({ className, style }: Props) {
         </div>
       </foreignObject>
 
+      {/* ═══ DESKPAD / DESK MAT (under keyboard + mouse) ═════════ */}
+      <g>
+        {/* Soft cast shadow underneath the mat */}
+        <rect x="65" y="490" width="540" height="220" rx="8" fill="#000" opacity="0.35" />
+        {/* Mat body — slightly lighter than desk so it reads as a separate surface */}
+        <rect x="60" y="485" width="535" height="218" rx="6" fill="#1B1B19" />
+        {/* Subtle top-edge highlight for depth */}
+        <rect x="62" y="486" width="531" height="1" rx="0.5" fill="#2C2C2A" opacity="0.55" />
+        {/* Stitched perimeter — inset 4px, dashed thin line */}
+        <rect
+          x="64" y="489" width="527" height="210" rx="4"
+          fill="none"
+          stroke="#3A3A38" strokeWidth="0.6"
+          strokeDasharray="3 2"
+          opacity="0.55"
+        />
+        {/* Subtle weave texture (sparse dots) */}
+        <g opacity="0.06" fill="#A8A69E">
+          {[80, 140, 200, 260, 320, 380, 440, 500, 560].flatMap(x =>
+            [510, 560, 610, 660].map(y => (
+              <circle key={`${x}-${y}`} cx={x} cy={y} r="0.4" />
+            ))
+          )}
+        </g>
+        {/* Tiny brand mark in bottom-right corner */}
+        <text x="582" y="697" fontSize="5" fontFamily="ui-monospace, monospace"
+              fill="#3A3A38" textAnchor="end" opacity="0.7">SA</text>
+      </g>
+
       {/* ═══ KEYBOARD (realistic mechanical TKL) ════════════════ */}
       <g>
-        {/* Drop shadow */}
-        <ellipse cx="300" cy={KB_Y + KB_H + 10} rx="200" ry="12" fill="#000" opacity="0.45" />
+        {/* Drop shadow on the deskpad */}
+        <ellipse cx="300" cy={KB_Y + KB_H + 10} rx="200" ry="9" fill="#000" opacity="0.4" />
 
         {/* Body — chamfered case */}
         <rect x={KB_X - 3} y={KB_Y - 2} width={KB_W + 6} height={KB_H + 6} rx="9" fill="#0A0A09" />
