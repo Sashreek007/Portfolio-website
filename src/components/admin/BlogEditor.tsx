@@ -200,6 +200,8 @@ type Post = {
   id: string; title: string; slug: string;
   content: JSONContent | null; excerpt: string | null;
   cover_image_url: string | null; is_published: boolean; published_at: string | null;
+  project_id?: string | null;
+  show_on_writing?: boolean;
 };
 type Props = { post?: Post; mode: "new" | "edit" };
 
@@ -501,6 +503,8 @@ export default function BlogEditor({ post, mode }: Props) {
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [coverUrl, setCoverUrl] = useState(post?.cover_image_url ?? "");
   const [isPublished, setIsPublished] = useState(post?.is_published ?? false);
+  const [showOnWriting, setShowOnWriting] = useState(post?.show_on_writing ?? true);
+  const isProjectPost = !!post?.project_id;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -662,6 +666,7 @@ export default function BlogEditor({ post, mode }: Props) {
       published_at: shouldPublish && !post?.published_at
         ? new Date().toISOString()
         : post?.published_at ?? null,
+      show_on_writing: showOnWriting,
     };
 
     const { error: dbError } = mode === "new"
@@ -809,6 +814,33 @@ export default function BlogEditor({ post, mode }: Props) {
           <img src={coverUrl} alt="" className="mt-1 rounded object-cover"
             style={{ maxHeight: "140px", border: "1px solid var(--gray-800)" }} />
         )}
+      </div>
+
+      {/* Writing-page visibility toggle */}
+      <div className="flex flex-col gap-2">
+        <label style={labelSt}>Writing page visibility</label>
+        <label
+          className="flex items-center gap-3 cursor-pointer"
+          style={{ color: "var(--text-secondary)", fontSize: "13px" }}
+        >
+          <input
+            type="checkbox"
+            checked={showOnWriting}
+            onChange={(e) => setShowOnWriting(e.target.checked)}
+            className="w-4 h-4 accent-violet-500 cursor-pointer"
+          />
+          <span>
+            show in the /writing list and home Writing rail
+            {isProjectPost && (
+              <span
+                className="ml-2 font-mono text-[10px] tracking-[0.08em] uppercase"
+                style={{ color: "var(--amber-bright)" }}
+              >
+                project post · off by default
+              </span>
+            )}
+          </span>
+        </label>
       </div>
 
       <div style={{ height: "1px", background: "var(--gray-800)" }} />

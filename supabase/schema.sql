@@ -27,9 +27,14 @@ CREATE TABLE IF NOT EXISTS posts (
   cover_image_url TEXT,
   is_published    BOOLEAN DEFAULT false,
   published_at    TIMESTAMPTZ,
+  project_id      UUID REFERENCES projects(id) ON DELETE CASCADE,
+  show_on_writing BOOLEAN NOT NULL DEFAULT true,
   created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS posts_project_id_idx ON posts (project_id);
+CREATE UNIQUE INDEX IF NOT EXISTS posts_project_id_unique_idx
+  ON posts (project_id) WHERE project_id IS NOT NULL;
 
 -- ─── Auto-update updated_at ───────────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()

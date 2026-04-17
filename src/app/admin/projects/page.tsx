@@ -1,6 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import type { Project } from "@/components/site/ProjectCard";
+import SyncProjectPostsButton from "./SyncProjectPostsButton";
 
 const statusColors = {
   active: "var(--green-bright)",
@@ -34,13 +35,16 @@ export default async function AdminProjectsPage() {
             Projects
           </h1>
         </div>
-        <Link
-          href="/admin/projects/new"
-          className="font-mono text-[12px] px-4 py-2 transition-all duration-200 hover:-translate-y-[1px]"
-          style={{ color: "var(--violet-pale)", background: "var(--violet-mid)", borderRadius: "4px" }}
-        >
-          + add project
-        </Link>
+        <div className="flex items-center gap-3">
+          <SyncProjectPostsButton />
+          <Link
+            href="/admin/projects/new"
+            className="font-mono text-[12px] px-4 py-2 transition-all duration-200 hover:-translate-y-[1px]"
+            style={{ color: "var(--violet-pale)", background: "var(--violet-mid)", borderRadius: "4px" }}
+          >
+            + add project
+          </Link>
+        </div>
       </div>
 
       {projects.length === 0 ? (

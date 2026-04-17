@@ -119,6 +119,8 @@ export default async function HomePage() {
         .from("posts")
         .select("id, title, slug, excerpt, published_at, created_at")
         .eq("is_published", true)
+        .eq("show_on_writing", true)
+        .is("project_id", null)
         .order("published_at", { ascending: false })
         .limit(3);
       if (posts) recentPosts = posts as Post[];

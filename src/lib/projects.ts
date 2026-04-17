@@ -1,4 +1,5 @@
 import type { Project } from "@/components/site/ProjectCard";
+import { slugify } from "@/lib/utils";
 
 export const SEED_PROJECTS: Project[] = [
   {
@@ -117,10 +118,7 @@ export const SEED_PROJECTS: Project[] = [
 ];
 
 export function projectSlug(p: Project) {
-  return p.name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  return slugify(p.name);
 }
 
 export function projectHref(p: Project) {

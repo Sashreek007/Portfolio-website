@@ -9,6 +9,8 @@ export default async function AdminBlogPage() {
     is_published: boolean;
     published_at: string | null;
     created_at: string;
+    project_id: string | null;
+    show_on_writing: boolean;
   }> = [];
 
   if (
@@ -18,9 +20,9 @@ export default async function AdminBlogPage() {
     const supabase = await createServerClient();
     const { data } = await supabase
       .from("posts")
-      .select("id, title, slug, is_published, published_at, created_at")
+      .select("id, title, slug, is_published, published_at, created_at, project_id, show_on_writing")
       .order("created_at", { ascending: false });
-    if (data) posts = data;
+    if (data) posts = data as typeof posts;
   }
 
   return (
@@ -75,6 +77,26 @@ export default async function AdminBlogPage() {
                   >
                     {post.is_published ? "published" : "draft"}
                   </span>
+                  {post.project_id && (
+                    <span
+                      className="font-mono text-[10px] tracking-[0.08em] uppercase px-[6px] py-[2px]"
+                      style={{
+                        color: "var(--amber-bright)",
+                        border: "1px solid color-mix(in srgb, var(--amber-bright) 30%, transparent)",
+                        borderRadius: "3px",
+                      }}
+                    >
+                      project
+                    </span>
+                  )}
+                  {!post.show_on_writing && (
+                    <span
+                      className="font-mono text-[10px] tracking-[0.08em] uppercase"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      hidden from writing
+                    </span>
+                  )}
                 </div>
                 <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
                   {new Date(post.published_at ?? post.created_at).toLocaleDateString("en-CA")}

@@ -13,6 +13,7 @@ type Post = {
   excerpt: string | null;
   published_at: string | null;
   created_at: string;
+  project_id: string | null;
 };
 
 function formatDate(iso: string) {
@@ -23,8 +24,53 @@ function formatDate(iso: string) {
   });
 }
 
+function PostRow({ post, last }: { post: Post; last: boolean }) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className="group flex flex-col gap-2 py-6 transition-colors duration-150"
+      style={{
+        borderBottom: last ? "none" : "1px solid var(--gray-800)",
+      }}
+    >
+      <div className="flex items-baseline justify-between gap-4 flex-wrap">
+        <h2
+          className="text-[18px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-150"
+          style={{
+            color: "var(--text-primary)",
+            fontFamily: "var(--font-body)",
+          }}
+        >
+          {post.title}
+        </h2>
+        <span
+          className="font-mono text-[11px] shrink-0"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {formatDate(post.published_at ?? post.created_at)}
+        </span>
+      </div>
+      {post.excerpt && (
+        <p
+          className="text-[14px] leading-[1.65]"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          {post.excerpt}
+        </p>
+      )}
+      <span
+        className="font-mono text-[12px] mt-1 group-hover:translate-x-1 transition-transform duration-150 inline-block"
+        style={{ color: "var(--violet-soft)" }}
+      >
+        read →
+      </span>
+    </Link>
+  );
+}
+
 export default async function BlogPage() {
-  let posts: Post[] = [];
+  let writingPosts: Post[] = [];
+  let projectPosts: Post[] = [];
 
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -34,17 +80,24 @@ export default async function BlogPage() {
       const supabase = await createServerClient();
       const { data } = await supabase
         .from("posts")
-        .select("id, title, slug, excerpt, published_at, created_at")
+        .select("id, title, slug, excerpt, published_at, created_at, project_id, show_on_writing")
         .eq("is_published", true)
         .order("published_at", { ascending: false });
-      if (data) posts = data as Post[];
+
+      if (data) {
+        const all = data as (Post & { show_on_writing: boolean })[];
+        writingPosts = all.filter((p) => !p.project_id && p.show_on_writing);
+        projectPosts = all.filter((p) => !!p.project_id);
+      }
     } catch {
       // silence
     }
   }
 
+  const hasAny = writingPosts.length + projectPosts.length > 0;
+
   return (
-    <div className="px-[6vw] py-16 w-full">
+    <div className="px-[6vw] py-16 w-full max-w-[960px] mx-auto">
       <SectionLabel>Writing</SectionLabel>
       <h1
         className="text-[28px] font-medium leading-[1.3] mb-4"
@@ -59,7 +112,7 @@ export default async function BlogPage() {
         Notes on systems, AI, and the things I&apos;m building.
       </p>
 
-      {posts.length === 0 ? (
+      {!hasAny ? (
         <div
           className="font-mono text-[13px] py-16 text-center"
           style={{
@@ -72,53 +125,67 @@ export default async function BlogPage() {
           <p className="mt-1 text-[11px]">check back soon</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-0">
-          {posts.map((post, i) => (
-            <Link
-              key={post.id}
-              href={`/blog/${post.slug}`}
-              className="group flex flex-col gap-2 py-6 transition-colors duration-150"
-              style={{
-                borderBottom:
-                  i < posts.length - 1
-                    ? "1px solid var(--gray-800)"
-                    : "none",
-              }}
-            >
-              <div className="flex items-baseline justify-between gap-4 flex-wrap">
-                <h2
-                  className="text-[18px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-150"
-                  style={{
-                    color: "var(--text-primary)",
-                    fontFamily: "var(--font-body)",
-                  }}
-                >
-                  {post.title}
-                </h2>
+        <>
+          {/* Writing (non-project) */}
+          {writingPosts.length > 0 && (
+            <section className="mb-16">
+              <div className="flex items-center gap-4 mb-4">
                 <span
-                  className="font-mono text-[11px] shrink-0"
+                  className="font-mono text-[11px] tracking-[0.2em] uppercase"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  {formatDate(post.published_at ?? post.created_at)}
+                  · essays ·
+                </span>
+                <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
+              </div>
+              <div className="flex flex-col">
+                {writingPosts.map((post, i) => (
+                  <PostRow
+                    key={post.id}
+                    post={post}
+                    last={i === writingPosts.length - 1}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Project blogs */}
+          {projectPosts.length > 0 && (
+            <section>
+              <div className="flex items-center gap-4 mb-4">
+                <span
+                  className="font-mono text-[11px] tracking-[0.2em] uppercase"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  · project blogs ·
+                </span>
+                <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
+                <span
+                  className="font-mono text-[11px] tracking-[0.2em] uppercase"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {String(projectPosts.length).padStart(2, "0")} entries
                 </span>
               </div>
-              {post.excerpt && (
-                <p
-                  className="text-[14px] leading-[1.65]"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  {post.excerpt}
-                </p>
-              )}
-              <span
-                className="font-mono text-[12px] mt-1 group-hover:translate-x-1 transition-transform duration-150 inline-block"
-                style={{ color: "var(--violet-soft)" }}
+              <p
+                className="text-[13.5px] leading-[1.7] mb-6 max-w-[560px]"
+                style={{ color: "var(--text-muted)" }}
               >
-                read →
-              </span>
-            </Link>
-          ))}
-        </div>
+                Write-ups for each project — decisions, tradeoffs, and what broke.
+              </p>
+              <div className="flex flex-col">
+                {projectPosts.map((post, i) => (
+                  <PostRow
+                    key={post.id}
+                    post={post}
+                    last={i === projectPosts.length - 1}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+        </>
       )}
     </div>
   );

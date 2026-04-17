@@ -52,6 +52,10 @@ export default async function EditPostPage({ params }: Props) {
           cover_image_url: post.cover_image_url,
           is_published: post.is_published,
           published_at: post.published_at,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          project_id: (post as any).project_id ?? null,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          show_on_writing: (post as any).show_on_writing ?? true,
         }}
       />
     </div>
