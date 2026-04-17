@@ -1,229 +1,255 @@
-"use client";
+import Link from "next/link";
+import AboutVariantSwitcher from "@/components/site/AboutVariantSwitcher";
 
-// Design 5 — SYSTEM STATUS
-// Server-monitoring / HUD dashboard aesthetic. Four corner-bracket panels arranged
-// in a 2×2 grid around a center identity panel. Uptime counter, stack list,
-// developer animation in the signals panel. Feels like a real ops dashboard.
+// Variant 5 — Bento Grid
+// Modular dashboard of varied-size cards: intro, current, stats, stack, experience, philosophy.
 
-import { useState, useEffect } from "react";
-import DeveloperAnimation from "@/components/site/DeveloperAnimation";
+export const metadata = { title: "About v5 — Bento" };
 
-function elapsed(start: number) {
-  const s = Math.floor((Date.now() - start) / 1000);
-  const h = Math.floor(s / 3600).toString().padStart(2, "0");
-  const m = Math.floor((s % 3600) / 60).toString().padStart(2, "0");
-  const sec = (s % 60).toString().padStart(2, "0");
-  return `${h}:${m}:${sec}`;
-}
-
-function Panel({
-  label,
+function Card({
   children,
   className = "",
+  label,
+  accent,
+  style,
 }: {
-  label: string;
   children: React.ReactNode;
   className?: string;
+  label?: string;
+  accent?: string;
+  style?: React.CSSProperties;
 }) {
   return (
-    <div className={`relative p-5 ${className}`}>
-      {/* Corner brackets */}
-      {(["tl", "tr", "bl", "br"] as const).map(pos => (
+    <div
+      className={`relative p-6 rounded-lg overflow-hidden ${className}`}
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--gray-800)",
+        ...style,
+      }}
+    >
+      {/* Accent bar */}
+      {accent && (
         <span
-          key={pos}
-          className="absolute w-4 h-4 pointer-events-none"
-          style={{
-            top: pos.startsWith("t") ? 0 : undefined,
-            bottom: pos.startsWith("b") ? 0 : undefined,
-            left: pos.endsWith("l") ? 0 : undefined,
-            right: pos.endsWith("r") ? 0 : undefined,
-            borderTop: pos.startsWith("t") ? "1px solid var(--violet-soft)" : undefined,
-            borderBottom: pos.startsWith("b") ? "1px solid var(--violet-soft)" : undefined,
-            borderLeft: pos.endsWith("l") ? "1px solid var(--violet-soft)" : undefined,
-            borderRight: pos.endsWith("r") ? "1px solid var(--violet-soft)" : undefined,
-            opacity: 0.55,
-          }}
+          className="absolute top-0 left-0 h-full w-[2px]"
+          style={{ background: accent }}
         />
-      ))}
-
-      {/* Panel label */}
-      <div
-        className="font-mono text-[9px] tracking-[0.22em] uppercase mb-4"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {label}
-      </div>
-
+      )}
+      {label && (
+        <p
+          className="font-mono text-[10px] tracking-[0.16em] uppercase mb-4"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {label}
+        </p>
+      )}
       {children}
     </div>
   );
 }
 
-const STACK = [
-  { lang: "Python",     pct: 90 },
-  { lang: "TypeScript", pct: 82 },
-  { lang: "Go",         pct: 72 },
-  { lang: "C++",        pct: 65 },
-  { lang: "Rust",       pct: 45 },
+const XP = [
+  { year: "2025 →", role: "project lead · undergrad ai society", current: true },
+  { year: "2025",   role: "teaching assistant · cmput 274" },
+  { year: "2025",   role: "nathacks · fluxatlas auction engine" },
 ];
 
-const LINKS = [
-  { href: "/#work",  label: "projects" },
-  { href: "/#about", label: "about" },
-  { href: "https://github.com/Sashreek007", label: "github ↗", ext: true },
-  { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true },
-  { href: "/resume", label: "resume" },
+const STACK: { label: string; items: string[]; accent: string }[] = [
+  { label: "langs",  items: ["Python", "Go", "C++", "TypeScript", "Rust", "C"],              accent: "var(--violet-soft)"  },
+  { label: "ml/ai",  items: ["PyTorch", "LangChain", "LangGraph", "MCP", "HuggingFace"],     accent: "var(--amber-bright)" },
+  { label: "infra",  items: ["Docker", "Redis", "Postgres", "Supabase", "FastAPI", "Linux"], accent: "var(--green-bright)" },
+  { label: "systems",items: ["RISC-V", "Neovim", "Go stdlib", "OpenCV", "MediaPipe"],        accent: "var(--violet-pale)"  },
 ];
 
-export default function Design5() {
-  const [start] = useState(() => Date.now());
-  const [uptime, setUptime] = useState("00:00:00");
-
-  useEffect(() => {
-    const id = setInterval(() => setUptime(elapsed(start)), 1000);
-    return () => clearInterval(id);
-  }, [start]);
-
+export default function AboutVariant5() {
   return (
-    <section
-      className="relative flex items-center justify-center min-h-[calc(100vh-73px)] px-[5vw] py-14"
+    <div
+      className="min-h-screen w-full py-20 px-[6vw]"
       style={{ background: "var(--bg-base)" }}
     >
-      {/* Ambient violet glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 50% 50%, color-mix(in srgb, var(--violet-dim) 7%, transparent), transparent 70%)",
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-[1180px] grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-        {/* ── ROW 1 ─────────────────────────────────────── */}
-
-        {/* Panel: IDENTITY */}
-        <Panel label="sys · identity" className="lg:col-span-2">
-          <h1
-            className="font-mono font-medium mb-3"
+      <div className="max-w-[1280px] mx-auto">
+        {/* Title row */}
+        <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
+          <div>
+            <p
+              className="font-mono text-[11px] tracking-[0.18em] uppercase mb-2"
+              style={{ color: "var(--text-muted)" }}
+            >
+              about · profile
+            </p>
+            <h1
+              className="text-[32px] font-medium tracking-[-0.01em]"
+              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+            >
+              Sashreek Addanki
+            </h1>
+          </div>
+          <Link
+            href="/about"
+            className="font-mono text-[12px] px-4 py-[8px] transition-all hover:-translate-y-[1px]"
             style={{
-              fontSize: "clamp(38px, 5.5vw, 64px)",
-              lineHeight: "1.02",
-              letterSpacing: "-0.03em",
-              color: "var(--text-primary)",
+              border: "1px solid var(--gray-800)",
+              color: "var(--text-muted)",
+              borderRadius: "4px",
             }}
           >
-            sashreek addanki
-          </h1>
-          <p className="font-mono text-[12px] mb-2" style={{ color: "var(--text-muted)" }}>
-            computing science @ ualberta&nbsp;&nbsp;·&nbsp;&nbsp;ai + systems
-          </p>
-          <p
-            className="text-[14px] leading-[1.75] max-w-[460px] mt-3"
-            style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}
-          >
-            I understand the machine before I build on top of it.
-          </p>
-        </Panel>
+            full bio →
+          </Link>
+        </div>
 
-        {/* Panel: STATUS */}
-        <Panel label="sys · status">
-          <div className="flex flex-col gap-4">
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.18em] uppercase mb-1" style={{ color: "var(--text-muted)" }}>availability</p>
-              <div className="flex items-center gap-2 font-mono text-[13px] font-medium" style={{ color: "var(--green-bright)" }}>
-                <span className="w-2 h-2 rounded-full" style={{ background: "var(--green-mid)", animation: "pulse-dot 2.5s ease-in-out infinite" }} />
-                open · internships
-              </div>
-            </div>
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.18em] uppercase mb-1" style={{ color: "var(--text-muted)" }}>location</p>
-              <p className="font-mono text-[12px]" style={{ color: "var(--text-secondary)" }}>edmonton, ab</p>
-            </div>
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.18em] uppercase mb-1" style={{ color: "var(--text-muted)" }}>uptime</p>
-              <p className="font-mono text-[12px] tabular-nums" style={{ color: "var(--violet-soft)" }}>{uptime}</p>
-            </div>
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.18em] uppercase mb-1" style={{ color: "var(--text-muted)" }}>grad</p>
-              <p className="font-mono text-[12px]" style={{ color: "var(--text-secondary)" }}>2028 · co-op stream</p>
-            </div>
-          </div>
-        </Panel>
+        <div
+          className="grid gap-4"
+          style={{ gridTemplateColumns: "repeat(12, minmax(0, 1fr))" }}
+        >
+          {/* Intro (wide) */}
+          <Card label="intro" className="col-span-12 lg:col-span-7" accent="var(--violet-mid)">
+            <p
+              className="text-[22px] lg:text-[26px] leading-[1.35] font-medium mb-4"
+              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+            >
+              Computing science @ UAlberta, building at the intersection of
+              <span style={{ color: "var(--violet-pale)" }}> AI </span>
+              and
+              <span style={{ color: "var(--amber-bright)" }}> systems</span>.
+            </p>
+            <p
+              className="text-[14px] leading-[1.8]"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              My work spans backend systems, low-level programming, and AI-driven
+              features that move beyond research demos into usable software.
+              I learn bottom-up — the mechanism before the abstraction.
+            </p>
+          </Card>
 
-        {/* ── ROW 2 ─────────────────────────────────────── */}
-
-        {/* Panel: STACK */}
-        <Panel label="sys · stack">
-          <div className="flex flex-col gap-3">
-            {STACK.map(({ lang, pct }) => (
-              <div key={lang}>
-                <div className="flex justify-between font-mono text-[10px] mb-1">
-                  <span style={{ color: "var(--text-secondary)" }}>{lang}</span>
-                  <span style={{ color: "var(--text-muted)" }}>{pct}%</span>
-                </div>
-                <div className="h-[3px] w-full rounded-full" style={{ background: "var(--gray-800)" }}>
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${pct}%`,
-                      background: "linear-gradient(90deg, var(--violet-mid), var(--violet-soft))",
-                      transition: "width 1.2s cubic-bezier(0.16,1,0.3,1)",
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-
-        {/* Panel: SIGNAL — developer animation */}
-        <Panel label="sys · signal" className="flex flex-col">
-          <div className="flex-1 flex items-center justify-center">
-            <DeveloperAnimation
-              style={{
-                width: "auto",
-                height: "min(240px, 28vh)",
-                color: "var(--text-primary)",
-                opacity: 0.65,
-              }}
-            />
-          </div>
-        </Panel>
-
-        {/* Panel: NAV */}
-        <Panel label="sys · navigate">
-          <div className="flex flex-col gap-2">
-            {LINKS.map(({ href, label, ext }) => (
-              <a
-                key={href}
-                href={href}
-                target={ext ? "_blank" : undefined}
-                rel={ext ? "noreferrer noopener" : undefined}
-                className="group flex items-center justify-between font-mono text-[12px] py-2 px-3 transition-colors duration-150"
+          {/* Current status */}
+          <Card label="currently" className="col-span-12 sm:col-span-6 lg:col-span-3" accent="var(--green-mid)">
+            <div className="flex items-center gap-[10px] mb-3">
+              <span
+                className="w-[8px] h-[8px] rounded-full inline-block"
                 style={{
-                  color: "var(--text-muted)",
-                  border: "1px solid var(--gray-800)",
-                  borderRadius: "3px",
+                  background: "var(--green-mid)",
+                  animation: "pulse-dot 2.5s ease-in-out infinite",
                 }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                    "color-mix(in srgb, var(--violet-soft) 40%, transparent)";
-                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--gray-800)";
-                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)";
-                }}
+              />
+              <span
+                className="font-mono text-[11px] tracking-[0.1em] uppercase"
+                style={{ color: "var(--green-bright)" }}
               >
-                <span>{label}</span>
-                <span style={{ opacity: 0.4 }}>→</span>
-              </a>
-            ))}
-          </div>
-        </Panel>
+                active
+              </span>
+            </div>
+            <p className="text-[14px] leading-[1.55]" style={{ color: "var(--text-primary)" }}>
+              Project lead on <span style={{ color: "var(--violet-pale)" }}>ClubMate AI</span> at the Undergraduate AI Society.
+            </p>
+            <p className="text-[12px] mt-3" style={{ color: "var(--text-muted)" }}>
+              LangChain · LangGraph · MCP
+            </p>
+          </Card>
 
+          {/* Stats */}
+          <Card className="col-span-12 sm:col-span-6 lg:col-span-2" accent="var(--amber-mid)">
+            <div className="flex flex-col gap-4">
+              {[
+                ["yr",   "2nd"],
+                ["grad", "'28"],
+                ["loc",  "YEG"],
+              ].map(([k, v]) => (
+                <div key={k} className="flex items-baseline justify-between">
+                  <span
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {k}
+                  </span>
+                  <span
+                    className="font-mono text-[20px]"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    {v}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Stack (wide) */}
+          <Card label="stack" className="col-span-12 lg:col-span-7" accent="var(--violet-soft)">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              {STACK.map(({ label, items, accent }) => (
+                <div key={label}>
+                  <p
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase mb-2"
+                    style={{ color: accent }}
+                  >
+                    {label}
+                  </p>
+                  <div className="flex flex-wrap gap-[6px]">
+                    {items.map((t) => (
+                      <span
+                        key={t}
+                        className="font-mono text-[11px] px-[8px] py-[3px]"
+                        style={{
+                          border: "1px solid var(--gray-800)",
+                          color: "var(--text-secondary)",
+                          borderRadius: "3px",
+                          background: "var(--bg-elevated)",
+                        }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Experience */}
+          <Card label="recent" className="col-span-12 lg:col-span-5" accent="var(--amber-bright)">
+            <ul className="flex flex-col">
+              {XP.map((e, i) => (
+                <li
+                  key={i}
+                  className="grid grid-cols-[80px_1fr] items-baseline py-[10px]"
+                  style={{
+                    borderBottom: i < XP.length - 1 ? "1px solid var(--gray-800)" : "none",
+                  }}
+                >
+                  <span
+                    className="font-mono text-[11px]"
+                    style={{ color: e.current ? "var(--green-bright)" : "var(--text-muted)" }}
+                  >
+                    {e.year}
+                  </span>
+                  <span className="text-[13px] leading-[1.5]" style={{ color: "var(--text-primary)" }}>
+                    {e.role}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          {/* Philosophy — pull quote */}
+          <Card className="col-span-12" accent="var(--violet-pale)">
+            <p
+              className="text-[20px] lg:text-[24px] leading-[1.45] italic"
+              style={{ color: "var(--violet-pale)", fontFamily: "var(--font-body)" }}
+            >
+              &ldquo;Kurose &amp; Ross before FastAPI. RISC-V before operating systems.
+              Each project is a deliberate rung — not a random one.&rdquo;
+            </p>
+            <p
+              className="font-mono text-[11px] tracking-[0.12em] uppercase mt-4"
+              style={{ color: "var(--text-muted)" }}
+            >
+              — operating principle
+            </p>
+          </Card>
+        </div>
       </div>
-    </section>
+
+      <AboutVariantSwitcher current={5} />
+    </div>
   );
 }

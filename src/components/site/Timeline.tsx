@@ -28,15 +28,6 @@ const items: TimelineItem[] = [
       "Supported assignments with office hours and code review sessions.",
     ],
   },
-  {
-    period: "Jan 2025",
-    role: "natHacks Participant — EcoTech Challenge",
-    org: "natHacks Hackathon",
-    details: [
-      "Built FluxAtlas — an international resource trading simulation with a Vickrey auction engine.",
-      "Full-stack: FastAPI backend, React frontend, PostgreSQL, Python + C++ order engine.",
-    ],
-  },
 ];
 
 export default function Timeline() {

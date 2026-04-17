@@ -1,194 +1,247 @@
-"use client";
+import Link from "next/link";
+import AboutVariantSwitcher from "@/components/site/AboutVariantSwitcher";
 
-// Design 6 — STATUS_MONOLITH (rev 2, no gimmicks)
-// Layout of /4 (massive top name, ghosted "01" backdrop, hairline divider).
-// Aesthetic of /5 (corner-bracket panels, sys · labels, monospace data) —
-// but stripped of live counters, animated bars, and any fake metrics.
+// Variant 6 — Editorial Split · "Dossier"
+// Same editorial skeleton as /3 but the right column is a numbered dossier
+// (01 / 02 / 03 …) instead of a boxed fact table.
 
-const STACK = [
-  ["python", "go", "c++"],
-  ["typescript", "rust", "c"],
-  ["pytorch", "langchain", "mcp"],
-  ["docker", "postgres", "supabase"],
+export const metadata = { title: "About v6 — Dossier" };
+
+const DOSSIER: [string, React.ReactNode][] = [
+  ["identity", <>computing science · ualberta</>],
+  ["focus",    <>ai + systems engineering</>],
+  ["year",     <>2nd · co-op stream</>],
+  ["grad",     <>2028</>],
+  [
+    "status",
+    <span className="flex items-center gap-[6px]">
+      <span
+        className="w-[6px] h-[6px] rounded-full inline-block"
+        style={{
+          background: "var(--green-mid)",
+          animation: "pulse-dot 2.5s ease-in-out infinite",
+        }}
+      />
+      open to internships
+    </span>,
+  ],
+  ["location", <>edmonton, ab</>],
 ];
 
-const LINKS = [
-  { href: "/#work",   label: "projects" },
-  { href: "/#about",  label: "about" },
-  { href: "https://github.com/Sashreek007", label: "github ↗", ext: true },
-  { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true },
-  { href: "/resume",  label: "resume" },
+const STACK_ROWS: [string, string[]][] = [
+  ["languages", ["Python", "Go", "C++", "TypeScript", "Rust", "C"]],
+  ["ml / ai",   ["PyTorch", "LangChain", "LangGraph", "MCP", "HuggingFace", "Ollama"]],
+  ["infra",     ["Docker", "Redis", "Postgres", "Supabase", "FastAPI", "Linux"]],
+  ["systems",   ["RISC-V", "Neovim", "Go stdlib", "OpenCV", "MediaPipe"]],
 ];
 
-function CornerBox({
-  label,
-  children,
-  className = "",
-}: {
-  label: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`relative p-5 ${className}`}>
-      {(["tl", "tr", "bl", "br"] as const).map(pos => (
-        <span
-          key={pos}
-          className="absolute w-3.5 h-3.5 pointer-events-none"
-          style={{
-            top: pos.startsWith("t") ? 0 : undefined,
-            bottom: pos.startsWith("b") ? 0 : undefined,
-            left: pos.endsWith("l") ? 0 : undefined,
-            right: pos.endsWith("r") ? 0 : undefined,
-            borderTop: pos.startsWith("t") ? "1px solid var(--violet-soft)" : undefined,
-            borderBottom: pos.startsWith("b") ? "1px solid var(--violet-soft)" : undefined,
-            borderLeft: pos.endsWith("l") ? "1px solid var(--violet-soft)" : undefined,
-            borderRight: pos.endsWith("r") ? "1px solid var(--violet-soft)" : undefined,
-            opacity: 0.5,
-          }}
-        />
-      ))}
-      <div
-        className="font-mono text-[9px] tracking-[0.22em] uppercase mb-3"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {label}
-      </div>
-      {children}
-    </div>
-  );
-}
+const XP = [
+  { year: "2025 →", role: "project lead · undergraduate ai society", current: true },
+  { year: "2025",   role: "teaching assistant · cmput 274" },
+  { year: "2025",   role: "nathacks ecotech · fluxatlas engine" },
+];
 
-export default function Design6() {
+export default function AboutVariant6() {
   return (
-    <section
-      className="relative flex flex-col justify-center min-h-[calc(100vh-73px)] px-[5vw] py-12 overflow-hidden"
+    <div
+      className="min-h-screen w-full py-24 px-[6vw]"
       style={{ background: "var(--bg-base)" }}
     >
-      {/* Ghost decoration — outline "01", anchored right */}
-      <div
-        className="absolute right-[-2vw] top-1/2 -translate-y-1/2 select-none pointer-events-none"
-        style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          fontSize: "clamp(240px, 40vw, 500px)",
-          lineHeight: 1,
-          color: "transparent",
-          WebkitTextStroke: "1px color-mix(in srgb, var(--gray-800) 70%, transparent)",
-          letterSpacing: "-0.05em",
-          opacity: 0.5,
-        }}
-        aria-hidden
-      >
-        01
-      </div>
-
-      {/* TOP STATUS BAR — static, no live counter */}
-      <div className="relative z-10 flex items-center justify-between mb-12 flex-wrap gap-4">
+      {/* Kicker */}
+      <div className="flex items-center gap-4 mb-14 max-w-[1200px] mx-auto">
         <span
-          className="font-mono text-[10px] tracking-[0.22em] uppercase"
+          className="font-mono text-[11px] tracking-[0.2em] uppercase"
           style={{ color: "var(--text-muted)" }}
         >
-          sys · portfolio · 2026
+          ABOUT · ISSUE 03
         </span>
+        <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
         <span
-          className="font-mono text-[10px] tracking-[0.22em] uppercase"
+          className="font-mono text-[11px] tracking-[0.2em] uppercase"
           style={{ color: "var(--text-muted)" }}
         >
-          edmonton, ab
+          six-entry dossier
         </span>
       </div>
 
-      {/* MASSIVE NAME — unchanged from /4 */}
-      <h1
-        className="relative z-10 fade-up font-mono font-medium mb-10"
-        style={{
-          fontSize: "clamp(52px, 11.5vw, 160px)",
-          lineHeight: "0.96",
-          letterSpacing: "-0.045em",
-          color: "var(--text-primary)",
-        }}
-      >
-        sashreek<br />addanki
-      </h1>
+      <div className="grid gap-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1200px] mx-auto">
+        {/* LEFT — essay */}
+        <article>
+          <h1
+            className="text-[44px] lg:text-[56px] font-medium leading-[1.02] mb-10 tracking-[-0.02em]"
+            style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+          >
+            Building at the seam <br />
+            between{" "}
+            <span style={{ color: "var(--violet-pale)" }}>ai</span>{" "}
+            and{" "}
+            <span style={{ color: "var(--amber-bright)" }}>systems</span>.
+          </h1>
 
-      {/* HAIRLINE DIVIDER */}
-      <div
-        className="relative z-10 h-px w-full mb-8"
-        style={{ background: "var(--gray-800)" }}
-      />
-
-      {/* LOWER ROW — 4 corner-bracket panels, all static content */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-
-        {/* IDENTITY */}
-        <CornerBox label="sys · identity">
-          <p
-            className="font-mono text-[12px] leading-[1.7]"
+          <div
+            className="flex flex-col gap-5 text-[15px] leading-[1.85] max-w-[560px]"
             style={{ color: "var(--text-secondary)" }}
           >
-            computing science<br />@ ualberta<br />
-            <span style={{ color: "var(--text-muted)" }}>ai + systems · co-op</span>
-          </p>
-        </CornerBox>
+            <p className="first-letter:float-left first-letter:text-[44px] first-letter:leading-[0.9] first-letter:pr-2 first-letter:mt-1 first-letter:text-[var(--violet-pale)] first-letter:font-medium">
+              My work spans backend systems, low-level programming, and AI-driven
+              features that move beyond research demos into usable software. I care
+              about the engineering required to bridge AI research ideas with real
+              systems.
+            </p>
 
-        {/* THESIS */}
-        <CornerBox label="sys · thesis">
-          <p
-            className="text-[14px] leading-[1.7]"
-            style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}
-          >
-            I understand the machine before I build on top of it.
-          </p>
-        </CornerBox>
+            <p>
+              I learn bottom-up — the mechanism before the abstraction.
+              Kurose &amp; Ross before FastAPI. RISC-V before operating systems.
+              Using something I don&apos;t understand makes me uncomfortable.
+            </p>
 
-        {/* STACK — clean text list, no fake percentage bars */}
-        <CornerBox label="sys · stack">
-          <div className="font-mono text-[11px] leading-[1.85]" style={{ color: "var(--text-secondary)" }}>
-            {STACK.map((row, i) => (
-              <div key={i}>{row.join(" · ")}</div>
-            ))}
-          </div>
-        </CornerBox>
-
-        {/* NAVIGATE — with availability dot at top, then links */}
-        <CornerBox label="sys · navigate">
-          <div
-            className="flex items-center gap-2 font-mono text-[11px] font-medium mb-3"
-            style={{ color: "var(--green-bright)" }}
-          >
-            <span
-              className="w-[6px] h-[6px] rounded-full"
+            <blockquote
+              className="pl-5 my-2 text-[16px] italic"
               style={{
-                background: "var(--green-mid)",
-                animation: "pulse-dot 2.5s ease-in-out infinite",
+                borderLeft: "2px solid var(--violet-mid)",
+                color: "var(--violet-pale)",
+                fontFamily: "var(--font-body)",
               }}
-            />
-            open · internships
+            >
+              &ldquo;Each project is a deliberate rung — not a random one.&rdquo;
+            </blockquote>
           </div>
-          <div className="flex flex-col gap-1">
-            {LINKS.map(({ href, label, ext }) => (
-              <a
-                key={href}
-                href={href}
-                target={ext ? "_blank" : undefined}
-                rel={ext ? "noreferrer noopener" : undefined}
-                className="group flex items-center justify-between font-mono text-[12px] py-1 transition-colors duration-150"
-                style={{ color: "var(--text-muted)" }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)";
-                }}
-              >
-                <span>{label}</span>
-                <span style={{ opacity: 0.4 }}>→</span>
-              </a>
-            ))}
+
+          <div className="mt-10 flex items-center gap-4">
+            <Link
+              href="/about"
+              className="font-mono text-[13px] px-4 py-[10px] transition-all hover:-translate-y-[1px]"
+              style={{
+                border: "1px solid var(--violet-mid)",
+                color: "var(--violet-pale)",
+                background: "color-mix(in srgb, var(--violet-dim) 30%, transparent)",
+                borderRadius: "4px",
+              }}
+            >
+              read full bio →
+            </Link>
+            <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+              approx. 4 min read
+            </span>
           </div>
-        </CornerBox>
+        </article>
+
+        {/* RIGHT — dossier + stack + recent */}
+        <aside className="flex flex-col gap-12">
+          {/* Numbered dossier */}
+          <section>
+            <p
+              className="font-mono text-[11px] tracking-[0.16em] uppercase mb-5"
+              style={{ color: "var(--text-muted)" }}
+            >
+              dossier
+            </p>
+            <ol className="flex flex-col">
+              {DOSSIER.map(([k, v], i) => (
+                <li
+                  key={k}
+                  className="grid grid-cols-[32px_90px_1fr] items-baseline py-[10px] gap-4"
+                  style={{
+                    borderTop: "1px solid var(--gray-800)",
+                    borderBottom: i === DOSSIER.length - 1 ? "1px solid var(--gray-800)" : "none",
+                  }}
+                >
+                  <span
+                    className="font-mono text-[11px]"
+                    style={{ color: "var(--amber-bright)" }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span
+                    className="font-mono text-[11px] tracking-[0.1em] uppercase"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {k}
+                  </span>
+                  <span
+                    className="font-mono text-[12px]"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    {v}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Stack */}
+          <section>
+            <p
+              className="font-mono text-[11px] tracking-[0.16em] uppercase mb-5"
+              style={{ color: "var(--text-muted)" }}
+            >
+              stack
+            </p>
+            <div className="flex flex-col gap-4">
+              {STACK_ROWS.map(([label, items]) => (
+                <div key={label}>
+                  <p
+                    className="font-mono text-[10px] tracking-[0.14em] uppercase mb-2"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {label}
+                  </p>
+                  <div className="flex flex-wrap gap-[6px]">
+                    {items.map((t) => (
+                      <span
+                        key={t}
+                        className="font-mono text-[11px] px-[10px] py-[4px]"
+                        style={{
+                          border: "1px solid var(--gray-800)",
+                          color: "var(--text-secondary)",
+                          borderRadius: "3px",
+                          background: "var(--bg-elevated)",
+                        }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Recent */}
+          <section>
+            <p
+              className="font-mono text-[11px] tracking-[0.16em] uppercase mb-5"
+              style={{ color: "var(--text-muted)" }}
+            >
+              recent
+            </p>
+            <ul className="flex flex-col">
+              {XP.map((e, i) => (
+                <li
+                  key={i}
+                  className="grid grid-cols-[80px_1fr] items-center py-[10px]"
+                  style={{
+                    borderTop: i === 0 ? "1px solid var(--gray-800)" : "none",
+                    borderBottom: "1px solid var(--gray-800)",
+                  }}
+                >
+                  <span
+                    className="font-mono text-[12px]"
+                    style={{ color: e.current ? "var(--green-bright)" : "var(--text-muted)" }}
+                  >
+                    {e.year}
+                  </span>
+                  <span className="text-[13px]" style={{ color: "var(--text-primary)" }}>
+                    {e.role}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </aside>
       </div>
-    </section>
+
+      <AboutVariantSwitcher current={6} />
+    </div>
   );
 }

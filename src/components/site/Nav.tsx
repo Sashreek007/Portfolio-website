@@ -1,8 +1,9 @@
 "use client";
 
 // Nav — hidden while at the hero, slides down once you scroll past it.
-// On the homepage, all section links are in-page anchors (#work, #about,
-// #writing, #contact). On other pages they route to the dedicated pages.
+// On the homepage, section links are in-page anchors (#work, #about, …).
+// On other pages they route back to the home page's section anchors
+// (/#work, /#about, …) so the nav always returns to the main site flow.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -40,12 +41,13 @@ const homeLinks = [
   { href: "#contact", label: "contact", id: "contact" },
 ];
 
+// On non-home pages, nav links route back to the home page's section anchors
+// rather than to the standalone sub-pages (/work, /about, /blog, /contact).
 const pageLinks = [
-  { href: "/",        label: "home" },
-  { href: "/work",    label: "work" },
-  { href: "/about",   label: "about" },
-  { href: "/blog",    label: "writing" },
-  { href: "/contact", label: "contact" },
+  { href: "/#work",    label: "work" },
+  { href: "/#about",   label: "about" },
+  { href: "/#writing", label: "writing" },
+  { href: "/#contact", label: "contact" },
 ];
 
 export default function Nav() {
@@ -132,25 +134,16 @@ export default function Nav() {
                 </a>
               );
             })
-          : pageLinks.map(({ href, label }) => {
-              const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className="relative font-mono text-[13px] transition-colors duration-200"
-                  style={{ color: active ? "var(--text-primary)" : "var(--text-muted)" }}
-                >
-                  {label}
-                  {active && (
-                    <span
-                      className="absolute -bottom-[21px] left-0 right-0 h-[2px]"
-                      style={{ background: "var(--violet-mid)" }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
+          : pageLinks.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="relative font-mono text-[13px] transition-colors duration-200 hover:text-[var(--text-primary)]"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {label}
+              </Link>
+            ))}
       </nav>
     </header>
   );

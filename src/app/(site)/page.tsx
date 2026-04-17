@@ -1,7 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import Hero from "@/components/site/Hero";
 import SectionLabel from "@/components/site/SectionLabel";
-import SkillsTable from "@/components/site/SkillsTable";
 import ProjectCard, { type Project } from "@/components/site/ProjectCard";
 import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
@@ -132,59 +131,185 @@ export default async function HomePage() {
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <Hero />
 
-      {/* ── About ─────────────────────────────────────────────────────────── */}
+      {/* ── About (editorial split · README) ─────────────────────────────── */}
       <section
         id="about"
         className="section-hidden px-[6vw] py-24"
+        style={{ background: "var(--bg-base)" }}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start max-w-[1200px]">
-          {/* Left — text */}
-          <div>
-            <SectionLabel>About</SectionLabel>
+        {/* Kicker */}
+        <div className="flex items-center gap-4 mb-14 max-w-[1200px] mx-auto">
+          <span
+            className="font-mono text-[11px] tracking-[0.2em] uppercase"
+            style={{ color: "var(--text-muted)" }}
+          >
+            ABOUT
+          </span>
+          <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
+          <span
+            className="font-mono text-[11px] tracking-[0.2em] uppercase"
+            style={{ color: "var(--text-muted)" }}
+          >
+            readme.md
+          </span>
+        </div>
+
+        <div className="grid gap-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1200px] mx-auto">
+          {/* LEFT — essay */}
+          <article>
             <h2
-              className="text-[26px] font-medium leading-[1.3] mb-6 mt-1"
+              className="text-[32px] lg:text-[40px] font-medium leading-[1.18] mb-10 tracking-[-0.015em]"
               style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
             >
-              Computing science @ UAlberta, building at the intersection of AI and systems.
+              Computing science @ UAlberta, building at the intersection of{" "}
+              <span style={{ color: "var(--violet-pale)" }}>AI</span>{" "}
+              and{" "}
+              <span style={{ color: "var(--amber-bright)" }}>systems</span>.
             </h2>
+
             <div
-              className="flex flex-col gap-4 text-[15px] leading-[1.8]"
+              className="flex flex-col gap-5 text-[15px] leading-[1.85] max-w-[560px]"
               style={{ color: "var(--text-secondary)" }}
             >
               <p>
-                My work spans backend systems, low-level programming, and AI-driven features
-                that move beyond research demos into usable software.
+                My work spans backend systems, low-level programming, and AI-driven
+                features that move beyond research demos into usable software. I&apos;m
+                especially interested in the engineering required to bridge AI research
+                ideas with real systems.
               </p>
               <p>
-                I learn bottom-up — the mechanism before the abstraction.
-                Kurose &amp; Ross before FastAPI. RISC-V before operating systems.
-                Using something I don&apos;t understand makes me uncomfortable.
+                I learn bottom-up — the mechanism before the abstraction. Kurose &amp;
+                Ross before FastAPI. Induction proofs before statistical packages. RISC-V
+                before operating systems. Using something I don&apos;t understand makes me
+                uncomfortable.
               </p>
               <p style={{ color: "var(--text-muted)" }}>
-                Second year, co-op stream, graduating 2028.
+                Currently in my second year, co-op stream, graduating 2028. Each project
+                is a deliberate rung — not a random one.
               </p>
             </div>
-            <div className="mt-8">
+
+            <div className="mt-10 flex items-center gap-4">
               <Link
                 href="/about"
-                className="font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
-                style={{ color: "var(--text-muted)" }}
+                className="font-mono text-[13px] px-4 py-[10px] transition-all hover:-translate-y-[1px]"
+                style={{
+                  border: "1px solid var(--violet-mid)",
+                  color: "var(--violet-pale)",
+                  background: "color-mix(in srgb, var(--violet-dim) 30%, transparent)",
+                  borderRadius: "4px",
+                }}
               >
-                full bio →
+                read full bio →
               </Link>
+              <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+                approx. 4 min read
+              </span>
             </div>
-          </div>
+          </article>
 
-          {/* Right — skills */}
-          <div>
-            <p
-              className="font-mono text-[11px] tracking-[0.12em] uppercase mb-5"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Stack
-            </p>
-            <SkillsTable />
-          </div>
+          {/* RIGHT — rendered README */}
+          <aside
+            className="flex flex-col gap-10 pl-6"
+            style={{ borderLeft: "1px solid var(--gray-800)" }}
+          >
+            {/* profile */}
+            <section>
+              <h3 className="font-mono text-[14px] mb-3 flex items-baseline gap-2">
+                <span style={{ color: "var(--violet-soft)" }}>##</span>
+                <span style={{ color: "var(--text-primary)" }}>profile</span>
+              </h3>
+              <dl className="flex flex-col gap-[6px] font-mono text-[12px]">
+                {[
+                  ["identity",    <>Computing science · UAlberta</>],
+                  ["focus",       <>AI + systems engineering</>],
+                  ["year",        <>2nd · co-op stream</>],
+                  ["graduating",  <>2028</>],
+                  [
+                    "status",
+                    <span className="inline-flex items-center gap-[6px]">
+                      <span
+                        className="w-[6px] h-[6px] rounded-full inline-block"
+                        style={{
+                          background: "var(--green-mid)",
+                          animation: "pulse-dot 2.5s ease-in-out infinite",
+                        }}
+                      />
+                      open to internships
+                    </span>,
+                  ],
+                  ["location",    <>Edmonton, AB</>],
+                ].map(([k, v], i) => (
+                  <div key={i} className="grid grid-cols-[110px_1fr] items-baseline gap-2">
+                    <dt
+                      className="tracking-[0.08em] uppercase text-[11px]"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {k}
+                    </dt>
+                    <dd style={{ color: "var(--text-primary)" }}>
+                      <span style={{ color: "var(--text-muted)" }}>→ </span>
+                      {v}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            {/* stack */}
+            <section>
+              <h3 className="font-mono text-[14px] mb-3 flex items-baseline gap-2">
+                <span style={{ color: "var(--violet-soft)" }}>##</span>
+                <span style={{ color: "var(--text-primary)" }}>stack</span>
+              </h3>
+              <ul className="flex flex-col gap-[6px] font-mono text-[12px]">
+                {[
+                  ["languages", ["python", "go", "c++", "typescript", "rust", "c"]],
+                  ["ml / ai",   ["pytorch", "langchain", "langgraph", "mcp", "huggingface", "ollama"]],
+                  ["infra",     ["docker", "redis", "postgres", "supabase", "fastapi", "linux"]],
+                  ["systems",   ["risc-v", "neovim", "go-stdlib", "opencv", "mediapipe"]],
+                ].map(([label, items]) => (
+                  <li
+                    key={label as string}
+                    className="grid grid-cols-[110px_1fr] items-baseline gap-2"
+                  >
+                    <span style={{ color: "var(--amber-bright)" }}>- {label}</span>
+                    <span style={{ color: "var(--text-secondary)" }}>
+                      {(items as string[]).join(", ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/* timeline */}
+            <section>
+              <h3 className="font-mono text-[14px] mb-3 flex items-baseline gap-2">
+                <span style={{ color: "var(--violet-soft)" }}>##</span>
+                <span style={{ color: "var(--text-primary)" }}>timeline</span>
+              </h3>
+              <ul className="flex flex-col gap-[8px] font-mono text-[12px]">
+                {[
+                  { year: "2025 →", role: "project lead · undergraduate ai society", current: true },
+                  { year: "2025",   role: "teaching assistant · cmput 274" },
+                ].map((e, i) => (
+                  <li key={i} className="grid grid-cols-[80px_1fr] items-baseline gap-2">
+                    <span style={{ color: e.current ? "var(--green-bright)" : "var(--text-muted)" }}>
+                      {e.year}
+                    </span>
+                    <span style={{ color: "var(--text-primary)" }}>
+                      {e.role}
+                      {e.current && (
+                        <span className="ml-2" style={{ color: "var(--green-bright)" }}>
+                          [current]
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </aside>
         </div>
       </section>
 
@@ -194,6 +319,7 @@ export default async function HomePage() {
       <section
         id="work"
         className="section-hidden px-[6vw] py-24"
+        style={{ background: "var(--bg-base)" }}
       >
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
@@ -227,6 +353,7 @@ export default async function HomePage() {
       <section
         id="writing"
         className="section-hidden px-[6vw] py-24"
+        style={{ background: "var(--bg-base)" }}
       >
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
@@ -296,6 +423,7 @@ export default async function HomePage() {
       <section
         id="contact"
         className="section-hidden px-[6vw] py-24"
+        style={{ background: "var(--bg-base)" }}
       >
         <SectionLabel>Contact</SectionLabel>
         <h2
