@@ -391,6 +391,11 @@ export default function WorkspaceAnimation({ className, style }: Props) {
       aria-hidden
     >
       <defs>
+        {/* Clip the editor foreignObject so its HTML content never spills out
+            (mobile Safari sometimes fails to clip foreignObject HTML on its own). */}
+        <clipPath id="ws-screen-clip">
+          <rect x="60" y="50" width="480" height="292" rx="6" />
+        </clipPath>
         <radialGradient id="ws-glow" cx="50%" cy="38%" r="60%">
           <stop offset="0%" stopColor="var(--violet-mid)" stopOpacity="0.20" />
           <stop offset="60%" stopColor="var(--violet-mid)" stopOpacity="0.07" />
@@ -523,7 +528,14 @@ export default function WorkspaceAnimation({ className, style }: Props) {
       <circle cx="300" cy="345" r="2.6" fill="none" stroke="#3A3A38" strokeWidth="0.5" opacity="0.55" />
 
       {/* ═══ NEOVIM EDITOR (full HTML inside foreignObject) ══════ */}
-      <foreignObject x="60" y="50" width="480" height="292">
+      <foreignObject
+        x="60"
+        y="50"
+        width="480"
+        height="292"
+        overflow="hidden"
+        clipPath="url(#ws-screen-clip)"
+      >
         <div
           {...{ xmlns: "http://www.w3.org/1999/xhtml" }}
           style={{
