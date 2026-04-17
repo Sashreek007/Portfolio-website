@@ -692,7 +692,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
                   } else if (isVisualLine) {
                     lineBg = "rgba(255,192,121,0.18)";
                   } else if (isCursorLine && !visualActive) {
-                    lineBg = "rgba(193,143,255,0.10)";
+                    lineBg = "rgba(193,143,255,0.18)";
                   }
 
                   out.push(
