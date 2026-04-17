@@ -142,7 +142,7 @@ export default async function WorkVariant6() {
                 className="px-[6px] py-[2px]"
                 style={{
                   color: "var(--bg-base)",
-                  background: "var(--amber-bright)",
+                  background: "var(--green-bright)",
                   borderRadius: "2px",
                   letterSpacing: "0.14em",
                 }}
@@ -277,7 +277,7 @@ export default async function WorkVariant6() {
             >
               {/* story header: slug number + dateline */}
               <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.15em] uppercase">
-                <span style={{ color: "var(--amber-bright)" }}>
+                <span style={{ color: "var(--green-bright)" }}>
                   №{String(i + 2).padStart(2, "0")}
                 </span>
                 <span style={{ color: "var(--gray-800)" }}>·</span>

@@ -110,7 +110,7 @@ export default async function WorkVariant4() {
           style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
         >
           Builds, laid out as{" "}
-          <span style={{ color: "var(--amber-bright)" }}>feature spreads</span>.
+          <span style={{ color: "var(--green-bright)" }}>feature spreads</span>.
         </h1>
         <p
           className="text-[15px] leading-[1.75] mb-20 max-w-[640px]"
@@ -149,7 +149,7 @@ export default async function WorkVariant4() {
                       feature {String(i + 1).padStart(2, "0")}
                     </span>
                     <span style={{ color: "var(--gray-800)" }}>/</span>
-                    <span style={{ color: "var(--amber-bright)" }}>
+                    <span style={{ color: "var(--green-bright)" }}>
                       {p.year ?? "—"}
                     </span>
                     <span style={{ color: "var(--gray-800)" }}>/</span>

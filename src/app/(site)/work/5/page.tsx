@@ -125,7 +125,7 @@ export default async function WorkVariant5() {
                 {/* asymmetric corner year */}
                 <span
                   className="absolute bottom-4 right-5 font-mono text-[11px] tracking-[0.14em]"
-                  style={{ color: "var(--amber-bright)" }}
+                  style={{ color: "var(--green-bright)" }}
                 >
                   {p.year ?? "—"}
                 </span>

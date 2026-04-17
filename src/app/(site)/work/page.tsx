@@ -30,7 +30,7 @@ export default async function WorkPage() {
         style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
       >
         Projects, laid out as{" "}
-        <span style={{ color: "var(--amber-bright)" }}>feature spreads</span>.
+        <span style={{ color: "var(--green-bright)" }}>feature spreads</span>.
       </h1>
       <p
         className="text-[15px] leading-[1.75] mb-14 max-w-[640px]"

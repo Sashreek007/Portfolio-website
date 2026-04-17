@@ -93,7 +93,7 @@ export default function FeatureStrip({
             feature {String(index + 1).padStart(2, "0")}
           </span>
           <span style={{ color: "var(--gray-800)" }}>/</span>
-          <span style={{ color: "var(--amber-bright)" }}>{p.year ?? "—"}</span>
+          <span style={{ color: "var(--green-bright)" }}>{p.year ?? "—"}</span>
           <span style={{ color: "var(--gray-800)" }}>/</span>
           <span
             className="flex items-center gap-[6px]"
