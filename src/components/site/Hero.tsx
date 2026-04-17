@@ -72,7 +72,7 @@ export default function Hero() {
         <div className="relative w-full max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
           <WorkspaceAnimation
             className="w-full h-auto block"
-            style={{ aspectRatio: "600 / 700" }}
+            style={{ aspectRatio: "600 / 800" }}
           />
         </div>
       </div>
