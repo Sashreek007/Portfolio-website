@@ -1,16 +1,15 @@
 "use client";
 
-// Design 6 — STATUS_MONOLITH
-// Layout of /4 (massive top name, ghosted "01" backdrop, hairline divider,
-// horizontal content row below) fused with the vibes of /5 (corner-bracket
-// panels, sys · labels, live uptime counter, language bars, data readouts).
-
-import { useState, useEffect } from "react";
+// Design 6 — STATUS_MONOLITH (rev 2, no gimmicks)
+// Layout of /4 (massive top name, ghosted "01" backdrop, hairline divider).
+// Aesthetic of /5 (corner-bracket panels, sys · labels, monospace data) —
+// but stripped of live counters, animated bars, and any fake metrics.
 
 const STACK = [
-  { lang: "python", pct: 90 },
-  { lang: "typescript", pct: 82 },
-  { lang: "go", pct: 72 },
+  ["python", "go", "c++"],
+  ["typescript", "rust", "c"],
+  ["pytorch", "langchain", "mcp"],
+  ["docker", "postgres", "supabase"],
 ];
 
 const LINKS = [
@@ -20,14 +19,6 @@ const LINKS = [
   { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true },
   { href: "/resume",  label: "resume" },
 ];
-
-function elapsed(start: number) {
-  const s = Math.floor((Date.now() - start) / 1000);
-  const h = Math.floor(s / 3600).toString().padStart(2, "0");
-  const m = Math.floor((s % 3600) / 60).toString().padStart(2, "0");
-  const sec = (s % 60).toString().padStart(2, "0");
-  return `${h}:${m}:${sec}`;
-}
 
 function CornerBox({
   label,
@@ -53,7 +44,7 @@ function CornerBox({
             borderBottom: pos.startsWith("b") ? "1px solid var(--violet-soft)" : undefined,
             borderLeft: pos.endsWith("l") ? "1px solid var(--violet-soft)" : undefined,
             borderRight: pos.endsWith("r") ? "1px solid var(--violet-soft)" : undefined,
-            opacity: 0.55,
+            opacity: 0.5,
           }}
         />
       ))}
@@ -69,20 +60,12 @@ function CornerBox({
 }
 
 export default function Design6() {
-  const [start] = useState(() => Date.now());
-  const [uptime, setUptime] = useState("00:00:00");
-
-  useEffect(() => {
-    const id = setInterval(() => setUptime(elapsed(start)), 1000);
-    return () => clearInterval(id);
-  }, [start]);
-
   return (
     <section
       className="relative flex flex-col justify-center min-h-[calc(100vh-73px)] px-[5vw] py-12 overflow-hidden"
       style={{ background: "var(--bg-base)" }}
     >
-      {/* Ghost decoration — outline 01, anchored right */}
+      {/* Ghost decoration — outline "01", anchored right */}
       <div
         className="absolute right-[-2vw] top-1/2 -translate-y-1/2 select-none pointer-events-none"
         style={{
@@ -100,33 +83,23 @@ export default function Design6() {
         01
       </div>
 
-      {/* TOP STATUS BAR */}
+      {/* TOP STATUS BAR — static, no live counter */}
       <div className="relative z-10 flex items-center justify-between mb-12 flex-wrap gap-4">
         <span
           className="font-mono text-[10px] tracking-[0.22em] uppercase"
           style={{ color: "var(--text-muted)" }}
         >
-          sys · portfolio · v2026.04
+          sys · portfolio · 2026
         </span>
-        <div
-          className="flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] uppercase"
+        <span
+          className="font-mono text-[10px] tracking-[0.22em] uppercase"
           style={{ color: "var(--text-muted)" }}
         >
-          <span
-            className="w-[6px] h-[6px] rounded-full"
-            style={{
-              background: "var(--green-mid)",
-              animation: "pulse-dot 2.5s ease-in-out infinite",
-            }}
-          />
-          live · uptime{" "}
-          <span className="tabular-nums" style={{ color: "var(--violet-soft)" }}>
-            {uptime}
-          </span>
-        </div>
+          edmonton, ab
+        </span>
       </div>
 
-      {/* MASSIVE NAME */}
+      {/* MASSIVE NAME — unchanged from /4 */}
       <h1
         className="relative z-10 fade-up font-mono font-medium mb-10"
         style={{
@@ -145,92 +118,54 @@ export default function Design6() {
         style={{ background: "var(--gray-800)" }}
       />
 
-      {/* LOWER ROW — 4 corner-bracket panels */}
+      {/* LOWER ROW — 4 corner-bracket panels, all static content */}
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
 
         {/* IDENTITY */}
         <CornerBox label="sys · identity">
           <p
-            className="font-mono text-[12px] mb-3"
+            className="font-mono text-[12px] leading-[1.7]"
             style={{ color: "var(--text-secondary)" }}
           >
-            computing science<br />@ ualberta · ai + systems
+            computing science<br />@ ualberta<br />
+            <span style={{ color: "var(--text-muted)" }}>ai + systems · co-op</span>
           </p>
+        </CornerBox>
+
+        {/* THESIS */}
+        <CornerBox label="sys · thesis">
           <p
-            className="text-[13px] leading-[1.7] italic"
+            className="text-[14px] leading-[1.7]"
             style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}
           >
-            "I understand the machine before I build on top of it."
+            I understand the machine before I build on top of it.
           </p>
         </CornerBox>
 
-        {/* STATUS */}
-        <CornerBox label="sys · status">
-          <div className="flex flex-col gap-2.5">
-            <div
-              className="flex items-center gap-2 font-mono text-[12px] font-medium"
-              style={{ color: "var(--green-bright)" }}
-            >
-              <span
-                className="w-[6px] h-[6px] rounded-full"
-                style={{
-                  background: "var(--green-mid)",
-                  animation: "pulse-dot 2.5s ease-in-out infinite",
-                }}
-              />
-              open · internships
-            </div>
-            <p className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
-              edmonton, ab
-            </p>
-            <p className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
-              grad 2028 · co-op
-            </p>
-            <p
-              className="font-mono text-[11px] tabular-nums"
-              style={{ color: "var(--violet-soft)" }}
-            >
-              uptime {uptime}
-            </p>
-          </div>
-        </CornerBox>
-
-        {/* STACK */}
+        {/* STACK — clean text list, no fake percentage bars */}
         <CornerBox label="sys · stack">
-          <div className="flex flex-col gap-2.5">
-            {STACK.map(({ lang, pct }) => (
-              <div key={lang}>
-                <div className="flex justify-between font-mono text-[10px] mb-1">
-                  <span style={{ color: "var(--text-secondary)" }}>{lang}</span>
-                  <span style={{ color: "var(--text-muted)" }}>{pct}%</span>
-                </div>
-                <div
-                  className="h-[2px] w-full rounded-full"
-                  style={{ background: "var(--gray-800)" }}
-                >
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${pct}%`,
-                      background:
-                        "linear-gradient(90deg, var(--violet-mid), var(--violet-soft))",
-                      transition: "width 1.2s cubic-bezier(0.16,1,0.3,1)",
-                    }}
-                  />
-                </div>
-              </div>
+          <div className="font-mono text-[11px] leading-[1.85]" style={{ color: "var(--text-secondary)" }}>
+            {STACK.map((row, i) => (
+              <div key={i}>{row.join(" · ")}</div>
             ))}
-            <p
-              className="font-mono text-[10px] mt-1"
-              style={{ color: "var(--text-muted)" }}
-            >
-              + c++, rust, c
-            </p>
           </div>
         </CornerBox>
 
-        {/* NAVIGATE */}
+        {/* NAVIGATE — with availability dot at top, then links */}
         <CornerBox label="sys · navigate">
+          <div
+            className="flex items-center gap-2 font-mono text-[11px] font-medium mb-3"
+            style={{ color: "var(--green-bright)" }}
+          >
+            <span
+              className="w-[6px] h-[6px] rounded-full"
+              style={{
+                background: "var(--green-mid)",
+                animation: "pulse-dot 2.5s ease-in-out infinite",
+              }}
+            />
+            open · internships
+          </div>
           <div className="flex flex-col gap-1">
             {LINKS.map(({ href, label, ext }) => (
               <a
@@ -238,15 +173,13 @@ export default function Design6() {
                 href={href}
                 target={ext ? "_blank" : undefined}
                 rel={ext ? "noreferrer noopener" : undefined}
-                className="group flex items-center justify-between font-mono text-[12px] py-1.5 transition-colors duration-150"
+                className="group flex items-center justify-between font-mono text-[12px] py-1 transition-colors duration-150"
                 style={{ color: "var(--text-muted)" }}
                 onMouseEnter={e => {
-                  (e.currentTarget as HTMLAnchorElement).style.color =
-                    "var(--text-primary)";
+                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
                 }}
                 onMouseLeave={e => {
-                  (e.currentTarget as HTMLAnchorElement).style.color =
-                    "var(--text-muted)";
+                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)";
                 }}
               >
                 <span>{label}</span>
