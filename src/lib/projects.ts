@@ -1,0 +1,141 @@
+import { createServerClient } from "@/lib/supabase/server";
+import type { Project } from "@/components/site/ProjectCard";
+
+export const SEED_PROJECTS: Project[] = [
+  {
+    id: "1",
+    name: "Career Co-Pilot",
+    description:
+      "AI-assisted job workflow platform that matches roles to your profile, generates tailored resumes, and supports browser-assisted applications while keeping the user in control.",
+    github_url: "https://github.com/Sashreek007/career-savers_CareerCo-Pilot",
+    demo_url: null,
+    image_url: null,
+    video_url: null,
+    stack: ["React", "TypeScript", "FastAPI", "Python", "Playwright", "SQLite", "Gemini API"],
+    status: "shipped",
+    year: 2025,
+    is_best: true,
+    is_current: false,
+    sort_order: 0,
+  },
+  {
+    id: "2",
+    name: "DoomScroller",
+    description:
+      "Chrome extension that converts doomscrolling into measurable distance, coins, and multiplayer battles with local-first tracking, Supabase sync, and personalized AI feedback.",
+    github_url: "https://github.com/Sashreek007/Doom-Scroller-by-Commit-and-Pray",
+    demo_url: null,
+    image_url: null,
+    video_url: null,
+    stack: ["TypeScript", "React", "TailwindCSS", "Supabase", "PostgreSQL", "Chrome Extension"],
+    status: "shipped",
+    year: 2025,
+    is_best: true,
+    is_current: false,
+    sort_order: 1,
+  },
+  {
+    id: "4",
+    name: "FluxAtlas — Economic Trading Engine",
+    description:
+      "Full-stack auction simulation platform modeling international resource trading with Vickrey auction mechanisms across 50+ simulated countries.",
+    github_url: "https://github.com/Aarushb/NH25_flux_Atlas",
+    demo_url: null,
+    image_url: null,
+    video_url: null,
+    stack: ["FastAPI", "React", "PostgreSQL", "Python", "TypeScript"],
+    status: "shipped",
+    year: 2025,
+    is_best: true,
+    is_current: false,
+    sort_order: 2,
+  },
+  {
+    id: "5",
+    name: "Spam Detection Discord Bot",
+    description:
+      "Deployed scam detection bot that identifies and removes malicious messages in real time with low-latency inference.",
+    github_url:
+      "https://github.com/UndergraduateArtificialIntelligenceClub/Spam-Detection-Discord-Bot",
+    demo_url: null,
+    image_url: null,
+    video_url: null,
+    stack: ["Python", "Discord.py", "Hugging Face"],
+    status: "active",
+    year: 2025,
+    is_best: true,
+    is_current: false,
+    sort_order: 3,
+  },
+  {
+    id: "6",
+    name: "Balloon Popper — Gesture-Controlled Game",
+    description:
+      "Gesture-controlled arcade game with webcam-based hand tracking at 60 FPS and dynamic difficulty scaling.",
+    github_url: "https://github.com/Sashreek007/fruit-ninja-hand-tracker",
+    demo_url: null,
+    image_url: null,
+    video_url: null,
+    stack: ["Python", "MediaPipe", "Pygame", "OpenCV"],
+    status: "shipped",
+    year: 2024,
+    is_best: true,
+    is_current: false,
+    sort_order: 4,
+  },
+  {
+    id: "7",
+    name: "LinkedIn Profile Summarizer",
+    description:
+      "Automated profile analysis pipeline combining web scraping and LLM processing to generate structured summaries.",
+    github_url: "https://github.com/Sashreek007/Langchain_agent",
+    demo_url: null,
+    image_url: null,
+    video_url: null,
+    stack: ["Python", "LangChain", "OpenAI API"],
+    status: "shipped",
+    year: 2024,
+    is_best: false,
+    is_current: false,
+    sort_order: 5,
+  },
+  {
+    id: "8",
+    name: "ClubMate AI",
+    description:
+      "Open-source automation platform for club operations, focused on intelligent task scheduling and document workflows.",
+    github_url: "https://github.com/UndergraduateArtificialIntelligenceClub/Clubmate-AI",
+    demo_url: null,
+    image_url: null,
+    video_url: null,
+    stack: ["Python", "LangChain", "LangGraph", "MCP"],
+    status: "building",
+    year: 2025,
+    is_best: false,
+    is_current: true,
+    sort_order: 6,
+  },
+];
+
+export async function getAllProjects(): Promise<Project[]> {
+  if (
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    try {
+      const supabase = await createServerClient();
+      const { data } = await supabase
+        .from("projects")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (data && data.length > 0) return data as Project[];
+    } catch {
+      // fall through to seed
+    }
+  }
+  return SEED_PROJECTS;
+}
+
+export function projectHref(p: Project) {
+  return `/projects/${p.id}`;
+}
