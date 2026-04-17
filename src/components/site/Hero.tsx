@@ -55,11 +55,11 @@ export default function Hero() {
           {/* CTA buttons */}
           <div className="flex flex-wrap gap-3">
             {[
-              { href: "#work",   label: "projects" },
               { href: "#about",  label: "about" },
+              { href: "#work",   label: "projects" },
+              { href: "/resume", label: "resume" },
               { href: "https://github.com/Sashreek007", label: "github ↗", ext: true },
               { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true },
-              { href: "/resume", label: "resume" },
             ].map(({ href, label, ext }) => (
               <a
                 key={href}
