@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import DeveloperAnimation from "./DeveloperAnimation";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,30 +61,8 @@ export default function Hero() {
         </svg>
       </div>
 
-      {/* ── 3-column grid: illustration | content | code panel ─────────── */}
-      <div className="relative z-10 grid w-full max-w-[1280px] items-center gap-10 lg:grid-cols-[1fr_minmax(auto,540px)_1fr] lg:gap-12">
-
-        {/* Left — developer illustration (decorative) */}
-        <div className="hidden lg:flex justify-end pointer-events-none">
-          <div
-            className="fade-up"
-            style={{
-              color: "var(--text-primary)",
-              opacity: 0.56,
-              animationDelay: "120ms",
-            }}
-          >
-            <DeveloperAnimation
-              style={{
-                width: "min(405px, 31vw)",
-                height: "auto",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Center — name, role, thesis, badge, CTAs */}
-        <div className="flex flex-col items-center text-center gap-4">
+      <div className="relative z-10 flex w-full justify-center">
+        <div className="flex max-w-[620px] flex-col items-center text-center gap-4">
           <h1
             className="fade-up font-mono font-medium leading-[1.05] tracking-[-0.03em]"
             style={{
@@ -172,94 +149,7 @@ export default function Hero() {
             ))}
           </div>
         </div>
-
-        {/* Right — terminal/code editor decoration */}
-        <div className="hidden lg:flex justify-start pointer-events-none">
-          <div
-            className="fade-up fade-up-2"
-            style={{
-              width: "min(300px, 24vw)",
-              opacity: 0.55,
-            }}
-          >
-            <CodePanel />
-          </div>
-        </div>
       </div>
     </section>
-  );
-}
-
-// ── Decorative code panel (right side) ─────────────────────────────────────
-function CodePanel() {
-  return (
-    <div
-      className="font-mono"
-      style={{
-        border: "1px solid var(--gray-800)",
-        borderRadius: "6px",
-        background: "color-mix(in srgb, var(--bg-elevated) 60%, transparent)",
-        overflow: "hidden",
-        backdropFilter: "blur(2px)",
-      }}
-    >
-      {/* title bar */}
-      <div
-        className="flex items-center gap-1.5 px-3 py-2"
-        style={{ borderBottom: "1px solid var(--gray-800)" }}
-      >
-        <span className="w-[7px] h-[7px] rounded-full" style={{ background: "var(--gray-600)" }} />
-        <span className="w-[7px] h-[7px] rounded-full" style={{ background: "var(--gray-600)" }} />
-        <span className="w-[7px] h-[7px] rounded-full" style={{ background: "var(--gray-600)" }} />
-        <span
-          className="ml-3 text-[10px] tracking-[0.08em]"
-          style={{ color: "var(--text-muted)" }}
-        >
-          ~/sashreek — main
-        </span>
-      </div>
-
-      {/* code body */}
-      <div
-        className="px-3 py-3 text-[10.5px] leading-[1.7]"
-        style={{ color: "var(--text-secondary)" }}
-      >
-        <div>
-          <span style={{ color: "var(--violet-soft)" }}>const</span>{" "}
-          <span style={{ color: "var(--text-primary)" }}>me</span>{" "}
-          <span style={{ color: "var(--text-muted)" }}>=</span> {"{"}
-        </div>
-        <div className="pl-3">
-          <span style={{ color: "var(--text-muted)" }}>role:</span>{" "}
-          <span style={{ color: "var(--green-bright)" }}>{"\"swe\""}</span>,
-        </div>
-        <div className="pl-3">
-          <span style={{ color: "var(--text-muted)" }}>focus:</span> [
-          <span style={{ color: "var(--green-bright)" }}>{"\"systems\""}</span>,{" "}
-          <span style={{ color: "var(--green-bright)" }}>{"\"ai\""}</span>],
-        </div>
-        <div className="pl-3">
-          <span style={{ color: "var(--text-muted)" }}>year:</span>{" "}
-          <span style={{ color: "var(--amber-bright)" }}>2028</span>,
-        </div>
-        <div className="pl-3">
-          <span style={{ color: "var(--text-muted)" }}>shipping:</span>{" "}
-          <span style={{ color: "var(--green-bright)" }}>true</span>,
-        </div>
-        <div>{"}"};</div>
-        <div className="mt-2 flex items-center gap-1">
-          <span style={{ color: "var(--violet-soft)" }}>{">"}</span>
-          <span
-            style={{
-              display: "inline-block",
-              width: "6px",
-              height: "12px",
-              background: "var(--violet-soft)",
-              animation: "blink-cursor 1.1s steps(2) infinite",
-            }}
-          />
-        </div>
-      </div>
-    </div>
   );
 }
