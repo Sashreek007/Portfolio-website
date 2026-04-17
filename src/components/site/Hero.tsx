@@ -52,19 +52,39 @@ export default function Hero() {
             I understand the machine before I build on top of it.
           </p>
 
-          {/* Availability */}
-          <div
-            className="inline-flex items-center gap-2 self-start font-mono text-[12px] font-medium tracking-[0.06em]"
-            style={{ color: "var(--green-bright)" }}
-          >
-            <span
-              className="w-[7px] h-[7px] rounded-full shrink-0"
-              style={{
-                background: "var(--green-mid)",
-                animation: "pulse-dot 2.5s ease-in-out infinite",
-              }}
-            />
-            available for internships
+          {/* CTA buttons */}
+          <div className="flex flex-wrap gap-3">
+            {[
+              { href: "#work",   label: "projects" },
+              { href: "#about",  label: "about" },
+              { href: "https://github.com/Sashreek007", label: "github ↗", ext: true },
+              { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true },
+              { href: "/resume", label: "resume" },
+            ].map(({ href, label, ext }) => (
+              <a
+                key={href}
+                href={href}
+                target={ext ? "_blank" : undefined}
+                rel={ext ? "noreferrer noopener" : undefined}
+                className="font-mono text-[13px] px-4 py-2 transition-all duration-200 hover:-translate-y-[2px]"
+                style={{
+                  color: "var(--text-muted)",
+                  border: "1px solid var(--gray-800)",
+                  borderRadius: "4px",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                    "color-mix(in srgb, var(--violet-soft) 50%, transparent)";
+                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--gray-800)";
+                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)";
+                }}
+              >
+                {label}
+              </a>
+            ))}
           </div>
         </div>
 
