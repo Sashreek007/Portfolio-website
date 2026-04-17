@@ -246,15 +246,6 @@
   );
 }
 
-/* ─── Home section anchor offsets ─────────────────────────────────────── */
-#hero,
-#about,
-#work,
-#writing,
-#contact {
-  scroll-margin-top: 92px;
-}
-
 /* ─── Syntax highlighting (lowlight / hljs) ─────────────────────────── */
 /* Applied to both the editor and the public blog post page */
 .hljs-keyword, .hljs-selector-tag, .hljs-deletion   { color: #c678dd; }
