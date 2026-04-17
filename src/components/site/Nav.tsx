@@ -44,6 +44,7 @@ const homeLinks = [
 // On non-home pages, nav links route back to the home page's section anchors
 // rather than to the standalone sub-pages (/work, /about, /blog, /contact).
 const pageLinks = [
+  { href: "/",         label: "home" },
   { href: "/#work",    label: "work" },
   { href: "/#about",   label: "about" },
   { href: "/#writing", label: "writing" },
