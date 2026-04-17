@@ -385,7 +385,12 @@ export default function WorkspaceAnimation({ className, style }: Props) {
   return (
     <div
       className={className}
-      style={{ position: "relative", overflow: "hidden", ...style }}
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        containerType: "inline-size",
+        ...style,
+      }}
       aria-hidden
     >
     <svg
@@ -525,405 +530,6 @@ export default function WorkspaceAnimation({ className, style }: Props) {
       {/* Subtle logo mark on lid bottom */}
       <circle cx="300" cy="345" r="2.6" fill="none" stroke="#3A3A38" strokeWidth="0.5" opacity="0.55" />
 
-      {/* ═══ NEOVIM EDITOR (full HTML inside foreignObject) ══════
-            Mobile Safari ignores clipPath/overflow on <foreignObject>
-            itself. Wrap in a <g clipPath=...> so the group-level clip
-            is applied to the rendered foreignObject output. */}
-      <g clipPath="url(#ws-screen-clip)">
-      <foreignObject
-        x="60"
-        y="50"
-        width="480"
-        height="292"
-        overflow="hidden"
-      >
-        <div
-          {...{ xmlns: "http://www.w3.org/1999/xhtml" }}
-          style={{
-            width: "480px",
-            height: "292px",
-            display: "flex",
-            flexDirection: "column",
-            background: "#161614",
-            fontFamily: "ui-monospace, 'Geist Mono', 'Fira Code', monospace",
-            fontSize: "10px",
-            lineHeight: "14px",
-            color: "#A8A69E",
-            borderRadius: "6px",
-            overflow: "hidden",
-            contain: "strict",
-          }}
-        >
-          {/* ── BUFFERLINE ────────────────────────────────────── */}
-          <div style={{
-            display: "flex",
-            background: "#0E0E0C",
-            borderBottom: "1px solid #1F1F1D",
-            height: "20px",
-            alignItems: "stretch",
-            fontSize: "9px",
-          }}>
-            {BUFFERS.map(b => (
-              <div key={b.num} style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "3px",
-                padding: "0 6px 0 5px",
-                background: b.active ? "#161614" : "transparent",
-                borderTop: b.active ? "1.5px solid #C18FFF" : "1.5px solid transparent",
-                color: b.active ? "#E8E6DF" : "#5F5E5A",
-                fontWeight: b.active ? 600 : 400,
-              }}>
-                <span style={{ color: "#5F5E5A" }}>{b.num}</span>
-                <span>{b.name}</span>
-                {b.modified && <span style={{ color: "#FFC079" }}>●</span>}
-                {b.errors && <span style={{ color: "#E55B5B", fontSize: "7px" }}>{"●" + b.errors}</span>}
-              </div>
-            ))}
-            <div style={{ flex: 1 }} />
-            <div style={{ padding: "0 8px", color: "#5F5E5A", display: "flex", alignItems: "center", gap: "4px" }}>
-              <span style={{ color: "#7AE2C5" }}>●</span>
-              <span>{BUFFERS.length}</span>
-            </div>
-          </div>
-
-          {/* ── BODY (sidebar + code) ─────────────────────────── */}
-          <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-
-            {/* nvim-tree sidebar */}
-            <div style={{
-              width: "118px",
-              background: "#0E0E0C",
-              borderRight: "1px solid #1F1F1D",
-              padding: "5px 5px",
-              fontSize: "8px",
-              lineHeight: "13px",
-              color: "#5F5E5A",
-              overflow: "hidden",
-            }}>
-              <div style={{
-                color: "#C18FFF",
-                fontWeight: 700,
-                fontSize: "8.5px",
-                padding: "0 0 5px 2px",
-                borderBottom: "1px solid #1F1F1D",
-                marginBottom: "4px",
-                letterSpacing: "0.04em",
-              }}>
-                NVIM
-              </div>
-              {FILE_TREE.map((item, i) => {
-                const indent = item.depth * 6;
-                const isFolder = item.type === "folder";
-                const icon = isFolder
-                  ? (item.open ? "▾ " : "▸ ")
-                  : "  ";
-                const dotColor = item.ext ? EXT_COLOR[item.ext] : "#5F5E5A";
-                return (
-                  <div key={i} style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "2px",
-                    paddingLeft: `${indent}px`,
-                    background: item.active ? "rgba(193,143,255,0.15)" : "transparent",
-                    color: item.active ? "#E8E6DF" : (isFolder ? "#FFC079" : "#888780"),
-                    fontWeight: item.active ? 600 : 400,
-                    height: "13px",
-                  }}>
-                    <span style={{ color: isFolder ? "#FFC079" : "#5F5E5A", width: "7px" }}>
-                      {icon}
-                    </span>
-                    {!isFolder && (
-                      <span style={{ color: dotColor, width: "4px" }}>●</span>
-                    )}
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {item.name}
-                    </span>
-                    {item.modified && <span style={{ color: "#FFC079", marginLeft: "auto" }}>M</span>}
-                    {item.gitNew && <span style={{ color: "#7AE2C5", marginLeft: "auto" }}>U</span>}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Code area */}
-            <div style={{
-              flex: 1,
-              padding: "6px 0 6px 0",
-              fontSize: "11px",
-              lineHeight: "17px",
-              color: "#A8A69E",
-              whiteSpace: "pre",
-              overflow: "hidden",
-              position: "relative",
-            }}>
-              {(() => {
-                let used = 0;
-                const out: React.ReactNode[] = [];
-                let displayRow = 0; // renumber after a line is deleted
-                for (let i = 0; i < CODE.length; i++) {
-                  const ln = CODE[i];
-                  const lnChars = LINE_CHARS[i];
-                  const startUsed = used;
-                  const visibleInLine = Math.max(0, Math.min(lnChars, typed - used));
-                  used += lnChars;
-
-                  // During post-delete / reset, the target line is gone entirely.
-                  const skipLine = lineHidden && i === DELETE_LINE_IDX;
-                  if (skipLine) {
-                    if (typed <= startUsed && i > 0) break;
-                    continue;
-                  }
-
-                  let consumed = 0;
-                  const segNodes: React.ReactNode[] = [];
-                  for (let s = 0; s < ln.segs.length; s++) {
-                    const seg = ln.segs[s];
-                    if (consumed >= visibleInLine) break;
-                    const take = Math.min(seg.t.length, visibleInLine - consumed);
-                    segNodes.push(
-                      <span key={s} style={{ color: colorFor(seg.k) }}>{seg.t.slice(0, take)}</span>,
-                    );
-                    consumed += take;
-                  }
-
-                  const isCursorLine = i === cursorLineIdx;
-                  const isVisualLine = visualActive && i === DELETE_LINE_IDX;
-                  const isDeleteLine = phase === "delete" && i === DELETE_LINE_IDX;
-                  displayRow += 1;
-                  // Relative line numbers off the current visible row
-                  const displayed = isCursorLine
-                    ? String(displayRow).padStart(2)
-                    : String(Math.abs(displayRow - (cursorLineIdx === i ? displayRow : currentLineNumber))).padStart(2);
-                  // Git sign in gutter: new import (+), modified Agent ctor (~)
-                  const gitSign = i === 0 ? "+" : (i === 5 ? "~" : "");
-                  const gitColor = gitSign === "+" ? "#5DCAA5" : "#FFC079";
-
-                  // Line background: visual-selection amber, delete red flash, cursor hint
-                  let lineBg = "transparent";
-                  if (isDeleteLine) {
-                    lineBg = `rgba(229,91,91,${0.35 * flash + 0.1})`;
-                  } else if (isVisualLine) {
-                    lineBg = "rgba(255,192,121,0.18)";
-                  } else if (isCursorLine && !visualActive) {
-                    lineBg = "rgba(193,143,255,0.10)";
-                  }
-
-                  out.push(
-                    <div key={i} style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "3px",
-                      background: lineBg,
-                      paddingLeft: "3px",
-                      position: "relative",
-                      transition: "background 180ms ease",
-                    }}>
-                      {/* Git sign */}
-                      <span style={{ color: gitColor, width: "8px", textAlign: "center", fontSize: "10px" }}>
-                        {gitSign}
-                      </span>
-                      {/* Line number */}
-                      <span style={{
-                        color: isVisualLine ? "#FFC079" : (isCursorLine ? "#FFC079" : "#5F5E5A"),
-                        opacity: (isCursorLine || isVisualLine) ? 0.95 : 0.55,
-                        width: "18px",
-                        textAlign: "right",
-                        fontSize: "9.5px",
-                      }}>
-                        {displayed}
-                      </span>
-                      {/* Code text + indent guides */}
-                      <span style={{ position: "relative" }}>
-                        {ln.indent > 0 && (
-                          <span style={{
-                            position: "absolute",
-                            left: 0, top: 0, bottom: 0,
-                            width: "1px",
-                            background: "#1F1F1D",
-                          }} />
-                        )}
-                        <span>{"  ".repeat(ln.indent)}</span>
-                        {segNodes}
-                        {isCursorLine && !isVisualLine && (
-                          <span style={{
-                            display: "inline-block",
-                            width: insertMode ? "2px" : "6px",
-                            height: "13px",
-                            background: insertMode ? "#C18FFF" : "#E8E6DF",
-                            verticalAlign: "text-bottom",
-                            marginLeft: "1px",
-                            opacity: insertMode ? 1 : 0.85,
-                            animation: "ws-cursor 1s steps(2) infinite",
-                          }} />
-                        )}
-                        {isVisualLine && phase === "visual" && (
-                          <span style={{
-                            display: "inline-block",
-                            width: "6px",
-                            height: "13px",
-                            background: "#FFC079",
-                            verticalAlign: "text-bottom",
-                            marginLeft: "1px",
-                            opacity: 0.9,
-                          }} />
-                        )}
-                      </span>
-                    </div>,
-                  );
-                  if (typed <= startUsed && i > 0) break;
-                }
-                return out;
-              })()}
-
-              {/* Vim command hint — shows keys pressed during the cycle */}
-              {phase !== "typing" && (
-                <div style={{
-                  position: "absolute",
-                  right: "8px",
-                  bottom: "6px",
-                  fontSize: "8.5px",
-                  color: "#5F5E5A",
-                  letterSpacing: "0.06em",
-                  background: "rgba(14,14,12,0.7)",
-                  padding: "2px 5px",
-                  borderRadius: "2px",
-                  border: "1px solid #1F1F1D",
-                }}>
-                  {phase === "normal" && "esc"}
-                  {phase === "visual" && "V"}
-                  {phase === "delete" && "Vd"}
-                  {phase === "post"   && "1 fewer line"}
-                  {phase === "reset"  && ":w"}
-                </div>
-              )}
-
-              {/* LSP completion popup (shows briefly when typing) */}
-              {insertMode && typed > 80 && typed < TOTAL_CHARS - 10 && (
-                <div style={{
-                  position: "absolute",
-                  left: "110px",
-                  top: `${(cursorLineIdx + 1) * 17 + 8}px`,
-                  background: "#1A1A18",
-                  border: "1px solid #2C2C2A",
-                  borderRadius: "3px",
-                  padding: "4px 6px",
-                  fontSize: "8.5px",
-                  lineHeight: "13px",
-                  color: "#A8A69E",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.6)",
-                  minWidth: "78px",
-                }}>
-                  <div style={{ display: "flex", gap: "3px", alignItems: "center" }}>
-                    <span style={{ color: "#7AE2C5" }}>ƒ</span>
-                    <span style={{ color: "#E8E6DF" }}>compile</span>
-                  </div>
-                  <div style={{ display: "flex", gap: "3px", alignItems: "center", opacity: 0.65 }}>
-                    <span style={{ color: "#C18FFF" }}>ƒ</span>
-                    <span>compileSync</span>
-                  </div>
-                  <div style={{ display: "flex", gap: "3px", alignItems: "center", opacity: 0.55 }}>
-                    <span style={{ color: "#FFC079" }}>τ</span>
-                    <span>Compiler</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ── LUALINE STATUSLINE ────────────────────────────── */}
-          <div style={{
-            display: "flex",
-            height: "20px",
-            background: "#0A0A09",
-            fontSize: "9px",
-            lineHeight: "20px",
-            alignItems: "stretch",
-          }}>
-            {/* Mode block */}
-            <div style={{
-              background:
-                mode === "INSERT" ? "#5DCAA5" :
-                mode === "V-LINE" ? "#FFC079" :
-                                    "#7F77DD",
-              color: "#0E0E0C",
-              fontWeight: 700,
-              padding: "0 8px",
-              letterSpacing: "0.06em",
-              transition: "background 160ms ease",
-            }}>
-              {` ${mode} `}
-            </div>
-            {/* Branch */}
-            <div style={{
-              background: "#1F1F1D",
-              color: "#FFC079",
-              padding: "0 8px",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-            }}>
-              <span></span>
-              <span>main</span>
-              <span style={{ color: "#5DCAA5" }}>+12</span>
-              <span style={{ color: "#E55B5B" }}>-3</span>
-            </div>
-            {/* File path */}
-            <div style={{
-              background: "#161614",
-              color: "#A8A69E",
-              padding: "0 8px",
-              flex: 1,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}>
-              ~/portfolio/src/core/agent.ts
-            </div>
-            {/* Diagnostics */}
-            <div style={{
-              background: "#161614",
-              padding: "0 6px",
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-            }}>
-              <span style={{ color: "#E55B5B" }}>● 0</span>
-              <span style={{ color: "#FFC079" }}>▲ 1</span>
-              <span style={{ color: "#7F77DD" }}>ⓘ 2</span>
-            </div>
-            {/* Filetype */}
-            <div style={{
-              background: "#1F1F1D",
-              color: "#7AE2C5",
-              padding: "0 8px",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-            }}>
-              <span>ts</span>
-              <span style={{ color: "#5F5E5A" }}>│</span>
-              <span style={{ color: "#A8A69E" }}>utf-8</span>
-              <span style={{ color: "#5F5E5A" }}>│</span>
-              <span style={{ color: "#A8A69E" }}>unix</span>
-            </div>
-            {/* Line:col + percent */}
-            <div style={{
-              background:
-                mode === "INSERT" ? "#5DCAA5" :
-                mode === "V-LINE" ? "#FFC079" :
-                                    "#7F77DD",
-              color: "#0E0E0C",
-              fontWeight: 700,
-              padding: "0 8px",
-              transition: "background 160ms ease",
-            }}>
-              {currentLineNumber}:{Math.min(typed, 80)}  {Math.round((cursorLineIdx + 1) / CODE.length * 100)}%
-            </div>
-          </div>
-        </div>
-      </foreignObject>
-      </g>
 
       {/* ═══ PLANT (front-left, partially overlapping the laptop edge) ═══ */}
       <g>
@@ -1153,6 +759,396 @@ export default function WorkspaceAnimation({ className, style }: Props) {
               fill="none" stroke="#1A1A18" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
       </g>
     </svg>
+
+    {/* ═══ NEOVIM EDITOR — HTML overlay, rendered OUTSIDE the SVG so that
+        mobile Safari scales it reliably. Positioned by percentage to match
+        the laptop screen area (x=60..540, y=50..342 within the 600×800
+        viewBox → left 10%, top 6.25%, width 80%, aspect 480/292).
+        Container queries size the font relative to the overlay width. */}
+    <div
+      style={{
+        position: "absolute",
+        left: "10%",
+        top: "6.25%",
+        width: "80%",
+        aspectRatio: "480 / 292",
+        borderRadius: "0.8cqi",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        background: "#161614",
+        fontFamily: "ui-monospace, 'Geist Mono', 'Fira Code', monospace",
+        // cqi is resolved against the outer wrapper (which has containerType).
+        // 2cqi of wrapper width maps to ~7px at 340px mobile, ~11px at 560px desktop.
+        fontSize: "clamp(6px, 2cqi, 11px)",
+        lineHeight: 1.4,
+        color: "#A8A69E",
+      }}
+    >
+      {/* ── BUFFERLINE ────────────────────────────────────── */}
+      <div style={{
+        display: "flex",
+        background: "#0E0E0C",
+        borderBottom: "1px solid #1F1F1D",
+        height: "2em",
+        alignItems: "stretch",
+        fontSize: "0.9em",
+        flexShrink: 0,
+      }}>
+        {BUFFERS.map(b => (
+          <div key={b.num} style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.3em",
+            padding: "0 0.6em 0 0.5em",
+            background: b.active ? "#161614" : "transparent",
+            borderTop: b.active ? "0.15em solid #C18FFF" : "0.15em solid transparent",
+            color: b.active ? "#E8E6DF" : "#5F5E5A",
+            fontWeight: b.active ? 600 : 400,
+          }}>
+            <span style={{ color: "#5F5E5A" }}>{b.num}</span>
+            <span>{b.name}</span>
+            {b.modified && <span style={{ color: "#FFC079" }}>●</span>}
+            {b.errors && <span style={{ color: "#E55B5B", fontSize: "0.8em" }}>{"●" + b.errors}</span>}
+          </div>
+        ))}
+        <div style={{ flex: 1 }} />
+        <div style={{ padding: "0 0.8em", color: "#5F5E5A", display: "flex", alignItems: "center", gap: "0.4em" }}>
+          <span style={{ color: "#7AE2C5" }}>●</span>
+          <span>{BUFFERS.length}</span>
+        </div>
+      </div>
+
+      {/* ── BODY (sidebar + code) ─────────────────────────── */}
+      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+
+        {/* nvim-tree sidebar */}
+        <div style={{
+          width: "25%",
+          background: "#0E0E0C",
+          borderRight: "1px solid #1F1F1D",
+          padding: "0.5em",
+          fontSize: "0.8em",
+          lineHeight: 1.3,
+          color: "#5F5E5A",
+          overflow: "hidden",
+        }}>
+          <div style={{
+            color: "#C18FFF",
+            fontWeight: 700,
+            fontSize: "0.9em",
+            padding: "0 0 0.5em 0.2em",
+            borderBottom: "1px solid #1F1F1D",
+            marginBottom: "0.4em",
+            letterSpacing: "0.04em",
+          }}>
+            NVIM
+          </div>
+          {FILE_TREE.map((item, i) => {
+            const indent = item.depth * 0.6;
+            const isFolder = item.type === "folder";
+            const icon = isFolder
+              ? (item.open ? "▾ " : "▸ ")
+              : "  ";
+            const dotColor = item.ext ? EXT_COLOR[item.ext] : "#5F5E5A";
+            return (
+              <div key={i} style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.2em",
+                paddingLeft: `${indent}em`,
+                background: item.active ? "rgba(193,143,255,0.15)" : "transparent",
+                color: item.active ? "#E8E6DF" : (isFolder ? "#FFC079" : "#888780"),
+                fontWeight: item.active ? 600 : 400,
+                height: "1.5em",
+                whiteSpace: "nowrap",
+              }}>
+                <span style={{ color: isFolder ? "#FFC079" : "#5F5E5A", flexShrink: 0 }}>
+                  {icon}
+                </span>
+                {!isFolder && (
+                  <span style={{ color: dotColor, flexShrink: 0 }}>●</span>
+                )}
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {item.name}
+                </span>
+                {item.modified && <span style={{ color: "#FFC079", marginLeft: "auto" }}>M</span>}
+                {item.gitNew && <span style={{ color: "#7AE2C5", marginLeft: "auto" }}>U</span>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Code area */}
+        <div style={{
+          flex: 1,
+          padding: "0.5em 0",
+          fontSize: "1.05em",
+          lineHeight: 1.5,
+          color: "#A8A69E",
+          whiteSpace: "pre",
+          overflow: "hidden",
+          position: "relative",
+        }}>
+          {(() => {
+            let used = 0;
+            const out: React.ReactNode[] = [];
+            let displayRow = 0;
+            for (let i = 0; i < CODE.length; i++) {
+              const ln = CODE[i];
+              const lnChars = LINE_CHARS[i];
+              const startUsed = used;
+              const visibleInLine = Math.max(0, Math.min(lnChars, typed - used));
+              used += lnChars;
+
+              const skipLine = lineHidden && i === DELETE_LINE_IDX;
+              if (skipLine) {
+                if (typed <= startUsed && i > 0) break;
+                continue;
+              }
+
+              let consumed = 0;
+              const segNodes: React.ReactNode[] = [];
+              for (let s = 0; s < ln.segs.length; s++) {
+                const seg = ln.segs[s];
+                if (consumed >= visibleInLine) break;
+                const take = Math.min(seg.t.length, visibleInLine - consumed);
+                segNodes.push(
+                  <span key={s} style={{ color: colorFor(seg.k) }}>{seg.t.slice(0, take)}</span>,
+                );
+                consumed += take;
+              }
+
+              const isCursorLine = i === cursorLineIdx;
+              const isVisualLine = visualActive && i === DELETE_LINE_IDX;
+              const isDeleteLine = phase === "delete" && i === DELETE_LINE_IDX;
+              displayRow += 1;
+              const displayed = isCursorLine
+                ? String(displayRow).padStart(2)
+                : String(Math.abs(displayRow - (cursorLineIdx === i ? displayRow : currentLineNumber))).padStart(2);
+              const gitSign = i === 0 ? "+" : (i === 5 ? "~" : "");
+              const gitColor = gitSign === "+" ? "#5DCAA5" : "#FFC079";
+
+              let lineBg = "transparent";
+              if (isDeleteLine) {
+                lineBg = `rgba(229,91,91,${0.35 * flash + 0.1})`;
+              } else if (isVisualLine) {
+                lineBg = "rgba(255,192,121,0.18)";
+              } else if (isCursorLine && !visualActive) {
+                lineBg = "rgba(193,143,255,0.10)";
+              }
+
+              out.push(
+                <div key={i} style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.3em",
+                  background: lineBg,
+                  paddingLeft: "0.3em",
+                  position: "relative",
+                  transition: "background 180ms ease",
+                }}>
+                  <span style={{ color: gitColor, width: "0.9em", textAlign: "center", flexShrink: 0 }}>
+                    {gitSign}
+                  </span>
+                  <span style={{
+                    color: isVisualLine ? "#FFC079" : (isCursorLine ? "#FFC079" : "#5F5E5A"),
+                    opacity: (isCursorLine || isVisualLine) ? 0.95 : 0.55,
+                    width: "1.6em",
+                    textAlign: "right",
+                    fontSize: "0.9em",
+                    flexShrink: 0,
+                  }}>
+                    {displayed}
+                  </span>
+                  <span style={{ position: "relative" }}>
+                    {ln.indent > 0 && (
+                      <span style={{
+                        position: "absolute",
+                        left: 0, top: 0, bottom: 0,
+                        width: "1px",
+                        background: "#1F1F1D",
+                      }} />
+                    )}
+                    <span>{"  ".repeat(ln.indent)}</span>
+                    {segNodes}
+                    {isCursorLine && !isVisualLine && (
+                      <span style={{
+                        display: "inline-block",
+                        width: insertMode ? "0.2em" : "0.55em",
+                        height: "1.1em",
+                        background: insertMode ? "#C18FFF" : "#E8E6DF",
+                        verticalAlign: "text-bottom",
+                        marginLeft: "0.1em",
+                        opacity: insertMode ? 1 : 0.85,
+                        animation: "ws-cursor 1s steps(2) infinite",
+                      }} />
+                    )}
+                    {isVisualLine && phase === "visual" && (
+                      <span style={{
+                        display: "inline-block",
+                        width: "0.55em",
+                        height: "1.1em",
+                        background: "#FFC079",
+                        verticalAlign: "text-bottom",
+                        marginLeft: "0.1em",
+                        opacity: 0.9,
+                      }} />
+                    )}
+                  </span>
+                </div>,
+              );
+              if (typed <= startUsed && i > 0) break;
+            }
+            return out;
+          })()}
+
+          {/* Vim command hint */}
+          {phase !== "typing" && (
+            <div style={{
+              position: "absolute",
+              right: "0.8em",
+              bottom: "0.5em",
+              fontSize: "0.8em",
+              color: "#5F5E5A",
+              letterSpacing: "0.06em",
+              background: "rgba(14,14,12,0.7)",
+              padding: "0.2em 0.5em",
+              borderRadius: "0.2em",
+              border: "1px solid #1F1F1D",
+            }}>
+              {phase === "normal" && "esc"}
+              {phase === "visual" && "V"}
+              {phase === "delete" && "Vd"}
+              {phase === "post"   && "1 fewer line"}
+              {phase === "reset"  && ":w"}
+            </div>
+          )}
+
+          {/* LSP completion popup */}
+          {insertMode && typed > 80 && typed < TOTAL_CHARS - 10 && (
+            <div style={{
+              position: "absolute",
+              left: "8em",
+              top: `${(cursorLineIdx + 1) * 1.5 + 0.5}em`,
+              background: "#1A1A18",
+              border: "1px solid #2C2C2A",
+              borderRadius: "0.2em",
+              padding: "0.3em 0.5em",
+              fontSize: "0.8em",
+              lineHeight: 1.3,
+              color: "#A8A69E",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.6)",
+              minWidth: "7em",
+            }}>
+              <div style={{ display: "flex", gap: "0.3em", alignItems: "center" }}>
+                <span style={{ color: "#7AE2C5" }}>ƒ</span>
+                <span style={{ color: "#E8E6DF" }}>compile</span>
+              </div>
+              <div style={{ display: "flex", gap: "0.3em", alignItems: "center", opacity: 0.65 }}>
+                <span style={{ color: "#C18FFF" }}>ƒ</span>
+                <span>compileSync</span>
+              </div>
+              <div style={{ display: "flex", gap: "0.3em", alignItems: "center", opacity: 0.55 }}>
+                <span style={{ color: "#FFC079" }}>τ</span>
+                <span>Compiler</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── LUALINE STATUSLINE ────────────────────────────── */}
+      <div style={{
+        display: "flex",
+        height: "2em",
+        background: "#0A0A09",
+        fontSize: "0.85em",
+        lineHeight: 2,
+        alignItems: "stretch",
+        flexShrink: 0,
+      }}>
+        {/* Mode block */}
+        <div style={{
+          background:
+            mode === "INSERT" ? "#5DCAA5" :
+            mode === "V-LINE" ? "#FFC079" :
+                                "#7F77DD",
+          color: "#0E0E0C",
+          fontWeight: 700,
+          padding: "0 0.8em",
+          letterSpacing: "0.06em",
+          transition: "background 160ms ease",
+        }}>
+          {` ${mode} `}
+        </div>
+        {/* Branch */}
+        <div style={{
+          background: "#1F1F1D",
+          color: "#FFC079",
+          padding: "0 0.8em",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.3em",
+        }}>
+          <span>main</span>
+          <span style={{ color: "#5DCAA5" }}>+12</span>
+          <span style={{ color: "#E55B5B" }}>-3</span>
+        </div>
+        {/* File path */}
+        <div style={{
+          background: "#161614",
+          color: "#A8A69E",
+          padding: "0 0.8em",
+          flex: 1,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}>
+          ~/portfolio/src/core/agent.ts
+        </div>
+        {/* Diagnostics */}
+        <div style={{
+          background: "#161614",
+          padding: "0 0.6em",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5em",
+        }}>
+          <span style={{ color: "#E55B5B" }}>● 0</span>
+          <span style={{ color: "#FFC079" }}>▲ 1</span>
+          <span style={{ color: "#7F77DD" }}>ⓘ 2</span>
+        </div>
+        {/* Filetype */}
+        <div style={{
+          background: "#1F1F1D",
+          color: "#7AE2C5",
+          padding: "0 0.8em",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.3em",
+        }}>
+          <span>ts</span>
+          <span style={{ color: "#5F5E5A" }}>│</span>
+          <span style={{ color: "#A8A69E" }}>utf-8</span>
+          <span style={{ color: "#5F5E5A" }}>│</span>
+          <span style={{ color: "#A8A69E" }}>unix</span>
+        </div>
+        {/* Line:col + percent */}
+        <div style={{
+          background:
+            mode === "INSERT" ? "#5DCAA5" :
+            mode === "V-LINE" ? "#FFC079" :
+                                "#7F77DD",
+          color: "#0E0E0C",
+          fontWeight: 700,
+          padding: "0 0.8em",
+          transition: "background 160ms ease",
+        }}>
+          {currentLineNumber}:{Math.min(typed, 80)}  {Math.round((cursorLineIdx + 1) / CODE.length * 100)}%
+        </div>
+      </div>
+    </div>
     </div>
   );
 }
