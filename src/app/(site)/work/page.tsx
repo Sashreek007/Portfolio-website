@@ -1,3 +1,4 @@
+import Link from "next/link";
 import WorkClient from "./WorkClient";
 import { getAllProjects } from "@/lib/projects.server";
 
@@ -8,6 +9,14 @@ export default async function WorkPage() {
 
   return (
     <div className="px-[6vw] py-16 max-w-[1200px] mx-auto w-full">
+      <Link
+        href="/"
+        className="inline-flex items-center gap-2 font-mono text-[12px] mb-10 transition-colors duration-150 hover:text-[var(--text-primary)]"
+        style={{ color: "var(--text-muted)" }}
+      >
+        ← home
+      </Link>
+
       {/* Header — editorial kicker to match home + about */}
       <div className="flex items-center gap-4 mb-14">
         <span

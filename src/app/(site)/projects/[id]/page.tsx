@@ -165,13 +165,24 @@ export default async function ProjectDetailPage({
       style={{ background: "var(--bg-base)" }}
     >
       <div className="max-w-[960px] mx-auto">
-        <Link
-          href="/work"
-          className="inline-flex items-center gap-2 font-mono text-[12px] mb-10 transition-colors duration-150 hover:text-[var(--text-primary)]"
+        <nav
+          className="flex items-center gap-[6px] font-mono text-[12px] mb-10"
           style={{ color: "var(--text-muted)" }}
         >
-          ← all projects
-        </Link>
+          <Link
+            href="/"
+            className="transition-colors duration-150 hover:text-[var(--text-primary)]"
+          >
+            ← home
+          </Link>
+          <span style={{ color: "var(--gray-800)" }}>/</span>
+          <Link
+            href="/work"
+            className="transition-colors duration-150 hover:text-[var(--text-primary)]"
+          >
+            projects
+          </Link>
+        </nav>
 
         <div className="flex items-center gap-4 mb-10">
           <span
