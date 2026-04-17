@@ -16,10 +16,10 @@ export default function Hero() {
       className="relative min-h-[100vh] px-[5vw] pt-12 pb-12 overflow-hidden flex items-center"
       style={{ background: "var(--bg-base)" }}
     >
-      <div className="grid w-full max-w-[1440px] mx-auto gap-12 lg:gap-8 items-center grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
+      <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
 
         {/* ── LEFT: name + subtitle + status ─────────────────────────── */}
-        <div className="flex flex-col">
+        <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
           {/* Massive name */}
           <h1
             className="fade-up font-mono font-medium"
@@ -53,7 +53,7 @@ export default function Hero() {
           </p>
 
           {/* CTA buttons */}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
             {[
               { href: "#about",  label: "about" },
               { href: "#work",   label: "projects" },
@@ -89,7 +89,7 @@ export default function Hero() {
         </div>
 
         {/* ── RIGHT: animated workspace ──────────────────────────────── */}
-        <div className="relative w-full max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
+        <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
           <WorkspaceAnimation
             className="w-full h-auto block"
             style={{ aspectRatio: "600 / 800" }}
