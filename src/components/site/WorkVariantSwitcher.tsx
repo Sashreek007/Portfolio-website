@@ -16,7 +16,7 @@ export default function WorkVariantSwitcher({ current }: { current: number }) {
       <span className="pr-2 pl-1" style={{ color: "var(--text-muted)" }}>
         work ·
       </span>
-      {[1, 2, 3, 4, 5].map((n) => (
+      {[1, 2, 3, 4, 5, 6].map((n) => (
         <Link
           key={n}
           href={`/work/${n}`}

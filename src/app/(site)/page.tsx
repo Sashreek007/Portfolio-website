@@ -1,7 +1,8 @@
 import { createServerClient } from "@/lib/supabase/server";
 import Hero from "@/components/site/Hero";
 import SectionLabel from "@/components/site/SectionLabel";
-import ProjectCard, { type Project } from "@/components/site/ProjectCard";
+import { type Project } from "@/components/site/ProjectCard";
+import SpecimenCard from "@/components/site/SpecimenCard";
 import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
 
@@ -341,9 +342,9 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {bestProjects.map((project, i) => (
-              <ProjectCard key={project.id} project={project} index={i} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {bestProjects.slice(0, 4).map((project, i) => (
+              <SpecimenCard key={project.id} project={project} index={i} />
             ))}
           </div>
         </div>

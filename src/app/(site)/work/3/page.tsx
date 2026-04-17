@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getAllProjects, projectHref } from "@/lib/projects";
+import { projectHref } from "@/lib/projects";
+import { getAllProjects } from "@/lib/projects.server";
 import WorkVariantSwitcher from "@/components/site/WorkVariantSwitcher";
 
 // Variant 3 — Release Log

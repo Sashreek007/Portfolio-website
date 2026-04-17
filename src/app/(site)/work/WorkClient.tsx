@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import ProjectCard, { type Project } from "@/components/site/ProjectCard";
+import FeatureStrip from "@/components/site/FeatureStrip";
+import type { Project } from "@/components/site/ProjectCard";
 
 type Filter = "best" | "all" | "current";
 
@@ -23,7 +24,7 @@ export default function WorkClient({ projects }: { projects: Project[] }) {
   return (
     <>
       {/* Filter tabs */}
-      <div className="flex gap-2 flex-wrap mb-8">
+      <div className="flex gap-2 flex-wrap mb-16">
         {filters.map(({ key, label }) => (
           <button
             key={key}
@@ -44,10 +45,10 @@ export default function WorkClient({ projects }: { projects: Project[] }) {
         ))}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {/* Feature strips */}
+      <div className="flex flex-col gap-24">
         {filtered.map((project, i) => (
-          <ProjectCard key={project.id} project={project} index={i} />
+          <FeatureStrip key={project.id} project={project} index={i} />
         ))}
       </div>
 
