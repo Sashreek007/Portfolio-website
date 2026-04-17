@@ -16,7 +16,7 @@ export default function Hero() {
       className="relative min-h-[100vh] px-[5vw] pt-12 pb-12 overflow-hidden flex items-center"
       style={{ background: "var(--bg-base)" }}
     >
-      <div className="grid w-full gap-12 lg:gap-8 items-center grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
+      <div className="grid w-full max-w-[1440px] mx-auto gap-12 lg:gap-8 items-center grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
 
         {/* ── LEFT: name + subtitle + status ─────────────────────────── */}
         <div className="flex flex-col">

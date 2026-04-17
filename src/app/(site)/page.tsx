@@ -321,29 +321,31 @@ export default async function HomePage() {
         className="section-hidden px-[6vw] py-24"
         style={{ background: "var(--bg-base)" }}
       >
-        <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
-          <div>
-            <SectionLabel>Work</SectionLabel>
-            <h2
-              className="text-[26px] font-medium leading-[1.25] mt-1"
-              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
+            <div>
+              <SectionLabel>Work</SectionLabel>
+              <h2
+                className="text-[26px] font-medium leading-[1.25] mt-1"
+                style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+              >
+                Selected projects
+              </h2>
+            </div>
+            <Link
+              href="/work"
+              className="font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
+              style={{ color: "var(--text-muted)" }}
             >
-              Selected projects
-            </h2>
+              view all →
+            </Link>
           </div>
-          <Link
-            href="/work"
-            className="font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            view all →
-          </Link>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {bestProjects.map((project, i) => (
-            <ProjectCard key={project.id} project={project} index={i} />
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {bestProjects.map((project, i) => (
+              <ProjectCard key={project.id} project={project} index={i} />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -355,6 +357,7 @@ export default async function HomePage() {
         className="section-hidden px-[6vw] py-24"
         style={{ background: "var(--bg-base)" }}
       >
+        <div className="max-w-[1200px] mx-auto">
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <SectionLabel>Writing</SectionLabel>
@@ -415,6 +418,7 @@ export default async function HomePage() {
             ))}
           </div>
         )}
+        </div>
       </section>
 
       {divider}
@@ -425,6 +429,7 @@ export default async function HomePage() {
         className="section-hidden px-[6vw] py-24"
         style={{ background: "var(--bg-base)" }}
       >
+        <div className="max-w-[1200px] mx-auto">
         <SectionLabel>Contact</SectionLabel>
         <h2
           className="text-[26px] font-medium leading-[1.25] mt-1 mb-4"
@@ -481,6 +486,7 @@ export default async function HomePage() {
               </span>
             </a>
           ))}
+        </div>
         </div>
       </section>
 
