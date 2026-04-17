@@ -22,138 +22,100 @@ export default function DeveloperAnimation({ className, style }: Props) {
             stroke-linejoin: round;
           }
 
-          .dev-hero__animated {
+          .dev-hero__motion {
             transform-box: view-box;
           }
 
+          .dev-hero__fill-weak {
+            fill: currentColor;
+            stroke: none;
+            opacity: 0.08;
+          }
+
+          .dev-hero__fill-mid {
+            fill: currentColor;
+            stroke: none;
+            opacity: 0.18;
+          }
+
+          .dev-hero__fill-strong {
+            fill: currentColor;
+            stroke: none;
+            opacity: 0.3;
+          }
+
+          .dev-hero__outline-dim {
+            opacity: 0.45;
+          }
+
           .dev-hero__cursor {
-            animation: cursor-blink 1.1s steps(2, end) infinite;
+            animation: dev-cursor 1.1s steps(2, end) infinite;
           }
 
-          .dev-hero__typing-hand {
-            transform-origin: 222px 208px;
-            animation: typing-hands 14s ease-in-out infinite;
-          }
-
-          .dev-hero__typing-finger-a {
-            transform-origin: 216px 208px;
-            animation: typing-hands 14s ease-in-out infinite;
-          }
-
-          .dev-hero__typing-finger-b {
-            transform-origin: 225px 209px;
-            animation: typing-hands 14s ease-in-out 140ms infinite;
+          .dev-hero__torso {
+            transform-origin: 254px 152px;
+            animation: dev-torso 14s ease-in-out infinite;
           }
 
           .dev-hero__head {
-            transform-origin: 279px 102px;
-            animation: head-tip 14s ease-in-out infinite;
+            transform-origin: 252px 124px;
+            animation: dev-head 14s ease-in-out infinite;
+          }
+
+          .dev-hero__typing-hand {
+            transform-origin: 220px 206px;
+            animation: dev-typing-hand 14s ease-in-out infinite;
+          }
+
+          .dev-hero__typing-finger-a {
+            transform-origin: 214px 207px;
+            animation: dev-typing-finger-a 14s ease-in-out infinite;
+          }
+
+          .dev-hero__typing-finger-b {
+            transform-origin: 225px 208px;
+            animation: dev-typing-finger-b 14s ease-in-out infinite;
           }
 
           .dev-hero__arm-right {
-            transform-origin: 282px 146px;
-            animation: arm-sip 14s ease-in-out infinite;
+            transform-origin: 280px 145px;
+            animation: dev-arm-sip 14s ease-in-out infinite;
           }
 
-          .dev-hero__upper-arm-r {
-            transform-origin: 282px 146px;
-            animation: arm-reach 14s ease-in-out infinite;
+          .dev-hero__arm-right-upper {
+            transform-origin: 280px 145px;
+            animation: dev-arm-upper 14s ease-in-out infinite;
           }
 
-          .dev-hero__forearm-r {
-            transform-origin: 262px 166px;
-            animation: forearm-follow 14s ease-in-out infinite;
+          .dev-hero__arm-right-forearm {
+            transform-origin: 252px 167px;
+            animation: dev-arm-forearm 14s ease-in-out infinite;
           }
 
           .dev-hero__desk-cup {
-            animation: desk-cup-opacity 14s ease-in-out infinite;
+            animation: dev-desk-cup 14s ease-in-out infinite;
           }
 
           .dev-hero__held-cup {
-            animation: held-cup-opacity 14s ease-in-out infinite;
+            animation: dev-held-cup 14s ease-in-out infinite;
           }
 
           .dev-hero__steam-a,
           .dev-hero__steam-b,
           .dev-hero__steam-c {
             transform-origin: center;
-            animation: steam-rise 2.2s ease-in-out infinite;
+            animation: dev-steam 2.4s ease-in-out infinite;
           }
 
-          .dev-hero__steam-b { animation-delay: 420ms; }
-          .dev-hero__steam-c { animation-delay: 840ms; }
-
-          @keyframes typing-hands {
-            0%, 6%, 14%, 22%, 30%, 38%, 46%, 50%, 82.1%, 88%, 94%, 100% {
-              transform: translateY(0px);
-            }
-
-            3%, 11%, 19%, 27%, 35%, 43%, 86%, 92%, 97% {
-              transform: translateY(3px);
-            }
-
-            60.7%, 75% {
-              transform: translateY(0px);
-            }
+          .dev-hero__steam-b {
+            animation-delay: 420ms;
           }
 
-          @keyframes arm-reach {
-            0%, 50%, 100% {
-              transform: rotate(0deg);
-            }
-
-            60.7%, 82.1% {
-              transform: rotate(-88deg);
-            }
-
-            75% {
-              transform: rotate(-46deg);
-            }
+          .dev-hero__steam-c {
+            animation-delay: 840ms;
           }
 
-          @keyframes forearm-follow {
-            0%, 50%, 100% {
-              transform: rotate(0deg);
-            }
-
-            60.7%, 82.1% {
-              transform: rotate(16deg);
-            }
-
-            75% {
-              transform: rotate(-141deg);
-            }
-          }
-
-          @keyframes arm-sip {
-            0%, 60.7%, 100% {
-              transform: translate(0px, 0px) rotate(0deg);
-            }
-
-            75% {
-              transform: translate(-26px, -42px) rotate(-9deg);
-            }
-
-            82.1% {
-              transform: translate(0px, 0px) rotate(0deg);
-            }
-          }
-
-          @keyframes head-tip {
-            0%, 60.7%, 100% {
-              transform: rotate(0deg);
-            }
-
-            71%, 75% {
-              transform: rotate(7deg);
-            }
-
-            82.1% {
-              transform: rotate(0deg);
-            }
-          }
-
-          @keyframes cursor-blink {
+          @keyframes dev-cursor {
             0%, 48% {
               opacity: 1;
             }
@@ -163,7 +125,131 @@ export default function DeveloperAnimation({ className, style }: Props) {
             }
           }
 
-          @keyframes steam-rise {
+          @keyframes dev-typing-hand {
+            0%, 7%, 16%, 24%, 33%, 41%, 50%, 82.1%, 88%, 94%, 100% {
+              transform: translateY(0px);
+            }
+
+            3%, 11%, 20%, 28%, 37%, 45%, 86%, 92%, 97% {
+              transform: translateY(2.5px);
+            }
+
+            60.7%, 75% {
+              transform: translateY(0px);
+            }
+          }
+
+          @keyframes dev-typing-finger-a {
+            0%, 10%, 18%, 26%, 34%, 42%, 50%, 82.1%, 100% {
+              transform: translateY(0px);
+            }
+
+            5%, 14%, 22%, 30%, 39%, 47%, 87%, 95% {
+              transform: translateY(3px);
+            }
+          }
+
+          @keyframes dev-typing-finger-b {
+            0%, 8%, 17%, 25%, 36%, 44%, 50%, 82.1%, 100% {
+              transform: translateY(2px);
+            }
+
+            4%, 12%, 21%, 31%, 40%, 48%, 90%, 97% {
+              transform: translateY(0px);
+            }
+          }
+
+          @keyframes dev-torso {
+            0%, 60.7%, 100% {
+              transform: rotate(0deg);
+            }
+
+            75% {
+              transform: rotate(3deg);
+            }
+
+            82.1% {
+              transform: rotate(0deg);
+            }
+          }
+
+          @keyframes dev-head {
+            0%, 60.7%, 100% {
+              transform: rotate(0deg);
+            }
+
+            72%, 75% {
+              transform: rotate(5deg);
+            }
+
+            82.1% {
+              transform: rotate(0deg);
+            }
+          }
+
+          @keyframes dev-arm-sip {
+            0%, 60.7%, 100% {
+              transform: translate(0px, 0px) rotate(0deg);
+            }
+
+            75% {
+              transform: translate(-9px, -14px) rotate(-4deg);
+            }
+
+            82.1% {
+              transform: translate(0px, 0px) rotate(0deg);
+            }
+          }
+
+          @keyframes dev-arm-upper {
+            0%, 50%, 100% {
+              transform: rotate(0deg);
+            }
+
+            60.7%, 82.1% {
+              transform: rotate(-86deg);
+            }
+
+            75% {
+              transform: rotate(-38deg);
+            }
+          }
+
+          @keyframes dev-arm-forearm {
+            0%, 50%, 100% {
+              transform: rotate(0deg);
+            }
+
+            60.7%, 82.1% {
+              transform: rotate(18deg);
+            }
+
+            75% {
+              transform: rotate(-132deg);
+            }
+          }
+
+          @keyframes dev-desk-cup {
+            0%, 55%, 100% {
+              opacity: 1;
+            }
+
+            58%, 82.1% {
+              opacity: 0;
+            }
+          }
+
+          @keyframes dev-held-cup {
+            0%, 55%, 100% {
+              opacity: 0;
+            }
+
+            58%, 82.1% {
+              opacity: 1;
+            }
+          }
+
+          @keyframes dev-steam {
             0% {
               opacity: 0;
               transform: translateY(4px);
@@ -175,150 +261,182 @@ export default function DeveloperAnimation({ className, style }: Props) {
 
             100% {
               opacity: 0;
-              transform: translateY(-12px);
+              transform: translateY(-13px);
             }
           }
 
-          @keyframes desk-cup-opacity {
-            0%, 54%, 100% {
-              opacity: 1;
+          @media (prefers-reduced-motion: reduce) {
+            .dev-hero__cursor,
+            .dev-hero__torso,
+            .dev-hero__head,
+            .dev-hero__typing-hand,
+            .dev-hero__typing-finger-a,
+            .dev-hero__typing-finger-b,
+            .dev-hero__arm-right,
+            .dev-hero__arm-right-upper,
+            .dev-hero__arm-right-forearm,
+            .dev-hero__desk-cup,
+            .dev-hero__held-cup,
+            .dev-hero__steam-a,
+            .dev-hero__steam-b,
+            .dev-hero__steam-c {
+              animation: none;
             }
 
-            57%, 82.1% {
+            .dev-hero__held-cup {
               opacity: 0;
             }
-          }
 
-          @keyframes held-cup-opacity {
-            0%, 54%, 100% {
-              opacity: 0;
-            }
-
-            57%, 82.1% {
+            .dev-hero__desk-cup {
               opacity: 1;
             }
           }
         `}</style>
       </defs>
 
-      <g className="dev-hero__scene" strokeWidth="1.8">
-        <g id="desk">
-          <line x1="18" y1="228" x2="362" y2="228" />
-          <line x1="18" y1="235" x2="362" y2="235" strokeWidth="0.9" opacity="0.3" />
-          <line x1="56" y1="235" x2="56" y2="286" strokeWidth="1.2" opacity="0.5" />
-          <line x1="330" y1="235" x2="330" y2="286" strokeWidth="1.2" opacity="0.5" />
+      <g className="dev-hero__scene">
+        <g id="rear-scene">
+          <rect x="8" y="214" width="364" height="14" rx="4" className="dev-hero__fill-weak" />
+          <line x1="12" y1="214" x2="368" y2="214" strokeWidth="1.7" />
+          <line x1="12" y1="228" x2="368" y2="228" strokeWidth="1.1" opacity="0.4" />
+          <line x1="48" y1="228" x2="48" y2="293" strokeWidth="1.2" opacity="0.52" />
+          <line x1="344" y1="228" x2="344" y2="293" strokeWidth="1.2" opacity="0.52" />
+
+          <rect x="294" y="132" width="14" height="72" rx="4" className="dev-hero__fill-weak" />
+          <rect x="244" y="190" width="72" height="10" rx="4" className="dev-hero__fill-weak" />
+          <line x1="280" y1="199" x2="280" y2="229" strokeWidth="1.2" opacity="0.45" />
         </g>
 
         <g id="monitor">
-          <rect x="28" y="74" width="116" height="76" rx="4" />
-          <rect x="36" y="82" width="100" height="60" rx="2" strokeWidth="0.9" opacity="0.45" />
-          <line x1="86" y1="150" x2="86" y2="191" strokeWidth="1.4" />
-          <line x1="69" y1="191" x2="103" y2="191" strokeWidth="1.4" />
-          <line x1="48" y1="96" x2="98" y2="96" strokeWidth="1" opacity="0.65" />
-          <line x1="48" y1="108" x2="118" y2="108" strokeWidth="1" opacity="0.65" />
-          <line x1="56" y1="120" x2="108" y2="120" strokeWidth="1" opacity="0.65" />
-          <line x1="48" y1="132" x2="92" y2="132" strokeWidth="1" opacity="0.65" />
-          <rect
-            x="110"
-            y="126"
-            width="5"
-            height="10"
-            fill="currentColor"
-            stroke="none"
-            className="dev-hero__cursor"
+          <rect x="22" y="50" width="148" height="102" rx="6" className="dev-hero__fill-weak" />
+          <rect x="22" y="50" width="148" height="102" rx="6" strokeWidth="2.1" />
+          <rect x="31" y="59" width="130" height="84" rx="3.5" className="dev-hero__fill-weak" />
+          <rect x="31" y="59" width="130" height="84" rx="3.5" strokeWidth="1" opacity="0.35" />
+          <line x1="95" y1="152" x2="95" y2="184" strokeWidth="1.5" />
+          <rect x="76" y="184" width="38" height="6" rx="3" className="dev-hero__fill-mid" />
+          <line x1="46" y1="78" x2="108" y2="78" strokeWidth="1.1" opacity="0.65" />
+          <line x1="46" y1="90" x2="120" y2="90" strokeWidth="1.1" opacity="0.65" />
+          <line x1="54" y1="102" x2="131" y2="102" strokeWidth="1.1" opacity="0.65" />
+          <line x1="54" y1="114" x2="118" y2="114" strokeWidth="1.1" opacity="0.65" />
+          <line x1="46" y1="126" x2="92" y2="126" strokeWidth="1.1" opacity="0.65" />
+          <rect x="131" y="121" width="5" height="10" fill="currentColor" stroke="none" className="dev-hero__cursor" />
+        </g>
+
+        <g id="torso" className="dev-hero__torso dev-hero__motion">
+          <path
+            d="M226 130 C239 121 278 123 292 140 C299 149 302 171 300 190 C286 199 248 201 230 190 C224 172 221 147 226 130 Z"
+            className="dev-hero__fill-mid"
           />
+          <path
+            d="M226 130 C239 121 278 123 292 140 C299 149 302 171 300 190 C286 199 248 201 230 190 C224 172 221 147 226 130 Z"
+            strokeWidth="1.6"
+          />
+          <path d="M238 129 C247 137 266 142 288 140" strokeWidth="1.1" opacity="0.48" />
+          <path
+            d="M239 187 C250 194 274 195 289 190 C286 203 272 211 254 211 C241 209 233 199 239 187 Z"
+            className="dev-hero__fill-weak"
+          />
+          <path d="M247 123 C251 119 259 119 263 123 L263 135 C259 138 251 138 247 135 Z" className="dev-hero__fill-mid" />
         </g>
 
-        <g id="keyboard">
-          <rect x="186" y="210" width="54" height="8" rx="2" />
-          <line x1="191" y1="212.5" x2="235" y2="212.5" strokeWidth="0.8" opacity="0.35" />
-          <line x1="194" y1="216" x2="232" y2="216" strokeWidth="0.8" opacity="0.35" />
+        <g id="far-arm" opacity="0.42">
+          <path
+            d="M281 144 C273 147 265 153 258 165 C261 170 266 173 272 175 C279 167 286 157 290 149 Z"
+            className="dev-hero__fill-mid"
+          />
+          <path
+            d="M258 165 C251 173 244 185 239 198 C242 202 247 205 252 206 C258 196 264 184 268 174 Z"
+            className="dev-hero__fill-mid"
+          />
+          <path d="M232 198 C232 203 235 207 240 208 H249 C248 203 244 199 237 197 Z" className="dev-hero__fill-mid" />
         </g>
 
-        <g id="coffee" className="dev-hero__desk-cup">
-          <g id="cup">
-            <path d="M311 194 L309 218 Q309 220 311 220 H329 Q331 220 331 218 L329 194 Z" />
-            <path d="M329 199 Q338 199 338 206 Q338 213 329 212" strokeWidth="1.5" />
-            <ellipse cx="320" cy="194" rx="9" ry="3" strokeWidth="1.4" />
+        <g id="typing-arm">
+          <path
+            d="M268 148 C258 151 248 158 241 170 C245 175 251 178 257 179 C265 171 272 161 277 152 Z"
+            className="dev-hero__fill-strong"
+          />
+          <path
+            d="M241 170 C234 179 226 191 220 203 C223 208 228 211 234 212 C240 202 246 189 250 179 Z"
+            className="dev-hero__fill-strong"
+          />
+          <g className="dev-hero__typing-hand dev-hero__motion">
+            <path d="M212 201 C211 207 214 211 220 213 H232 C231 206 226 201 218 200 Z" className="dev-hero__fill-strong" />
           </g>
-          <g id="steam" opacity="0.8">
+          <g className="dev-hero__typing-finger-a dev-hero__motion">
+            <rect x="210" y="206" width="6" height="2.6" rx="1.3" fill="currentColor" stroke="none" />
+          </g>
+          <g className="dev-hero__typing-finger-b dev-hero__motion">
+            <rect x="222" y="207" width="7" height="2.6" rx="1.3" fill="currentColor" stroke="none" />
+          </g>
+        </g>
+
+        <g id="head" className="dev-hero__head dev-hero__motion">
+          <path
+            d="M246 82 C256 75 274 76 285 84 C293 91 295 108 289 119 C283 129 271 134 258 132 C245 130 236 121 235 109 C234 98 237 88 246 82 Z"
+            className="dev-hero__fill-mid"
+          />
+          <path
+            d="M246 82 C256 75 274 76 285 84 C293 91 295 108 289 119 C283 129 271 134 258 132 C245 130 236 121 235 109 C234 98 237 88 246 82 Z"
+            strokeWidth="1.7"
+          />
+          <path
+            d="M244 89 C248 78 262 73 275 77 C286 80 293 88 292 99 C285 94 277 90 266 89 C257 88 249 88 244 89 Z"
+            className="dev-hero__fill-strong"
+          />
+          <path d="M287 101 Q292 105 288 112" strokeWidth="1.2" />
+          <path d="M249 101 Q246 106 249 111" strokeWidth="1.1" />
+          <path d="M252 118 Q258 120 266 118" strokeWidth="1.2" />
+          <circle cx="252" cy="100" r="1.8" fill="currentColor" stroke="none" />
+          <ellipse cx="254" cy="100" rx="8" ry="6" strokeWidth="0.9" opacity="0.55" />
+          <line x1="262" y1="99" x2="267" y2="99" strokeWidth="0.8" opacity="0.55" />
+        </g>
+
+        <g id="desk-cup" className="dev-hero__desk-cup">
+          <path d="M306 191 L304 216 Q304 219 307 219 H326 Q329 219 328 216 L326 191 Z" className="dev-hero__fill-mid" />
+          <path d="M306 191 L304 216 Q304 219 307 219 H326 Q329 219 328 216 L326 191 Z" strokeWidth="1.3" />
+          <ellipse cx="316" cy="191" rx="10" ry="3.1" strokeWidth="1.2" />
+          <path d="M326 197 Q336 197 336 204 Q336 211 326 210" strokeWidth="1.1" />
+          <g opacity="0.8">
+            <path className="dev-hero__steam-a dev-hero__motion" d="M309 184 Q307 176 310 168 Q313 160 311 153" strokeWidth="1" />
+            <path className="dev-hero__steam-b dev-hero__motion" d="M316 183 Q314 175 317 167 Q320 159 318 152" strokeWidth="1" />
+            <path className="dev-hero__steam-c dev-hero__motion" d="M323 184 Q321 176 324 168 Q327 160 325 153" strokeWidth="1" />
+          </g>
+        </g>
+
+        <g id="near-arm" className="dev-hero__arm-right dev-hero__motion">
+          <g className="dev-hero__arm-right-upper dev-hero__motion">
             <path
-              className="dev-hero__steam-a dev-hero__animated"
-              d="M314 188 Q312 180 315 171 Q318 163 316 156"
-              strokeWidth="1.1"
+              d="M279 143 C270 146 260 152 252 166 C256 172 263 175 270 177 C278 168 286 159 291 149 Z"
+              className="dev-hero__fill-strong"
             />
-            <path
-              className="dev-hero__steam-b dev-hero__animated"
-              d="M320 186 Q318 178 321 169 Q324 161 322 154"
-              strokeWidth="1.1"
-            />
-            <path
-              className="dev-hero__steam-c dev-hero__animated"
-              d="M326 188 Q324 180 327 171 Q330 163 328 156"
-              strokeWidth="1.1"
-            />
-          </g>
-        </g>
+            <path d="M279 143 C270 146 260 152 252 166 C256 172 263 175 270 177 C278 168 286 159 291 149 Z" strokeWidth="1.1" />
 
-        <g id="chair">
-          <rect x="251" y="176" width="47" height="8" rx="2" />
-          <rect x="293" y="136" width="8" height="48" rx="2" />
-          <line x1="274" y1="184" x2="274" y2="228" strokeWidth="1.3" opacity="0.7" />
-        </g>
+            <g className="dev-hero__arm-right-forearm dev-hero__motion">
+              <path
+                d="M251 165 C243 173 234 187 226 199 C230 205 236 208 243 210 C250 199 257 186 261 174 Z"
+                className="dev-hero__fill-strong"
+              />
+              <path d="M251 165 C243 173 234 187 226 199 C230 205 236 208 243 210 C250 199 257 186 261 174 Z" strokeWidth="1.1" />
+              <path d="M218 197 C212 198 210 203 211 209 C218 213 227 214 235 211 C233 204 229 198 218 197 Z" className="dev-hero__fill-strong" />
+              <path d="M223 205 Q227 207 231 205" strokeWidth="0.9" opacity="0.55" />
 
-        <g id="person">
-          <g id="legs">
-            <path d="M266 182 L286 204 L286 228" strokeWidth="2.2" />
-            <path d="M274 182 L296 204 L296 228" strokeWidth="2.2" opacity="0.72" />
-          </g>
-
-          <g id="torso">
-            <path d="M266 136 Q261 158 266 182 H289 Q293 161 288 136" />
-            <path d="M269 154 Q277 160 286 156" strokeWidth="1" opacity="0.45" />
-            <line x1="279" y1="122" x2="279" y2="136" strokeWidth="2" />
-          </g>
-
-          <g id="head" className="dev-hero__head dev-hero__animated">
-            <circle cx="279" cy="102" r="20" />
-            <path d="M262 95 Q264 79 275 75 Q287 72 296 79 Q303 86 301 99" strokeWidth="2.6" />
-            <path d="M264 99 Q259 92 261 106" strokeWidth="1.9" opacity="0.8" />
-            <path d="M296 98 Q302 102 296 110" strokeWidth="1.3" />
-            <path d="M270 102 Q267 106 270 111" strokeWidth="1.2" />
-            <path d="M270 118 Q276 120 282 118" strokeWidth="1.2" />
-            <circle cx="271" cy="101" r="1.8" fill="currentColor" stroke="none" />
-            <path d="M286 89 Q287 95 283 100" strokeWidth="0.9" opacity="0.55" />
-          </g>
-
-          <g id="arm-left">
-            <path d="M271 145 L249 164" strokeWidth="2.2" />
-            <path d="M249 164 L225 204" strokeWidth="2.2" />
-            <g className="dev-hero__typing-hand dev-hero__animated">
-              <rect x="214" y="204" width="15" height="5" rx="2.5" fill="currentColor" stroke="none" opacity="0.92" />
-            </g>
-            <g className="dev-hero__typing-finger-a dev-hero__animated">
-              <rect x="211" y="207" width="6" height="2.5" rx="1.25" fill="currentColor" stroke="none" />
-            </g>
-            <g className="dev-hero__typing-finger-b dev-hero__animated">
-              <rect x="223" y="208" width="6" height="2.5" rx="1.25" fill="currentColor" stroke="none" />
-            </g>
-          </g>
-
-          <g id="arm-right" className="dev-hero__arm-right dev-hero__animated">
-            <g id="upper-arm-r" className="dev-hero__upper-arm-r dev-hero__animated">
-              <line x1="282" y1="146" x2="262" y2="166" strokeWidth="2.4" />
-
-              <g id="forearm-r" className="dev-hero__forearm-r dev-hero__animated">
-                <line x1="262" y1="166" x2="232" y2="203" strokeWidth="2.4" />
-                <rect x="223" y="202" width="14" height="5" rx="2.5" fill="currentColor" stroke="none" />
-
-                <g className="dev-hero__held-cup">
-                  <path d="M210 188 L209 205 Q209 207 211 207 H223 Q225 207 225 205 L224 188 Z" strokeWidth="1.4" />
-                  <path d="M223 191 Q230 191 230 196 Q230 201 223 200" strokeWidth="1.2" />
-                  <ellipse cx="217" cy="188" rx="7" ry="2.4" strokeWidth="1.2" />
-                </g>
+              <g className="dev-hero__held-cup">
+                <path d="M206 186 L205 205 Q205 207 207 207 H221 Q223 207 223 205 L222 186 Z" className="dev-hero__fill-mid" />
+                <path d="M206 186 L205 205 Q205 207 207 207 H221 Q223 207 223 205 L222 186 Z" strokeWidth="1.1" />
+                <ellipse cx="214" cy="186" rx="7.5" ry="2.4" strokeWidth="1" />
+                <path d="M222 190 Q229 190 229 195 Q229 200 222 199" strokeWidth="1" />
               </g>
             </g>
           </g>
+        </g>
+
+        <g id="keyboard-front">
+          <rect x="183" y="203" width="63" height="11" rx="3" className="dev-hero__fill-weak" />
+          <rect x="183" y="203" width="63" height="11" rx="3" strokeWidth="1.1" opacity="0.6" />
+          <line x1="189" y1="206.5" x2="239" y2="206.5" strokeWidth="0.8" opacity="0.32" />
+          <line x1="191" y1="210" x2="237" y2="210" strokeWidth="0.8" opacity="0.32" />
+          <line x1="12" y1="221" x2="368" y2="221" strokeWidth="0.9" opacity="0.22" />
         </g>
       </g>
     </svg>

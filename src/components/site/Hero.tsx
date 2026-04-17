@@ -71,13 +71,13 @@ export default function Hero() {
             className="fade-up"
             style={{
               color: "var(--text-primary)",
-              opacity: 0.55,
+              opacity: 0.62,
               animationDelay: "120ms",
             }}
           >
             <DeveloperAnimation
               style={{
-                width: "min(360px, 28vw)",
+                width: "min(440px, 34vw)",
                 height: "auto",
               }}
             />
