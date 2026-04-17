@@ -127,77 +127,17 @@ export default async function HomePage() {
     }
   }
 
-  const featuredProject = bestProjects[0] ?? null;
-  const supportingProjects = bestProjects.slice(1);
-
   return (
     <>
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <Hero />
-
-      {/* ── Selected Work ─────────────────────────────────────────────────── */}
-      <section
-        id="work"
-        className="section-hidden px-[6vw] py-24"
-        style={{ borderTop: "1px solid var(--gray-800)" }}
-      >
-        <div className="mx-auto grid w-full max-w-[1160px] gap-10 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
-          <div className="max-w-[220px]">
-            <SectionLabel>Work</SectionLabel>
-            <h2
-              className="text-[28px] font-medium leading-[1.2] mt-1"
-              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-            >
-              Selected projects
-            </h2>
-            <p
-              className="mt-4 text-[15px] leading-[1.75]"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              Personal builds, experiments, and community projects with a bias
-              toward systems and real use.
-            </p>
-            <Link
-              href="/work"
-              className="mt-6 inline-flex font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              view all →
-            </Link>
-          </div>
-
-          <div className="flex flex-col gap-5">
-            {featuredProject && (
-              <ProjectCard
-                project={featuredProject}
-                index={0}
-                featured
-              />
-            )}
-
-            {supportingProjects.length > 0 && (
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {supportingProjects.map((project, i) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    index={i + 1}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {divider}
 
       {/* ── About ─────────────────────────────────────────────────────────── */}
       <section
         id="about"
         className="section-hidden px-[6vw] py-24"
       >
-        <div className="mx-auto grid w-full max-w-[1160px] grid-cols-1 items-start gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:gap-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start max-w-[1200px]">
           {/* Left — text */}
           <div>
             <SectionLabel>About</SectionLabel>
@@ -250,86 +190,104 @@ export default async function HomePage() {
 
       {divider}
 
+      {/* ── Selected Work ─────────────────────────────────────────────────── */}
+      <section
+        id="work"
+        className="section-hidden px-[6vw] py-24"
+      >
+        <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <SectionLabel>Work</SectionLabel>
+            <h2
+              className="text-[26px] font-medium leading-[1.25] mt-1"
+              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+            >
+              Selected projects
+            </h2>
+          </div>
+          <Link
+            href="/work"
+            className="font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            view all →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {bestProjects.map((project, i) => (
+            <ProjectCard key={project.id} project={project} index={i} />
+          ))}
+        </div>
+      </section>
+
+      {divider}
+
       {/* ── Writing ───────────────────────────────────────────────────────── */}
       <section
         id="writing"
         className="section-hidden px-[6vw] py-24"
       >
-        <div className="mx-auto grid w-full max-w-[1160px] gap-10 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
-          <div className="max-w-[220px]">
+        <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
+          <div>
             <SectionLabel>Writing</SectionLabel>
             <h2
-              className="text-[28px] font-medium leading-[1.2] mt-1"
+              className="text-[26px] font-medium leading-[1.25] mt-1"
               style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
             >
               Recent posts
             </h2>
-            <p
-              className="mt-4 text-[15px] leading-[1.75]"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              Notes on systems, AI, and the software underneath the things I&apos;m building.
-            </p>
-            <Link
-              href="/blog"
-              className="mt-6 inline-flex font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              view all →
-            </Link>
           </div>
-
-          {recentPosts.length === 0 ? (
-            <p className="font-mono text-[13px]" style={{ color: "var(--text-muted)" }}>
-              nothing published yet — check back soon
-            </p>
-          ) : (
-            <div className="flex max-w-[780px] flex-col gap-0">
-              {recentPosts.map((post, i) => (
-                <Link
-                  key={post.id}
-                  href={`/blog/${post.slug}`}
-                  className="group grid grid-cols-[36px_minmax(0,1fr)] items-start gap-4 py-6 md:grid-cols-[48px_minmax(0,1fr)_auto] md:gap-6"
-                  style={{
-                    borderBottom:
-                      i < recentPosts.length - 1 ? "1px solid var(--gray-800)" : "none",
-                  }}
-                >
-                  <span
-                    className="font-mono text-[11px] leading-[1.8]"
-                    style={{ color: "var(--gray-600)" }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-
-                  <div className="flex flex-col gap-1">
-                    <span
-                      className="text-[18px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-200"
-                      style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-                    >
-                      {post.title}
-                    </span>
-                    {post.excerpt && (
-                      <span
-                        className="mt-1 text-[14px] leading-[1.7]"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        {post.excerpt}
-                      </span>
-                    )}
-                  </div>
-
-                  <span
-                    className="col-start-2 mt-1 font-mono text-[11px] shrink-0 md:col-auto md:text-right"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    {formatDate(post.published_at ?? post.created_at)}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          )}
+          <Link
+            href="/blog"
+            className="font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            view all →
+          </Link>
         </div>
+
+        {recentPosts.length === 0 ? (
+          <p className="font-mono text-[13px]" style={{ color: "var(--text-muted)" }}>
+            nothing published yet — check back soon
+          </p>
+        ) : (
+          <div className="flex flex-col gap-0 max-w-[760px]">
+            {recentPosts.map((post, i) => (
+              <Link
+                key={post.id}
+                href={`/blog/${post.slug}`}
+                className="post-item group flex items-start justify-between gap-6 py-6"
+                style={{
+                  borderBottom: i < recentPosts.length - 1 ? "1px solid var(--gray-800)" : "none",
+                }}
+              >
+                <div className="flex flex-col gap-1">
+                  <span
+                    className="text-[16px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-200"
+                    style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+                  >
+                    {post.title}
+                  </span>
+                  {post.excerpt && (
+                    <span
+                      className="text-[13px] leading-[1.6] mt-1"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {post.excerpt}
+                    </span>
+                  )}
+                </div>
+                <span
+                  className="font-mono text-[11px] shrink-0 mt-1"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {formatDate(post.published_at ?? post.created_at)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {divider}
@@ -339,92 +297,62 @@ export default async function HomePage() {
         id="contact"
         className="section-hidden px-[6vw] py-24"
       >
-        <div className="mx-auto grid w-full max-w-[1160px] gap-10 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
-          <div className="max-w-[240px]">
-            <SectionLabel>Contact</SectionLabel>
-            <h2
-              className="text-[28px] font-medium leading-[1.2] mt-1 mb-4"
-              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-            >
-              Get in touch
-            </h2>
-            <p
-              className="text-[15px] leading-[1.75]"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              Open to internship opportunities in backend, MLOps, and AI systems.
-              If you&apos;re working on something interesting, reach out.
-            </p>
-            <p
-              className="mt-6 font-mono text-[11px] tracking-[0.12em] uppercase"
-              style={{ color: "var(--text-muted)" }}
-            >
-              best for / backend / mlops / ai systems
-            </p>
-          </div>
+        <SectionLabel>Contact</SectionLabel>
+        <h2
+          className="text-[26px] font-medium leading-[1.25] mt-1 mb-4"
+          style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+        >
+          Get in touch
+        </h2>
+        <p
+          className="text-[15px] leading-[1.7] mb-10 max-w-[480px]"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          Open to internship opportunities in backend, MLOps, and AI systems.
+          If you&apos;re working on something interesting, reach out.
+        </p>
 
-          <div
-            className="max-w-[720px]"
-            style={{ border: "1px solid var(--gray-800)", borderRadius: "8px" }}
-          >
-            <div
-              className="flex items-center justify-between px-5 py-3"
-              style={{ borderBottom: "1px solid var(--gray-800)" }}
+        <div
+          className="flex flex-col gap-0 max-w-[480px]"
+          style={{ border: "1px solid var(--gray-800)", borderRadius: "6px" }}
+        >
+          {[
+            { label: "email", value: "sashreek.addanki@gmail.com", href: "mailto:sashreek.addanki@gmail.com", external: false },
+            { label: "github", value: "Sashreek007", href: "https://github.com/Sashreek007", external: true },
+            { label: "linkedin", value: "sashreek-addanki", href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", external: true },
+          ].map(({ label, value, href, external }, i, arr) => (
+            <a
+              key={label}
+              href={href}
+              target={external ? "_blank" : undefined}
+              rel={external ? "noreferrer noopener" : undefined}
+              className="group flex items-center justify-between px-5 py-4 transition-colors duration-150"
+              style={{
+                borderBottom: i < arr.length - 1 ? "1px solid var(--gray-800)" : "none",
+              }}
             >
               <span
-                className="font-mono text-[11px] tracking-[0.12em] uppercase"
+                className="font-mono text-[11px] tracking-[0.10em] uppercase"
                 style={{ color: "var(--text-muted)" }}
               >
-                signal routes
+                {label}
               </span>
               <span
-                className="font-mono text-[11px] tracking-[0.08em] uppercase"
-                style={{ color: "var(--green-bright)" }}
+                className="text-[14px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-150"
+                style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
               >
-                open
+                {value}
+                {external && (
+                  <span
+                    className="ml-2 font-mono text-[11px] opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                    style={{ color: "var(--violet-soft)" }}
+                  >
+                    ↗
+                  </span>
+                )}
               </span>
-            </div>
-
-            <div className="flex flex-col gap-0">
-              {[
-                { label: "email", value: "sashreek.addanki@gmail.com", href: "mailto:sashreek.addanki@gmail.com", external: false },
-                { label: "github", value: "Sashreek007", href: "https://github.com/Sashreek007", external: true },
-                { label: "linkedin", value: "sashreek-addanki", href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", external: true },
-              ].map(({ label, value, href, external }, i, arr) => (
-                <a
-                  key={label}
-                  href={href}
-                  target={external ? "_blank" : undefined}
-                  rel={external ? "noreferrer noopener" : undefined}
-                  className="group flex flex-col gap-2 px-5 py-4 transition-colors duration-150 sm:flex-row sm:items-center sm:justify-between"
-                  style={{
-                    borderBottom: i < arr.length - 1 ? "1px solid var(--gray-800)" : "none",
-                  }}
-                >
-                  <span
-                    className="font-mono text-[11px] tracking-[0.10em] uppercase"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    {label}
-                  </span>
-                  <span
-                    className="break-all text-[14px] font-medium transition-colors duration-150 group-hover:text-[var(--violet-pale)] sm:text-right"
-                    style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-                  >
-                    {value}
-                    {external && (
-                      <span
-                        className="ml-2 font-mono text-[11px] opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-                        style={{ color: "var(--violet-soft)" }}
-                      >
-                        ↗
-                      </span>
-                    )}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
+            </a>
+          ))}
         </div>
       </section>
 

@@ -1,3 +1,37 @@
+"use client";
+
+import { useState } from "react";
+import {
+  SiPython, SiGo, SiCplusplus, SiTypescript, SiRust,
+  SiPytorch, SiLangchain, SiHuggingface,
+  SiDocker, SiRedis, SiPostgresql, SiFastapi, SiLinux,
+  SiNeovim, SiReact, SiNextdotjs, SiSupabase,
+  SiTailwindcss,
+} from "react-icons/si";
+import { IconType } from "react-icons";
+
+// Brand colors for each tech (hex without #)
+const TECH_META: Record<string, { icon: IconType; color: string }> = {
+  Python:       { icon: SiPython,      color: "#3776AB" },
+  Go:           { icon: SiGo,          color: "#00ADD8" },
+  "C++":        { icon: SiCplusplus,   color: "#00599C" },
+  TypeScript:   { icon: SiTypescript,  color: "#3178C6" },
+  Rust:         { icon: SiRust,        color: "#CE422B" },
+  PyTorch:      { icon: SiPytorch,     color: "#EE4C2C" },
+  LangChain:    { icon: SiLangchain,   color: "#1C3C3C" },
+  "Hugging Face": { icon: SiHuggingface, color: "#FFD21E" },
+  Docker:       { icon: SiDocker,      color: "#2496ED" },
+  Redis:        { icon: SiRedis,       color: "#FF4438" },
+  PostgreSQL:   { icon: SiPostgresql,  color: "#4169E1" },
+  FastAPI:      { icon: SiFastapi,     color: "#009688" },
+  Linux:        { icon: SiLinux,       color: "#FCC624" },
+  Neovim:       { icon: SiNeovim,      color: "#57A143" },
+  React:        { icon: SiReact,       color: "#61DAFB" },
+  "Next.js":    { icon: SiNextdotjs,   color: "#E8E6DF" },
+  Supabase:     { icon: SiSupabase,    color: "#3ECF8E" },
+  TailwindCSS:  { icon: SiTailwindcss, color: "#06B6D4" },
+};
+
 const skills = [
   {
     category: "Languages",
@@ -17,40 +51,56 @@ const skills = [
   },
 ];
 
+function SkillChip({ label }: { label: string }) {
+  const [hovered, setHovered] = useState(false);
+  const meta = TECH_META[label];
+  const Icon = meta?.icon;
+  const brandColor = meta?.color ?? "var(--text-muted)";
+
+  return (
+    <span
+      className="inline-flex items-center gap-[6px] px-3 py-[6px] font-mono text-[12px] cursor-default select-none transition-all duration-200"
+      style={{
+        borderRadius: "5px",
+        border: `1px solid ${hovered ? `color-mix(in srgb, ${brandColor} 40%, transparent)` : "var(--gray-800)"}`,
+        background: hovered
+          ? `color-mix(in srgb, ${brandColor} 8%, var(--bg-elevated))`
+          : "var(--bg-elevated)",
+        color: hovered ? brandColor : "var(--text-secondary)",
+        transform: hovered ? "translateY(-1px)" : "none",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {Icon && (
+        <Icon
+          size={13}
+          style={{
+            color: hovered ? brandColor : "var(--text-muted)",
+            flexShrink: 0,
+            transition: "color 200ms",
+          }}
+        />
+      )}
+      {label}
+    </span>
+  );
+}
+
 export default function SkillsTable() {
   return (
-    <div
-      className="overflow-hidden rounded-[8px]"
-      style={{ border: "1px solid var(--gray-800)" }}
-    >
-      {skills.map(({ category, items }, i) => (
-        <div
-          key={category}
-          className="grid gap-4 px-5 py-4 md:grid-cols-[112px_minmax(0,1fr)] md:gap-6"
-          style={{
-            borderBottom:
-              i < skills.length - 1 ? "1px solid var(--gray-800)" : "none",
-          }}
-        >
+    <div className="flex flex-col gap-6">
+      {skills.map(({ category, items }) => (
+        <div key={category}>
           <p
-            className="font-mono text-[10px] font-medium tracking-[0.14em] uppercase"
+            className="font-mono text-[10px] font-medium tracking-[0.14em] uppercase mb-3"
             style={{ color: "var(--text-muted)" }}
           >
             {category}
           </p>
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
+          <div className="flex flex-wrap gap-2">
             {items.map((item) => (
-              <span
-                key={item}
-                className="inline-flex items-center gap-2 font-mono text-[12px]"
-                style={{ color: "var(--text-primary)" }}
-              >
-                <span
-                  className="h-[4px] w-[4px] rounded-full"
-                  style={{ background: "var(--violet-mid)" }}
-                />
-                {item}
-              </span>
+              <SkillChip key={item} label={item} />
             ))}
           </div>
         </div>
