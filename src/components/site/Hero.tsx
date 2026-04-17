@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import WorkspaceIllustration from "./WorkspaceIllustration";
+import DeveloperAnimation from "./DeveloperAnimation";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,9 +75,9 @@ export default function Hero() {
               animationDelay: "120ms",
             }}
           >
-            <WorkspaceIllustration
+            <DeveloperAnimation
               style={{
-                width: "min(320px, 26vw)",
+                width: "min(360px, 28vw)",
                 height: "auto",
               }}
             />
