@@ -65,13 +65,13 @@ export default function Hero() {
       {/* ── 3-column grid: illustration | content | code panel ─────────── */}
       <div className="relative z-10 grid w-full max-w-[1280px] items-center gap-10 lg:grid-cols-[1fr_minmax(auto,540px)_1fr] lg:gap-12">
 
-        {/* Left — workspace illustration (decorative) */}
+        {/* Left — developer illustration (decorative) */}
         <div className="hidden lg:flex justify-end pointer-events-none">
           <div
             className="fade-up"
             style={{
               color: "var(--text-primary)",
-              opacity: 0.42,
+              opacity: 0.55,
               animationDelay: "120ms",
             }}
           >
