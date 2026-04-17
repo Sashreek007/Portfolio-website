@@ -383,19 +383,17 @@ export default function WorkspaceAnimation({ className, style }: Props) {
   const KB_H = KB_PAD * 2 + KB_ROWS.length * KEY_H + (KB_ROWS.length - 1) * ROW_GAP;
 
   return (
+    <div
+      className={className}
+      style={{ position: "relative", overflow: "hidden", ...style }}
+      aria-hidden
+    >
     <svg
       viewBox="0 0 600 800"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      style={style}
-      aria-hidden
+      style={{ display: "block", width: "100%", height: "100%" }}
     >
       <defs>
-        {/* Clip the editor foreignObject so its HTML content never spills out
-            (mobile Safari sometimes fails to clip foreignObject HTML on its own). */}
-        <clipPath id="ws-screen-clip">
-          <rect x="60" y="50" width="480" height="292" rx="6" />
-        </clipPath>
         <radialGradient id="ws-glow" cx="50%" cy="38%" r="60%">
           <stop offset="0%" stopColor="var(--violet-mid)" stopOpacity="0.20" />
           <stop offset="60%" stopColor="var(--violet-mid)" stopOpacity="0.07" />
@@ -527,20 +525,23 @@ export default function WorkspaceAnimation({ className, style }: Props) {
       {/* Subtle logo mark on lid bottom */}
       <circle cx="300" cy="345" r="2.6" fill="none" stroke="#3A3A38" strokeWidth="0.5" opacity="0.55" />
 
-      {/* ═══ NEOVIM EDITOR (full HTML inside foreignObject) ══════ */}
+      {/* ═══ NEOVIM EDITOR (full HTML inside foreignObject) ══════
+            Mobile Safari ignores clipPath/overflow on <foreignObject>
+            itself. Wrap in a <g clipPath=...> so the group-level clip
+            is applied to the rendered foreignObject output. */}
+      <g clipPath="url(#ws-screen-clip)">
       <foreignObject
         x="60"
         y="50"
         width="480"
         height="292"
         overflow="hidden"
-        clipPath="url(#ws-screen-clip)"
       >
         <div
           {...{ xmlns: "http://www.w3.org/1999/xhtml" }}
           style={{
-            width: "100%",
-            height: "100%",
+            width: "480px",
+            height: "292px",
             display: "flex",
             flexDirection: "column",
             background: "#161614",
@@ -550,6 +551,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
             color: "#A8A69E",
             borderRadius: "6px",
             overflow: "hidden",
+            contain: "strict",
           }}
         >
           {/* ── BUFFERLINE ────────────────────────────────────── */}
@@ -921,6 +923,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
           </div>
         </div>
       </foreignObject>
+      </g>
 
       {/* ═══ PLANT (front-left, partially overlapping the laptop edge) ═══ */}
       <g>
@@ -1150,5 +1153,6 @@ export default function WorkspaceAnimation({ className, style }: Props) {
               fill="none" stroke="#1A1A18" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
       </g>
     </svg>
+    </div>
   );
 }
