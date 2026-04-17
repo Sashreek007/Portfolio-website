@@ -106,8 +106,7 @@ export default function Hero() {
 
           <div className="fade-up fade-up-3 flex flex-wrap justify-center gap-3 mt-6">
             {[
-              { href: "#work", label: "projects" },
-              { href: "#about", label: "about" },
+              { href: "/resume", label: "resume" },
               {
                 href: "https://github.com/Sashreek007",
                 label: "github ↗",
@@ -118,7 +117,6 @@ export default function Hero() {
                 label: "linkedin ↗",
                 external: true,
               },
-              { href: "/resume", label: "resume" },
             ].map(({ href, label, external }) => (
               <a
                 key={href}

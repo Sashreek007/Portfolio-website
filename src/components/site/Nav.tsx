@@ -26,10 +26,23 @@ const headerStyle: React.CSSProperties = {
   borderBottom: "1px solid var(--gray-800)",
 };
 
+function getNavItemStyle(active: boolean): React.CSSProperties {
+  return {
+    color: active ? "var(--text-primary)" : "var(--text-muted)",
+    border: active
+      ? "1px solid color-mix(in srgb, var(--violet-soft) 38%, transparent)"
+      : "1px solid transparent",
+    background: active
+      ? "color-mix(in srgb, var(--violet-dim) 16%, transparent)"
+      : "transparent",
+  };
+}
+
 export default function Nav() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("");
+  const logoActive = isHome && (activeSection === "" || activeSection === "hero");
 
   useEffect(() => {
     if (!isHome) {
@@ -75,8 +88,9 @@ export default function Nav() {
     >
       <a
         href={logoHref}
-        className="font-mono text-[13px] font-medium tracking-[0.12em] uppercase"
-        style={{ color: "var(--text-muted)" }}
+        aria-current={logoActive ? "location" : undefined}
+        className="inline-flex items-center rounded-[999px] px-3 py-1.5 font-mono text-[13px] font-medium tracking-[0.12em] uppercase transition-colors duration-200"
+        style={getNavItemStyle(logoActive)}
       >
         SA
       </a>
@@ -90,16 +104,10 @@ export default function Nav() {
                   key={href}
                   href={href}
                   aria-current={active ? "location" : undefined}
-                  className="relative inline-flex pb-2 font-mono text-[13px] transition-colors duration-200"
-                  style={{ color: active ? "var(--text-primary)" : "var(--text-muted)" }}
+                  className="inline-flex items-center rounded-[999px] px-3 py-1.5 font-mono text-[13px] transition-colors duration-200"
+                  style={getNavItemStyle(active)}
                 >
                   {label}
-                  {active && (
-                    <span
-                      className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
-                      style={{ background: "var(--violet-mid)" }}
-                    />
-                  )}
                 </a>
               );
             })
@@ -110,16 +118,10 @@ export default function Nav() {
                   key={href}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className="relative inline-flex pb-2 font-mono text-[13px] transition-colors duration-200"
-                  style={{ color: active ? "var(--text-primary)" : "var(--text-muted)" }}
+                  className="inline-flex items-center rounded-[999px] px-3 py-1.5 font-mono text-[13px] transition-colors duration-200"
+                  style={getNavItemStyle(active)}
                 >
                   {label}
-                  {active && (
-                    <span
-                      className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
-                      style={{ background: "var(--violet-mid)" }}
-                    />
-                  )}
                 </Link>
               );
             })}
