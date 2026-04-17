@@ -126,33 +126,33 @@ export default function ProjectForm({ project, mode }: Props) {
         .single();
       if (error || !updated) { setError(error?.message ?? "update failed"); setSaving(false); return; }
 
-      // Upsert the linked post. Preserve existing content/published_at/show_on_writing
-      // so admin edits aren't clobbered — only sync the project-derived fields.
+      // Sync the linked post. We only touch fields that should track the
+      // project (title, slug, cover) — leave content, excerpt, publish
+      // state, and writing-page visibility alone so admin edits survive.
+      // If the post doesn't exist yet (project predates this flow), insert
+      // a blank draft stub the admin can fill in.
       const { data: existingPost } = await supabase
         .from("posts")
-        .select("id, published_at")
+        .select("id")
         .eq("project_id", project!.id)
         .maybeSingle();
 
-      const fresh = buildProjectPostPayload(updated as Project, {
-        preservePublishedAt: existingPost?.published_at ?? null,
-      });
+      const projectFields = {
+        title: (updated as Project).name,
+        slug: buildProjectPostPayload(updated as Project).slug,
+        cover_image_url: (updated as Project).image_url ?? null,
+      };
 
       if (existingPost) {
-        // Only sync fields that should track the project — leave content,
-        // show_on_writing, and is_published alone to preserve admin edits.
         const { error: postErr } = await supabase
           .from("posts")
-          .update({
-            title: fresh.title,
-            slug: fresh.slug,
-            excerpt: fresh.excerpt,
-            cover_image_url: fresh.cover_image_url,
-          })
+          .update(projectFields)
           .eq("id", existingPost.id);
         if (postErr) { setError(`project saved, but blog post sync failed: ${postErr.message}`); setSaving(false); return; }
       } else {
-        const { error: postErr } = await supabase.from("posts").insert(fresh);
+        const { error: postErr } = await supabase
+          .from("posts")
+          .insert(buildProjectPostPayload(updated as Project));
         if (postErr) { setError(`project saved, but blog post create failed: ${postErr.message}`); setSaving(false); return; }
       }
     }

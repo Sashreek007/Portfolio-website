@@ -8,7 +8,10 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "node:fs";
-import { buildProjectPostPayload } from "../src/lib/project-post";
+import {
+  buildProjectPostPayload,
+  buildProjectPostSeedContent,
+} from "../src/lib/project-post";
 import type { Project } from "../src/components/site/ProjectCard";
 
 function loadEnv() {
@@ -48,7 +51,16 @@ async function main() {
     return;
   }
 
-  const rows = missing.map((p) => buildProjectPostPayload(p));
+  // One-off backfill: publish immediately with pre-written Overview /
+  // Stack / Links content. Diverges from the stub created by the admin
+  // form, which is a draft the user writes from scratch.
+  const rows = missing.map((p) => ({
+    ...buildProjectPostPayload(p),
+    content: buildProjectPostSeedContent(p),
+    excerpt: p.description,
+    is_published: true,
+    published_at: new Date().toISOString(),
+  }));
   const { error } = await supabase.from("posts").insert(rows);
   if (error) throw error;
 

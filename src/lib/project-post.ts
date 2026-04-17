@@ -1,11 +1,29 @@
 import type { Project } from "@/components/site/ProjectCard";
 import { projectSlug } from "@/lib/projects";
 
-// Build the Tiptap JSON body seeded for a project-linked blog post.
-// Mirrors what the /projects/[id] detail page used to render: overview,
-// stack, links. Kept deliberately terse so it's a starting point the
-// admin can expand in the editor.
-function buildProjectPostContent(project: Project) {
+// Empty stub created when a project is added via the admin. Links the
+// post to the project (so sync/edit flows find it), but leaves the
+// content, excerpt, and publish state untouched — the admin writes
+// the blog themselves. Defaults to draft + hidden from /writing.
+export function buildProjectPostPayload(project: Project) {
+  return {
+    project_id: project.id,
+    title: project.name,
+    slug: projectSlug(project),
+    content: null,
+    excerpt: null,
+    cover_image_url: project.image_url ?? null,
+    is_published: false,
+    published_at: null,
+    show_on_writing: false,
+  };
+}
+
+// Kept for the one-off backfill script. Used to pre-populate project
+// posts that existed before the auto-create flow landed. NOT used by
+// the admin form or sync button — those create empty stubs so the
+// admin can write from scratch.
+export function buildProjectPostSeedContent(project: Project) {
   const content: Array<Record<string, unknown>> = [];
 
   content.push(
@@ -73,24 +91,4 @@ function buildProjectPostContent(project: Project) {
   }
 
   return { type: "doc", content };
-}
-
-// Payload we insert/upsert into `posts` when the admin creates a project.
-// show_on_writing defaults to false so project blogs stay out of /writing
-// and the home writing rail.
-export function buildProjectPostPayload(
-  project: Project,
-  opts: { preservePublishedAt?: string | null } = {}
-) {
-  return {
-    project_id: project.id,
-    title: project.name,
-    slug: projectSlug(project),
-    content: buildProjectPostContent(project),
-    excerpt: project.description,
-    cover_image_url: project.image_url ?? null,
-    is_published: true,
-    published_at: opts.preservePublishedAt ?? new Date().toISOString(),
-    show_on_writing: false,
-  };
 }
