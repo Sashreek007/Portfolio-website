@@ -396,7 +396,13 @@ export default function WorkspaceAnimation({ className, style }: Props) {
     <svg
       viewBox="0 0 600 800"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ display: "block", width: "100%", height: "100%" }}
+      style={{
+        display: "block",
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+      }}
     >
       <defs>
         <radialGradient id="ws-glow" cx="50%" cy="38%" r="60%">
@@ -531,233 +537,6 @@ export default function WorkspaceAnimation({ className, style }: Props) {
       <circle cx="300" cy="345" r="2.6" fill="none" stroke="#3A3A38" strokeWidth="0.5" opacity="0.55" />
 
 
-      {/* ═══ PLANT (front-left, partially overlapping the laptop edge) ═══ */}
-      <g>
-        {/* Pot */}
-        <path d="M14,388 L92,388 L86,442 Q86,448 81,448 L25,448 Q20,448 20,442 Z" fill="url(#ws-pot)" />
-        {/* Pot rim band */}
-        <ellipse cx="53" cy="388" rx="39" ry="4.5" fill="#7E4810" />
-        <ellipse cx="53" cy="386.5" rx="37" ry="3" fill="#E8A052" />
-        <rect x="15" y="392" width="77" height="2.5" fill="#7E4810" opacity="0.4" />
-        {/* Soil */}
-        <ellipse cx="53" cy="387" rx="34" ry="2" fill="#2A1408" />
-        {/* Pot vertical ridges */}
-        <line x1="32" y1="397" x2="30" y2="442" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
-        <line x1="53" y1="397" x2="53" y2="445" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
-        <line x1="74" y1="397" x2="76" y2="442" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
-
-        {/* Leaves */}
-        <g style={{ transformOrigin: "53px 386px", animation: "ws-leaf-sway 4.5s ease-in-out infinite" }}>
-          {/* Back-left leaf */}
-          <path d="M30,386 Q10,358 16,325 Q28,302 38,325 Q42,365 32,386 Z"
-                fill="url(#ws-leaf)" transform="rotate(-22 30 365)" />
-          <path d="M27,383 Q22,358 23,330" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(-22 30 365)" />
-          {/* Center-tall leaf */}
-          <path d="M53,386 Q36,350 41,308 Q53,284 65,308 Q70,350 53,386 Z" fill="url(#ws-leaf)" />
-          <path d="M53,386 Q51,350 53,310" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" />
-          {/* Back-right leaf */}
-          <path d="M76,386 Q96,358 90,325 Q78,302 68,325 Q64,365 74,386 Z"
-                fill="url(#ws-leaf)" transform="rotate(22 76 365)" />
-          <path d="M79,383 Q84,358 83,330" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(22 76 365)" />
-        </g>
-        {/* Front leaf (different sway) */}
-        <g style={{ transformOrigin: "62px 386px", animation: "ws-leaf-sway-r 5.2s ease-in-out infinite" }}>
-          <path d="M62,386 Q56,365 58,338 Q66,322 72,340 Q74,368 68,386 Z"
-                fill="#1D9E75" transform="rotate(28 62 378)" />
-          <path d="M64,386 Q62,365 66,342" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(28 62 378)" />
-        </g>
-      </g>
-
-      {/* ═══ COFFEE MUG (front-right, smaller, partially in front of laptop) ═══ */}
-      <g>
-        {/* Steam */}
-        <g>
-          <path d="M520,400 Q517,386 520,372 Q523,358 520,344" fill="none"
-                stroke="#E8E6DF" strokeWidth="2" strokeLinecap="round"
-                style={{ animation: "ws-steam-a 2.8s ease-out infinite", transformOrigin: "520px 400px" }} />
-          <path d="M535,400 Q532,386 535,372 Q538,358 535,344" fill="none"
-                stroke="#E8E6DF" strokeWidth="2" strokeLinecap="round"
-                style={{ animation: "ws-steam-b 2.8s ease-out 0.9s infinite", transformOrigin: "535px 400px" }} />
-          <path d="M550,400 Q547,386 550,372 Q553,358 550,344" fill="none"
-                stroke="#E8E6DF" strokeWidth="2" strokeLinecap="round"
-                style={{ animation: "ws-steam-c 2.8s ease-out 1.8s infinite", transformOrigin: "550px 400px" }} />
-        </g>
-        {/* Mug body — smaller (~75 tall, was 128) */}
-        <path d="M500,402 L500,470 Q500,478 510,478 L560,478 Q570,478 570,470 L570,402 Z" fill="url(#ws-mug)" />
-        {/* Right shadow */}
-        <path d="M555,405 L555,470 Q555,478 565,478 L560,478 Q570,478 570,470 L570,405 Z"
-              fill="#5C2F08" opacity="0.55" />
-        {/* Rim */}
-        <ellipse cx="535" cy="402" rx="35" ry="7" fill="#5C2F08" />
-        <ellipse cx="535" cy="400" rx="34" ry="5" fill="#E8A052" />
-        <ellipse cx="535" cy="402" rx="32" ry="4" fill="#7E4810" />
-        {/* Coffee */}
-        <ellipse cx="535" cy="403" rx="30" ry="4" fill="#1F0E04" />
-        <ellipse cx="535" cy="402" rx="25" ry="2" fill="#5C3018" opacity="0.7" />
-        {/* Foam ring (subtle) */}
-        <ellipse cx="535" cy="401" rx="27" ry="1.5" fill="none" stroke="#E8C9A0" strokeWidth="0.5" opacity="0.55" />
-        {/* Handle (smaller) */}
-        <path d="M570,415 Q592,415 592,438 Q592,460 570,460"
-              fill="none" stroke="#C97A24" strokeWidth="9" strokeLinecap="round" />
-        <path d="M570,415 Q592,415 592,438 Q592,460 570,460"
-              fill="none" stroke="#5C2F08" strokeWidth="9" strokeLinecap="round" opacity="0.45" />
-        {/* Highlight stripe */}
-        <path d="M507,415 L507,464" stroke="#FFC079" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
-        {/* Bottom shadow on desk */}
-        <ellipse cx="535" cy="478" rx="34" ry="2.5" fill="#000" opacity="0.6" />
-      </g>
-
-      {/* ═══ DESKPAD / DESK MAT (under keyboard + mouse) ═════════ */}
-      <g>
-        {/* Soft cast shadow underneath the mat */}
-        <rect x="65" y="490" width="540" height="220" rx="8" fill="#000" opacity="0.35" />
-        {/* Mat body — slightly lighter than desk so it reads as a separate surface */}
-        <rect x="60" y="485" width="535" height="218" rx="6" fill="#1B1B19" />
-        {/* Subtle top-edge highlight for depth */}
-        <rect x="62" y="486" width="531" height="1" rx="0.5" fill="#2C2C2A" opacity="0.55" />
-        {/* Stitched perimeter — inset 4px, dashed thin line */}
-        <rect
-          x="64" y="489" width="527" height="210" rx="4"
-          fill="none"
-          stroke="#3A3A38" strokeWidth="0.6"
-          strokeDasharray="3 2"
-          opacity="0.55"
-        />
-        {/* Subtle weave texture (sparse dots) */}
-        <g opacity="0.06" fill="#A8A69E">
-          {[80, 140, 200, 260, 320, 380, 440, 500, 560].flatMap(x =>
-            [510, 560, 610, 660].map(y => (
-              <circle key={`${x}-${y}`} cx={x} cy={y} r="0.4" />
-            ))
-          )}
-        </g>
-        {/* Tiny brand mark in bottom-right corner */}
-        <text x="582" y="697" fontSize="5" fontFamily="ui-monospace, monospace"
-              fill="#3A3A38" textAnchor="end" opacity="0.7">SA</text>
-      </g>
-
-      {/* ═══ KEYBOARD (realistic mechanical TKL) ════════════════ */}
-      <g>
-        {/* Drop shadow on the deskpad */}
-        <ellipse cx="300" cy={KB_Y + KB_H + 10} rx="200" ry="9" fill="#000" opacity="0.4" />
-
-        {/* Body — chamfered case */}
-        <rect x={KB_X - 3} y={KB_Y - 2} width={KB_W + 6} height={KB_H + 6} rx="9" fill="#0A0A09" />
-        <rect x={KB_X} y={KB_Y} width={KB_W} height={KB_H} rx="7" fill="url(#ws-kb-body)" />
-        {/* Top edge highlight */}
-        <rect x={KB_X + 4} y={KB_Y + 1} width={KB_W - 8} height="1.2" rx="0.6" fill="#3A3A38" opacity="0.8" />
-        {/* Subtle inset around the keys */}
-        <rect x={KB_X + 6} y={KB_Y + 6} width={KB_W - 12} height={KB_H - 12} rx="5" fill="none"
-              stroke="#0E0E0C" strokeWidth="1" opacity="0.7" />
-
-        {/* Keys */}
-        {KB_ROWS.map((row, ri) => {
-          const rowY = KB_Y + KB_PAD + ri * (KEY_H + ROW_GAP);
-          let cursor = KB_X + KB_PAD;
-          return (
-            <g key={ri}>
-              {row.map((k, ki) => {
-                const kx = cursor;
-                cursor += k.w * U;
-                if (k.g) return null;
-                return (
-                  <KeyCap
-                    key={ki}
-                    x={kx + 1}
-                    y={rowY}
-                    wU={k.w}
-                    h={KEY_H - 2}
-                    label={k.l}
-                    accent={k.accent}
-                    U={U}
-                  />
-                );
-              })}
-            </g>
-          );
-        })}
-
-        {/* USB cable hint going off to the laptop */}
-        <path d={`M${KB_X + KB_W / 2} ${KB_Y - 1} Q300 ${KB_Y - 18} 300 ${KB_Y - 32}`}
-              fill="none" stroke="#1A1A18" strokeWidth="2.4" strokeLinecap="round" opacity="0.85" />
-
-        {/* RGB underglow */}
-        <ellipse cx="300" cy={KB_Y + KB_H + 4} rx="180" ry="6"
-                 fill="url(#ws-rgb)"
-                 style={{ animation: "ws-kb-glow 4s ease-in-out infinite" }} />
-      </g>
-
-      {/* ═══ GAMING MOUSE (right of keyboard) ═════════════════ */}
-      <g>
-        {/* Drop shadow */}
-        <ellipse cx="540" cy={695} rx="42" ry="6" fill="#000" opacity="0.5" />
-
-        {/* RGB underglow */}
-        <ellipse cx="540" cy="690" rx="40" ry="6"
-                 fill="url(#ws-rgb)"
-                 style={{ animation: "ws-rgb-pulse 3.5s ease-in-out infinite" }} />
-
-        {/* Body — asymmetric egg with pinky rest, tapered front */}
-        <path
-          d="M515,600
-             Q515,572 542,572
-             Q572,572 575,605
-             L578,665
-             Q578,690 545,690
-             Q510,690 510,668
-             L508,635
-             Q508,615 515,600 Z"
-          fill="url(#ws-mouse)"
-        />
-        {/* Top shine */}
-        <path
-          d="M515,600
-             Q515,572 542,572
-             Q572,572 575,605
-             L578,665
-             Q578,690 545,690
-             Q510,690 510,668
-             L508,635
-             Q508,615 515,600 Z"
-          fill="url(#ws-mouse-shine)"
-        />
-
-        {/* Click split (left/right click separation line) */}
-        <line x1="544" y1="574" x2="544" y2="630" stroke="#0A0A09" strokeWidth="0.9" opacity="0.85" />
-
-        {/* Scroll wheel housing */}
-        <rect x="540" y="595" width="9" height="16" rx="2" fill="#0A0A09" />
-        {/* Scroll wheel ridges (rubberized) */}
-        <rect x="541" y="597" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
-        <rect x="541" y="600.5" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
-        <rect x="541" y="604" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
-        <rect x="541" y="607.5" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
-
-        {/* DPI button (small, in front of scroll wheel) */}
-        <rect x="540" y="615" width="9" height="3.5" rx="1" fill="#0A0A09" />
-        <rect x="541" y="615.5" width="7" height="0.8" rx="0.4" fill="#3A3A38" />
-
-        {/* Side buttons (back/forward, on the left "thumb" side) */}
-        <rect x="510" y="618" width="8" height="5" rx="1" fill="#0A0A09" opacity="0.85" />
-        <rect x="510" y="626" width="8" height="5" rx="1" fill="#0A0A09" opacity="0.85" />
-        {/* Tiny labels (forward/back arrows) */}
-        <text x="514" y="622" fontSize="3" fill="#5F5E5A" textAnchor="middle">◂</text>
-        <text x="514" y="630" fontSize="3" fill="#5F5E5A" textAnchor="middle">▸</text>
-
-        {/* Glowing logo on palm rest */}
-        <g style={{ animation: "ws-rgb-pulse 3s ease-in-out infinite" }}>
-          <circle cx="544" cy="660" r="6" fill="var(--violet-mid)" opacity="0.18" />
-          <path d="M540,656 L548,656 M540,660 L548,660 M540,664 L548,664"
-                stroke="var(--violet-soft)" strokeWidth="0.8" strokeLinecap="round" opacity="0.9" />
-        </g>
-
-        {/* Pinky rest contour (subtle line) */}
-        <path d="M575,615 Q577,640 575,665" stroke="#0A0A09" strokeWidth="0.6" opacity="0.7" fill="none" />
-
-        {/* Mouse cable going up to the laptop */}
-        <path d="M542,572 Q535,560 540,540 Q548,520 545,500"
-              fill="none" stroke="#1A1A18" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
-      </g>
     </svg>
 
     {/* ═══ NEOVIM EDITOR — HTML overlay, rendered OUTSIDE the SVG so that
@@ -1149,6 +928,239 @@ export default function WorkspaceAnimation({ className, style }: Props) {
         </div>
       </div>
     </div>
+
+    {/* ═══ FRONT SVG LAYER — plant, mug, deskpad, keyboard, mouse.
+        Rendered after the editor overlay so the plant leaves sit in
+        front of the laptop screen the way the original design intended. */}
+    <svg
+      viewBox="0 0 600 800"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        display: "block",
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+      }}
+    >
+      <defs>
+        <linearGradient id="ws-pot" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#9A4F0E" />
+          <stop offset="50%" stopColor="#C97A24" />
+          <stop offset="100%" stopColor="#7E4810" />
+        </linearGradient>
+        <linearGradient id="ws-leaf" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#0E704D" />
+          <stop offset="55%" stopColor="#1D9E75" />
+          <stop offset="100%" stopColor="#5DCAA5" />
+        </linearGradient>
+        <linearGradient id="ws-mug" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#E8A052" />
+          <stop offset="55%" stopColor="#C97A24" />
+          <stop offset="100%" stopColor="#7E4810" />
+        </linearGradient>
+        <linearGradient id="ws-mouse" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3A3A38" />
+          <stop offset="50%" stopColor="#1F1F1D" />
+          <stop offset="100%" stopColor="#0A0A09" />
+        </linearGradient>
+        <radialGradient id="ws-mouse-shine" cx="35%" cy="20%" r="50%">
+          <stop offset="0%" stopColor="#5F5E5A" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#3A3A38" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="ws-kb-body" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#28282A" />
+          <stop offset="100%" stopColor="#0E0E0C" />
+        </linearGradient>
+        <radialGradient id="ws-rgb" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="var(--violet-soft)" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="var(--violet-soft)" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* ═══ PLANT (front-left, partially overlapping the laptop edge) ═══ */}
+      <g>
+        {/* Pot */}
+        <path d="M14,388 L92,388 L86,442 Q86,448 81,448 L25,448 Q20,448 20,442 Z" fill="url(#ws-pot)" />
+        {/* Pot rim band */}
+        <ellipse cx="53" cy="388" rx="39" ry="4.5" fill="#7E4810" />
+        <ellipse cx="53" cy="386.5" rx="37" ry="3" fill="#E8A052" />
+        <rect x="15" y="392" width="77" height="2.5" fill="#7E4810" opacity="0.4" />
+        {/* Soil */}
+        <ellipse cx="53" cy="387" rx="34" ry="2" fill="#2A1408" />
+        {/* Pot vertical ridges */}
+        <line x1="32" y1="397" x2="30" y2="442" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
+        <line x1="53" y1="397" x2="53" y2="445" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
+        <line x1="74" y1="397" x2="76" y2="442" stroke="#7E4810" strokeWidth="0.6" opacity="0.5" />
+
+        {/* Leaves */}
+        <g style={{ transformOrigin: "53px 386px", animation: "ws-leaf-sway 4.5s ease-in-out infinite" }}>
+          {/* Back-left leaf */}
+          <path d="M30,386 Q10,358 16,325 Q28,302 38,325 Q42,365 32,386 Z"
+                fill="url(#ws-leaf)" transform="rotate(-22 30 365)" />
+          <path d="M27,383 Q22,358 23,330" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(-22 30 365)" />
+          {/* Center-tall leaf */}
+          <path d="M53,386 Q36,350 41,308 Q53,284 65,308 Q70,350 53,386 Z" fill="url(#ws-leaf)" />
+          <path d="M53,386 Q51,350 53,310" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" />
+          {/* Back-right leaf */}
+          <path d="M76,386 Q96,358 90,325 Q78,302 68,325 Q64,365 74,386 Z"
+                fill="url(#ws-leaf)" transform="rotate(22 76 365)" />
+          <path d="M79,383 Q84,358 83,330" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(22 76 365)" />
+        </g>
+        {/* Front leaf (different sway) */}
+        <g style={{ transformOrigin: "62px 386px", animation: "ws-leaf-sway-r 5.2s ease-in-out infinite" }}>
+          <path d="M62,386 Q56,365 58,338 Q66,322 72,340 Q74,368 68,386 Z"
+                fill="#1D9E75" transform="rotate(28 62 378)" />
+          <path d="M64,386 Q62,365 66,342" stroke="#0E704D" strokeWidth="0.6" fill="none" opacity="0.7" transform="rotate(28 62 378)" />
+        </g>
+      </g>
+
+      {/* ═══ COFFEE MUG (front-right, smaller, partially in front of laptop) ═══ */}
+      <g>
+        {/* Steam */}
+        <g>
+          <path d="M520,400 Q517,386 520,372 Q523,358 520,344" fill="none"
+                stroke="#E8E6DF" strokeWidth="2" strokeLinecap="round"
+                style={{ animation: "ws-steam-a 2.8s ease-out infinite", transformOrigin: "520px 400px" }} />
+          <path d="M535,400 Q532,386 535,372 Q538,358 535,344" fill="none"
+                stroke="#E8E6DF" strokeWidth="2" strokeLinecap="round"
+                style={{ animation: "ws-steam-b 2.8s ease-out 0.9s infinite", transformOrigin: "535px 400px" }} />
+          <path d="M550,400 Q547,386 550,372 Q553,358 550,344" fill="none"
+                stroke="#E8E6DF" strokeWidth="2" strokeLinecap="round"
+                style={{ animation: "ws-steam-c 2.8s ease-out 1.8s infinite", transformOrigin: "550px 400px" }} />
+        </g>
+        {/* Mug body */}
+        <path d="M500,402 L500,470 Q500,478 510,478 L560,478 Q570,478 570,470 L570,402 Z" fill="url(#ws-mug)" />
+        <path d="M555,405 L555,470 Q555,478 565,478 L560,478 Q570,478 570,470 L570,405 Z"
+              fill="#5C2F08" opacity="0.55" />
+        <ellipse cx="535" cy="402" rx="35" ry="7" fill="#5C2F08" />
+        <ellipse cx="535" cy="400" rx="34" ry="5" fill="#E8A052" />
+        <ellipse cx="535" cy="402" rx="32" ry="4" fill="#7E4810" />
+        <ellipse cx="535" cy="403" rx="30" ry="4" fill="#1F0E04" />
+        <ellipse cx="535" cy="402" rx="25" ry="2" fill="#5C3018" opacity="0.7" />
+        <ellipse cx="535" cy="401" rx="27" ry="1.5" fill="none" stroke="#E8C9A0" strokeWidth="0.5" opacity="0.55" />
+        <path d="M570,415 Q592,415 592,438 Q592,460 570,460"
+              fill="none" stroke="#C97A24" strokeWidth="9" strokeLinecap="round" />
+        <path d="M570,415 Q592,415 592,438 Q592,460 570,460"
+              fill="none" stroke="#5C2F08" strokeWidth="9" strokeLinecap="round" opacity="0.45" />
+        <path d="M507,415 L507,464" stroke="#FFC079" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+        <ellipse cx="535" cy="478" rx="34" ry="2.5" fill="#000" opacity="0.6" />
+      </g>
+
+      {/* ═══ DESKPAD / DESK MAT (under keyboard + mouse) ═════════ */}
+      <g>
+        <rect x="65" y="490" width="540" height="220" rx="8" fill="#000" opacity="0.35" />
+        <rect x="60" y="485" width="535" height="218" rx="6" fill="#1B1B19" />
+        <rect x="62" y="486" width="531" height="1" rx="0.5" fill="#2C2C2A" opacity="0.55" />
+        <rect
+          x="64" y="489" width="527" height="210" rx="4"
+          fill="none"
+          stroke="#3A3A38" strokeWidth="0.6"
+          strokeDasharray="3 2"
+          opacity="0.55"
+        />
+        <g opacity="0.06" fill="#A8A69E">
+          {[80, 140, 200, 260, 320, 380, 440, 500, 560].flatMap(x =>
+            [510, 560, 610, 660].map(y => (
+              <circle key={`${x}-${y}`} cx={x} cy={y} r="0.4" />
+            ))
+          )}
+        </g>
+        <text x="582" y="697" fontSize="5" fontFamily="ui-monospace, monospace"
+              fill="#3A3A38" textAnchor="end" opacity="0.7">SA</text>
+      </g>
+
+      {/* ═══ KEYBOARD (realistic mechanical TKL) ════════════════ */}
+      <g>
+        <ellipse cx="300" cy={KB_Y + KB_H + 10} rx="200" ry="9" fill="#000" opacity="0.4" />
+        <rect x={KB_X - 3} y={KB_Y - 2} width={KB_W + 6} height={KB_H + 6} rx="9" fill="#0A0A09" />
+        <rect x={KB_X} y={KB_Y} width={KB_W} height={KB_H} rx="7" fill="url(#ws-kb-body)" />
+        <rect x={KB_X + 4} y={KB_Y + 1} width={KB_W - 8} height="1.2" rx="0.6" fill="#3A3A38" opacity="0.8" />
+        <rect x={KB_X + 6} y={KB_Y + 6} width={KB_W - 12} height={KB_H - 12} rx="5" fill="none"
+              stroke="#0E0E0C" strokeWidth="1" opacity="0.7" />
+        {KB_ROWS.map((row, ri) => {
+          const rowY = KB_Y + KB_PAD + ri * (KEY_H + ROW_GAP);
+          let cursor = KB_X + KB_PAD;
+          return (
+            <g key={ri}>
+              {row.map((k, ki) => {
+                const kx = cursor;
+                cursor += k.w * U;
+                if (k.g) return null;
+                return (
+                  <KeyCap
+                    key={ki}
+                    x={kx + 1}
+                    y={rowY}
+                    wU={k.w}
+                    h={KEY_H - 2}
+                    label={k.l}
+                    accent={k.accent}
+                    U={U}
+                  />
+                );
+              })}
+            </g>
+          );
+        })}
+        <path d={`M${KB_X + KB_W / 2} ${KB_Y - 1} Q300 ${KB_Y - 18} 300 ${KB_Y - 32}`}
+              fill="none" stroke="#1A1A18" strokeWidth="2.4" strokeLinecap="round" opacity="0.85" />
+        <ellipse cx="300" cy={KB_Y + KB_H + 4} rx="180" ry="6"
+                 fill="url(#ws-rgb)"
+                 style={{ animation: "ws-kb-glow 4s ease-in-out infinite" }} />
+      </g>
+
+      {/* ═══ GAMING MOUSE (right of keyboard) ═════════════════ */}
+      <g>
+        <ellipse cx="540" cy={695} rx="42" ry="6" fill="#000" opacity="0.5" />
+        <ellipse cx="540" cy="690" rx="40" ry="6"
+                 fill="url(#ws-rgb)"
+                 style={{ animation: "ws-rgb-pulse 3.5s ease-in-out infinite" }} />
+        <path
+          d="M515,600
+             Q515,572 542,572
+             Q572,572 575,605
+             L578,665
+             Q578,690 545,690
+             Q510,690 510,668
+             L508,635
+             Q508,615 515,600 Z"
+          fill="url(#ws-mouse)"
+        />
+        <path
+          d="M515,600
+             Q515,572 542,572
+             Q572,572 575,605
+             L578,665
+             Q578,690 545,690
+             Q510,690 510,668
+             L508,635
+             Q508,615 515,600 Z"
+          fill="url(#ws-mouse-shine)"
+        />
+        <line x1="544" y1="574" x2="544" y2="630" stroke="#0A0A09" strokeWidth="0.9" opacity="0.85" />
+        <rect x="540" y="595" width="9" height="16" rx="2" fill="#0A0A09" />
+        <rect x="541" y="597" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
+        <rect x="541" y="600.5" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
+        <rect x="541" y="604" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
+        <rect x="541" y="607.5" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
+        <rect x="540" y="615" width="9" height="3.5" rx="1" fill="#0A0A09" />
+        <rect x="541" y="615.5" width="7" height="0.8" rx="0.4" fill="#3A3A38" />
+        <rect x="510" y="618" width="8" height="5" rx="1" fill="#0A0A09" opacity="0.85" />
+        <rect x="510" y="626" width="8" height="5" rx="1" fill="#0A0A09" opacity="0.85" />
+        <text x="514" y="622" fontSize="3" fill="#5F5E5A" textAnchor="middle">◂</text>
+        <text x="514" y="630" fontSize="3" fill="#5F5E5A" textAnchor="middle">▸</text>
+        <g style={{ animation: "ws-rgb-pulse 3s ease-in-out infinite" }}>
+          <circle cx="544" cy="660" r="6" fill="var(--violet-mid)" opacity="0.18" />
+          <path d="M540,656 L548,656 M540,660 L548,660 M540,664 L548,664"
+                stroke="var(--violet-soft)" strokeWidth="0.8" strokeLinecap="round" opacity="0.9" />
+        </g>
+        <path d="M575,615 Q577,640 575,665" stroke="#0A0A09" strokeWidth="0.6" opacity="0.7" fill="none" />
+        <path d="M542,572 Q535,560 540,540 Q548,520 545,500"
+              fill="none" stroke="#1A1A18" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
+      </g>
+    </svg>
     </div>
   );
 }
