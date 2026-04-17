@@ -1,5 +1,9 @@
 "use client";
 
+// Nav — hidden while at the hero, slides down once you scroll past it.
+// On the homepage, all section links are in-page anchors (#work, #about,
+// #writing, #contact). On other pages they route to the dedicated pages.
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -18,10 +22,21 @@ function useScrollProgress() {
   return p;
 }
 
+function useScrolledPastHero(threshold = 0.6) {
+  const [past, setPast] = useState(false);
+  useEffect(() => {
+    const update = () => setPast(window.scrollY > window.innerHeight * threshold);
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => window.removeEventListener("scroll", update);
+  }, [threshold]);
+  return past;
+}
+
 const homeLinks = [
   { href: "#work",    label: "work",    id: "work" },
   { href: "#about",   label: "about",   id: "about" },
-  { href: "/blog",    label: "writing", id: "" },
+  { href: "#writing", label: "writing", id: "writing" },
   { href: "#contact", label: "contact", id: "contact" },
 ];
 
@@ -33,18 +48,14 @@ const pageLinks = [
   { href: "/contact", label: "contact" },
 ];
 
-const headerStyle: React.CSSProperties = {
-  background: "color-mix(in srgb, var(--bg-base) 85%, transparent)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
-  borderBottom: "1px solid var(--gray-800)",
-};
-
 export default function Nav() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("");
   const progress = useScrollProgress();
+  // On the home page, hide the nav until past the hero. On other pages, always show.
+  const scrolledPastHero = useScrolledPastHero(0.6);
+  const visible = isHome ? scrolledPastHero : true;
 
   useEffect(() => {
     if (!isHome) return;
@@ -68,8 +79,19 @@ export default function Nav() {
 
   return (
     <header
-      className="sticky top-0 z-50 flex items-center justify-between px-[6vw] py-5 overflow-hidden"
-      style={headerStyle}
+      className="top-0 left-0 right-0 z-50 flex items-center justify-between px-[6vw] py-5 overflow-hidden"
+      style={{
+        // On home: fixed so it doesn't reserve space (hero fills full viewport).
+        // On other pages: sticky so it occupies the top of the document normally.
+        position: isHome ? "fixed" : "sticky",
+        background: "color-mix(in srgb, var(--bg-base) 85%, transparent)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        borderBottom: "1px solid var(--gray-800)",
+        transform: visible ? "translateY(0)" : "translateY(-100%)",
+        transition: "transform 350ms cubic-bezier(0.16, 1, 0.3, 1)",
+        pointerEvents: visible ? "auto" : "none",
+      }}
     >
       {/* Scroll progress bar */}
       <div
@@ -92,11 +114,9 @@ export default function Nav() {
       <nav className="flex items-center gap-6">
         {isHome
           ? homeLinks.map(({ href, label, id }) => {
-              const isPage = href.startsWith("/");
-              const active = !isPage && activeSection === id;
-              const Tag = isPage ? Link : "a";
+              const active = activeSection === id;
               return (
-                <Tag
+                <a
                   key={href}
                   href={href}
                   className="relative font-mono text-[13px] transition-colors duration-200"
@@ -109,7 +129,7 @@ export default function Nav() {
                       style={{ background: "var(--violet-mid)" }}
                     />
                   )}
-                </Tag>
+                </a>
               );
             })
           : pageLinks.map(({ href, label }) => {

@@ -1,4 +1,5 @@
 import Nav from "@/components/site/Nav";
+import ScrollControls from "@/components/site/ScrollControls";
 
 export default function SiteLayout({
   children,
@@ -9,6 +10,7 @@ export default function SiteLayout({
     <>
       <Nav />
       <main className="flex-1">{children}</main>
+      <ScrollControls />
       <footer
         className="px-[6vw] py-6 font-mono text-[11px] flex justify-between flex-wrap gap-3"
         style={{

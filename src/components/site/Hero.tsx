@@ -1,154 +1,179 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+// Hero — STATUS_MONOLITH layout (from /6) with the CharacterAnimation in the
+// space the "01" used to occupy. No top sys label. No ghosted decoration.
+// Single-page friendly: nav panel uses in-page anchors.
+
+import CharacterAnimation from "./CharacterAnimation";
+
+const STACK = [
+  ["python", "go", "c++"],
+  ["typescript", "rust", "c"],
+  ["pytorch", "langchain", "mcp"],
+  ["docker", "postgres", "supabase"],
+];
+
+const LINKS = [
+  { href: "#work",    label: "projects" },
+  { href: "#about",   label: "about" },
+  { href: "#writing", label: "writing" },
+  { href: "#contact", label: "contact" },
+  { href: "/resume",  label: "resume" },
+];
+
+function CornerBox({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`relative p-5 ${className}`}>
+      {(["tl", "tr", "bl", "br"] as const).map(pos => (
+        <span
+          key={pos}
+          className="absolute w-3.5 h-3.5 pointer-events-none"
+          style={{
+            top: pos.startsWith("t") ? 0 : undefined,
+            bottom: pos.startsWith("b") ? 0 : undefined,
+            left: pos.endsWith("l") ? 0 : undefined,
+            right: pos.endsWith("r") ? 0 : undefined,
+            borderTop: pos.startsWith("t") ? "1px solid var(--violet-soft)" : undefined,
+            borderBottom: pos.startsWith("b") ? "1px solid var(--violet-soft)" : undefined,
+            borderLeft: pos.endsWith("l") ? "1px solid var(--violet-soft)" : undefined,
+            borderRight: pos.endsWith("r") ? "1px solid var(--violet-soft)" : undefined,
+            opacity: 0.5,
+          }}
+        />
+      ))}
+      <div
+        className="font-mono text-[9px] tracking-[0.22em] uppercase mb-3"
+        style={{ color: "var(--text-muted)" }}
+      >
+        {label}
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export default function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Subtle parallax on the ambient glow
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      const el = containerRef.current;
-      if (!el) return;
-      const { left, top, width, height } = el.getBoundingClientRect();
-      const x = ((e.clientX - left) / width - 0.5) * 20;
-      const y = ((e.clientY - top) / height - 0.5) * 20;
-      el.style.setProperty("--glow-x", `calc(50% + ${x}px)`);
-      el.style.setProperty("--glow-y", `calc(50% + ${y}px)`);
-    };
-    window.addEventListener("mousemove", handler);
-    return () => window.removeEventListener("mousemove", handler);
-  }, []);
-
   return (
     <section
       id="hero"
-      ref={containerRef}
-      className="relative flex items-center justify-center min-h-[calc(100vh-73px)] px-[6vw] py-20"
-      style={
-        {
-          "--glow-x": "50%",
-          "--glow-y": "50%",
-        } as React.CSSProperties
-      }
+      className="relative flex flex-col justify-center min-h-[calc(100vh)] px-[5vw] py-12 overflow-hidden"
+      style={{ background: "var(--bg-base)" }}
     >
-      {/* Ambient violet glow */}
+      {/* Character animation — anchored right, vertically centered */}
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at var(--glow-x) var(--glow-y), color-mix(in srgb, var(--violet-dim) 8%, transparent), transparent 70%)",
-        }}
-      />
-
-      {/* Subtle crosshatch texture */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.025]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, var(--gray-600) 0px, transparent 1px, transparent 32px, var(--gray-600) 32px), repeating-linear-gradient(90deg, var(--gray-600) 0px, transparent 1px, transparent 32px, var(--gray-600) 32px)",
-        }}
-      />
-
-      {/* Scroll cue */}
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
-        style={{ animation: "bounceCue 2s ease-in-out infinite" }}
+        className="absolute right-[2vw] top-1/2 -translate-y-1/2 select-none pointer-events-none hidden md:block"
+        aria-hidden
       >
-        <span className="font-mono text-[10px] tracking-[0.12em] uppercase" style={{ color: "var(--text-muted)" }}>scroll</span>
-        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" style={{ color: "var(--text-muted)" }}>
-          <path d="M1 1L6 7L11 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <CharacterAnimation
+          style={{
+            width: "auto",
+            height: "min(78vh, 660px)",
+          }}
+        />
       </div>
 
-      <div className="relative z-10 flex w-full justify-center">
-        <div className="flex max-w-[620px] flex-col items-center text-center gap-4">
-          <h1
-            className="fade-up font-mono font-medium leading-[1.05] tracking-[-0.03em]"
-            style={{
-              fontSize: "clamp(48px, 8vw, 72px)",
-              color: "var(--text-primary)",
-            }}
-          >
-            sashreek addanki
-          </h1>
+      {/* MASSIVE NAME (matches /4 monolith treatment) */}
+      <h1
+        className="relative z-10 fade-up font-mono font-medium mb-10"
+        style={{
+          fontSize: "clamp(52px, 11.5vw, 160px)",
+          lineHeight: "0.96",
+          letterSpacing: "-0.045em",
+          color: "var(--text-primary)",
+        }}
+      >
+        sashreek<br />addanki
+      </h1>
 
+      {/* HAIRLINE DIVIDER */}
+      <div
+        className="relative z-10 h-px w-full mb-8"
+        style={{ background: "var(--gray-800)" }}
+      />
+
+      {/* LOWER ROW — 4 corner-bracket panels */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-[100%]">
+        {/* IDENTITY */}
+        <CornerBox label="sys · identity">
           <p
-            className="fade-up fade-up-1 font-mono text-[14px]"
-            style={{ color: "var(--text-muted)" }}
+            className="font-mono text-[12px] leading-[1.7]"
+            style={{ color: "var(--text-secondary)" }}
           >
-            computing science @ ualberta&nbsp;&nbsp;·&nbsp;&nbsp;ai + systems
+            computing science<br />@ ualberta<br />
+            <span style={{ color: "var(--text-muted)" }}>
+              ai + systems · co-op
+            </span>
           </p>
+        </CornerBox>
 
+        {/* THESIS */}
+        <CornerBox label="sys · thesis">
           <p
-            className="fade-up fade-up-2 text-[16px] leading-[1.75] max-w-[520px] mt-2"
-            style={{
-              color: "var(--text-secondary)",
-              fontFamily: "var(--font-body)",
-            }}
+            className="text-[14px] leading-[1.7]"
+            style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}
           >
             I understand the machine before I build on top of it.
           </p>
+        </CornerBox>
 
+        {/* STACK */}
+        <CornerBox label="sys · stack">
           <div
-            className="fade-up fade-up-3 flex items-center gap-2 mt-2 font-mono text-[12px] font-medium tracking-[0.06em]"
+            className="font-mono text-[11px] leading-[1.85]"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {STACK.map((row, i) => (
+              <div key={i}>{row.join(" · ")}</div>
+            ))}
+          </div>
+        </CornerBox>
+
+        {/* NAVIGATE */}
+        <CornerBox label="sys · navigate">
+          <div
+            className="flex items-center gap-2 font-mono text-[11px] font-medium mb-3"
             style={{ color: "var(--green-bright)" }}
           >
             <span
-              className="w-[7px] h-[7px] rounded-full flex-shrink-0"
+              className="w-[6px] h-[6px] rounded-full"
               style={{
                 background: "var(--green-mid)",
                 animation: "pulse-dot 2.5s ease-in-out infinite",
               }}
             />
-            available for internships
+            open · internships
           </div>
-
-          <div className="fade-up fade-up-3 flex flex-wrap justify-center gap-3 mt-6">
-            {[
-              { href: "#work", label: "projects" },
-              { href: "#about", label: "about" },
-              {
-                href: "https://github.com/Sashreek007",
-                label: "github ↗",
-                external: true,
-              },
-              {
-                href: "https://www.linkedin.com/in/sashreek-addanki-121471257/",
-                label: "linkedin ↗",
-                external: true,
-              },
-              { href: "/resume", label: "resume" },
-            ].map(({ href, label, external }) => (
-              <a
-                key={href}
-                href={href}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noreferrer noopener" : undefined}
-                className="font-mono text-[13px] px-4 py-2 transition-all duration-200 hover:-translate-y-[2px]"
-                style={{
-                  color: "var(--text-muted)",
-                  border: "1px solid var(--gray-800)",
-                  borderRadius: "4px",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                    "color-mix(in srgb, var(--violet-soft) 50%, transparent)";
-                  (e.currentTarget as HTMLAnchorElement).style.color =
-                    "var(--text-primary)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                    "var(--gray-800)";
-                  (e.currentTarget as HTMLAnchorElement).style.color =
-                    "var(--text-muted)";
-                }}
-              >
-                {label}
-              </a>
-            ))}
+          <div className="flex flex-col gap-1">
+            {LINKS.map(({ href, label }) => {
+              const ext = href === "/resume";
+              return (
+                <a
+                  key={href}
+                  href={href}
+                  className="group flex items-center justify-between font-mono text-[12px] py-1 transition-colors duration-150"
+                  style={{ color: "var(--text-muted)" }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-primary)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)";
+                  }}
+                >
+                  <span>{label}</span>
+                  <span style={{ opacity: 0.4 }}>{ext ? "→" : "↓"}</span>
+                </a>
+              );
+            })}
           </div>
-        </div>
+        </CornerBox>
       </div>
     </section>
   );
