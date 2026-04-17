@@ -5,12 +5,6 @@ import { projectSlug } from "@/lib/projects";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Project } from "@/components/site/ProjectCard";
 
-const statusTone = {
-  active: "var(--green-bright)",
-  shipped: "var(--text-muted)",
-  building: "var(--amber-bright)",
-} as const;
-
 export async function generateMetadata({
   params,
 }: {
@@ -200,23 +194,14 @@ export default async function ProjectDetailPage({
           </span>
         </div>
 
-        <div className="flex items-center gap-3 mb-5 font-mono text-[11px] tracking-[0.08em] uppercase">
-          <span
-            className="w-[7px] h-[7px] rounded-full"
-            style={{
-              background: statusTone[p.status],
-              boxShadow:
-                p.status === "active"
-                  ? `0 0 8px ${statusTone[p.status]}`
-                  : "none",
-            }}
-          />
-          <span style={{ color: statusTone[p.status] }}>{p.status}</span>
-          <span style={{ color: "var(--gray-800)" }}>/</span>
-          {p.year && (
-            <span style={{ color: "var(--green-bright)" }}>{p.year}</span>
-          )}
-        </div>
+        {p.year && (
+          <div
+            className="mb-5 font-mono text-[11px] tracking-[0.08em] uppercase"
+            style={{ color: "var(--green-bright)" }}
+          >
+            {p.year}
+          </div>
+        )}
 
         <h1
           className="font-medium leading-[1.08] tracking-[-0.02em] mb-6"

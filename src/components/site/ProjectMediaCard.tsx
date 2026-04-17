@@ -2,12 +2,6 @@ import Link from "next/link";
 import { projectHref } from "@/lib/projects";
 import type { Project } from "@/components/site/ProjectCard";
 
-const statusTone = {
-  active: "var(--green-bright)",
-  shipped: "var(--text-muted)",
-  building: "var(--amber-bright)",
-} as const;
-
 function MediaFrame({
   project: p,
   index,
@@ -114,24 +108,14 @@ export default function ProjectMediaCard({
       <MediaFrame project={p} index={index} />
 
       <div className="flex flex-col gap-4 p-5">
-        {/* status / year row */}
-        <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase">
-          <span
-            className="w-[7px] h-[7px] rounded-full"
-            style={{
-              background: statusTone[p.status],
-              boxShadow:
-                p.status === "active"
-                  ? `0 0 8px ${statusTone[p.status]}`
-                  : "none",
-            }}
-          />
-          <span style={{ color: statusTone[p.status] }}>{p.status}</span>
-          <span style={{ color: "var(--gray-800)" }}>/</span>
-          {p.year && (
-            <span style={{ color: "var(--text-muted)" }}>{p.year}</span>
-          )}
-        </div>
+        {p.year && (
+          <div
+            className="font-mono text-[11px] tracking-[0.08em] uppercase"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {p.year}
+          </div>
+        )}
 
         {/* Title */}
         <h3
