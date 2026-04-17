@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Project } from "@/components/site/ProjectCard";
-import { buildProjectPostPayload } from "@/lib/project-post";
 
 type FormData = {
   name: string;
@@ -105,56 +104,16 @@ export default function ProjectForm({ project, mode }: Props) {
     const supabase = createClient();
 
     if (mode === "new") {
-      const { data: inserted, error } = await supabase
+      const { error } = await supabase
         .from("projects")
-        .insert({ ...payload, sort_order: 99 })
-        .select()
-        .single();
-      if (error || !inserted) { setError(error?.message ?? "insert failed"); setSaving(false); return; }
-
-      // Auto-create the matching project blog post. Hidden from /writing
-      // by default; shown in /blog → Project blogs section.
-      const postPayload = buildProjectPostPayload(inserted as Project);
-      const { error: postErr } = await supabase.from("posts").insert(postPayload);
-      if (postErr) { setError(`project saved, but blog post failed: ${postErr.message}`); setSaving(false); return; }
+        .insert({ ...payload, sort_order: 99 });
+      if (error) { setError(error.message); setSaving(false); return; }
     } else {
-      const { data: updated, error } = await supabase
+      const { error } = await supabase
         .from("projects")
         .update(payload)
-        .eq("id", project!.id)
-        .select()
-        .single();
-      if (error || !updated) { setError(error?.message ?? "update failed"); setSaving(false); return; }
-
-      // Sync the linked post. We only touch fields that should track the
-      // project (title, slug, cover) — leave content, excerpt, publish
-      // state, and writing-page visibility alone so admin edits survive.
-      // If the post doesn't exist yet (project predates this flow), insert
-      // a blank draft stub the admin can fill in.
-      const { data: existingPost } = await supabase
-        .from("posts")
-        .select("id")
-        .eq("project_id", project!.id)
-        .maybeSingle();
-
-      const projectFields = {
-        title: (updated as Project).name,
-        slug: buildProjectPostPayload(updated as Project).slug,
-        cover_image_url: (updated as Project).image_url ?? null,
-      };
-
-      if (existingPost) {
-        const { error: postErr } = await supabase
-          .from("posts")
-          .update(projectFields)
-          .eq("id", existingPost.id);
-        if (postErr) { setError(`project saved, but blog post sync failed: ${postErr.message}`); setSaving(false); return; }
-      } else {
-        const { error: postErr } = await supabase
-          .from("posts")
-          .insert(buildProjectPostPayload(updated as Project));
-        if (postErr) { setError(`project saved, but blog post create failed: ${postErr.message}`); setSaving(false); return; }
-      }
+        .eq("id", project!.id);
+      if (error) { setError(error.message); setSaving(false); return; }
     }
 
     router.push("/admin/projects");

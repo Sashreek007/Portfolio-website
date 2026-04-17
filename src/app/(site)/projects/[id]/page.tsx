@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getAllProjects } from "@/lib/projects.server";
+import { projectSlug } from "@/lib/projects";
+import { createServerClient } from "@/lib/supabase/server";
 import type { Project } from "@/components/site/ProjectCard";
 
 const statusTone = {
@@ -6,6 +10,20 @@ const statusTone = {
   shipped: "var(--text-muted)",
   building: "var(--amber-bright)",
 } as const;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const projects = await getAllProjects();
+  const p = projects.find((x) => x.id === id);
+  return {
+    title: p ? `${p.name} · Sashreek Addanki` : "Project · Sashreek Addanki",
+    description: p?.description ?? undefined,
+  };
+}
 
 function DemoFrame({ project: p }: { project: Project }) {
   return (
@@ -49,14 +67,10 @@ function DemoFrame({ project: p }: { project: Project }) {
               className="absolute w-4 h-4"
               style={{
                 ...pos,
-                borderTop:
-                  pos.top !== undefined ? "1px solid var(--gray-600)" : undefined,
-                borderBottom:
-                  pos.bottom !== undefined ? "1px solid var(--gray-600)" : undefined,
-                borderLeft:
-                  pos.left !== undefined ? "1px solid var(--gray-600)" : undefined,
-                borderRight:
-                  pos.right !== undefined ? "1px solid var(--gray-600)" : undefined,
+                borderTop: pos.top !== undefined ? "1px solid var(--gray-600)" : undefined,
+                borderBottom: pos.bottom !== undefined ? "1px solid var(--gray-600)" : undefined,
+                borderLeft: pos.left !== undefined ? "1px solid var(--gray-600)" : undefined,
+                borderRight: pos.right !== undefined ? "1px solid var(--gray-600)" : undefined,
               }}
             />
           ))}
@@ -94,24 +108,57 @@ function DemoFrame({ project: p }: { project: Project }) {
   );
 }
 
-type Props = {
-  project: Project;
-  index: number;
-  total: number;
-  prevSlug: string | null;
-  prevName: string | null;
-  nextSlug: string | null;
-  nextName: string | null;
-};
+// Only show the blog hook if a matching published post with real
+// content actually exists. Matches by project_id first (explicit link),
+// then falls back to slug convention.
+async function findLinkedPost(project: Project) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return null;
+  }
 
-export default function ProjectBlogView({
-  project: p,
-  index,
-  prevSlug,
-  prevName,
-  nextSlug,
-  nextName,
-}: Props) {
+  try {
+    const supabase = await createServerClient();
+    const slug = projectSlug(project);
+
+    const { data } = await supabase
+      .from("posts")
+      .select("slug, title, excerpt, content, is_published, project_id")
+      .or(`project_id.eq.${project.id},slug.eq.${slug}`)
+      .eq("is_published", true)
+      .limit(1)
+      .maybeSingle();
+
+    if (!data) return null;
+    // Treat empty/missing content as "no blog yet".
+    if (!data.content) return null;
+    return data as {
+      slug: string;
+      title: string;
+      excerpt: string | null;
+    };
+  } catch {
+    return null;
+  }
+}
+
+export default async function ProjectDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const projects = await getAllProjects();
+  const index = projects.findIndex((x) => x.id === id);
+  const p = index >= 0 ? projects[index] : null;
+  if (!p) notFound();
+
+  const prev = index > 0 ? projects[index - 1] : null;
+  const next = index < projects.length - 1 ? projects[index + 1] : null;
+  const linkedPost = await findLinkedPost(p);
+
   return (
     <div
       className="min-h-screen w-full px-[6vw] py-16"
@@ -269,14 +316,54 @@ export default function ProjectBlogView({
           </section>
         )}
 
+        {/* Blog hook — only rendered if a matching published post exists. */}
+        {linkedPost && (
+          <section
+            className="mb-16 p-6 flex flex-col gap-3"
+            style={{
+              border: "1px solid var(--gray-800)",
+              borderRadius: "8px",
+              background: "var(--bg-surface)",
+            }}
+          >
+            <span
+              className="font-mono text-[11px] tracking-[0.15em] uppercase"
+              style={{ color: "var(--text-muted)" }}
+            >
+              read more
+            </span>
+            <h3
+              className="text-[18px] font-medium leading-[1.3]"
+              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+            >
+              {linkedPost.title}
+            </h3>
+            {linkedPost.excerpt && (
+              <p
+                className="text-[14px] leading-[1.7]"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {linkedPost.excerpt}
+              </p>
+            )}
+            <Link
+              href={`/blog/${linkedPost.slug}`}
+              className="font-mono text-[12px] mt-2 inline-flex items-center gap-2 transition-all duration-200 hover:translate-x-[3px]"
+              style={{ color: "var(--violet-soft)" }}
+            >
+              read on the blog →
+            </Link>
+          </section>
+        )}
+
         <nav
           className="flex items-center justify-between pt-8 mt-8 gap-4"
           style={{ borderTop: "1px solid var(--gray-800)" }}
         >
           <div className="flex-1">
-            {prevSlug && (
+            {prev && (
               <Link
-                href={`/blog/${prevSlug}`}
+                href={`/projects/${prev.id}`}
                 className="group flex flex-col gap-1"
               >
                 <span
@@ -289,15 +376,15 @@ export default function ProjectBlogView({
                   className="text-[14px] font-medium group-hover:text-[var(--violet-pale)] transition-colors"
                   style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
                 >
-                  {prevName}
+                  {prev.name}
                 </span>
               </Link>
             )}
           </div>
           <div className="flex-1 text-right">
-            {nextSlug && (
+            {next && (
               <Link
-                href={`/blog/${nextSlug}`}
+                href={`/projects/${next.id}`}
                 className="group flex flex-col gap-1 items-end"
               >
                 <span
@@ -310,7 +397,7 @@ export default function ProjectBlogView({
                   className="text-[14px] font-medium group-hover:text-[var(--violet-pale)] transition-colors"
                   style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
                 >
-                  {nextName}
+                  {next.name}
                 </span>
               </Link>
             )}

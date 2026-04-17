@@ -122,5 +122,5 @@ export function projectSlug(p: Project) {
 }
 
 export function projectHref(p: Project) {
-  return `/blog/${projectSlug(p)}`;
+  return `/projects/${p.id}`;
 }
