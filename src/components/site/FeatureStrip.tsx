@@ -2,12 +2,6 @@ import Link from "next/link";
 import { projectHref } from "@/lib/projects";
 import type { Project } from "@/components/site/ProjectCard";
 
-const statusTone = {
-  active: "var(--green-bright)",
-  shipped: "var(--text-muted)",
-  building: "var(--amber-bright)",
-} as const;
-
 function MediaFrame({ index }: { index: number }) {
   return (
     <div
@@ -90,27 +84,10 @@ export default function FeatureStrip({
       <div className="flex flex-col gap-5" style={{ direction: "ltr" }}>
         <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.12em] uppercase">
           <span style={{ color: "var(--text-muted)" }}>
-            feature {String(index + 1).padStart(2, "0")}
+            project {String(index + 1).padStart(2, "0")}
           </span>
           <span style={{ color: "var(--gray-800)" }}>/</span>
           <span style={{ color: "var(--green-bright)" }}>{p.year ?? "—"}</span>
-          <span style={{ color: "var(--gray-800)" }}>/</span>
-          <span
-            className="flex items-center gap-[6px]"
-            style={{ color: statusTone[p.status] }}
-          >
-            <span
-              className="w-[6px] h-[6px] rounded-full"
-              style={{
-                background: statusTone[p.status],
-                boxShadow:
-                  p.status === "active"
-                    ? `0 0 8px ${statusTone.active}`
-                    : "none",
-              }}
-            />
-            {p.status}
-          </span>
         </div>
 
         <h3
@@ -144,7 +121,7 @@ export default function FeatureStrip({
             className="font-mono text-[10px] tracking-[0.15em] uppercase w-full"
             style={{ color: "var(--text-muted)" }}
           >
-            colophon
+            languages &amp; stack used
           </span>
           {p.stack.map((tech) => (
             <span

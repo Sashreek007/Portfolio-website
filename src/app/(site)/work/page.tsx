@@ -14,7 +14,7 @@ export default async function WorkPage() {
           className="font-mono text-[11px] tracking-[0.2em] uppercase"
           style={{ color: "var(--text-muted)" }}
         >
-          WORK · FEATURE SPREADS
+          WORK · PROJECTS
         </span>
         <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
         <span
@@ -29,16 +29,14 @@ export default async function WorkPage() {
         className="text-[36px] lg:text-[44px] font-medium leading-[1.15] mb-4 tracking-[-0.015em] max-w-[720px]"
         style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
       >
-        Projects, laid out as{" "}
-        <span style={{ color: "var(--green-bright)" }}>feature spreads</span>.
+        <span style={{ color: "var(--green-bright)" }}>Projects</span>.
       </h1>
       <p
         className="text-[15px] leading-[1.75] mb-14 max-w-[640px]"
         style={{ color: "var(--text-secondary)" }}
       >
-        Personal builds, research, and community work. Each project gets a
-        full-width feature with a demo frame and a reading column — click to
-        open the write-up and watch the demo.
+        Personal builds, research, and community work. Click any project to
+        open the case file and watch the demo.
       </p>
 
       <WorkClient projects={projects} />
