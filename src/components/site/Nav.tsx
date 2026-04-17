@@ -26,6 +26,14 @@ const headerStyle: React.CSSProperties = {
   borderBottom: "1px solid var(--gray-800)",
 };
 
+const railLinks = [
+  { href: "#hero",    label: "top",     id: "hero" },
+  { href: "#about",   label: "about",   id: "about" },
+  { href: "#work",    label: "work",    id: "work" },
+  { href: "#writing", label: "writing", id: "writing" },
+  { href: "#contact", label: "contact", id: "contact" },
+];
+
 function getNavItemStyle(active: boolean): React.CSSProperties {
   return {
     color: active ? "var(--text-primary)" : "var(--text-muted)",
@@ -42,11 +50,13 @@ export default function Nav() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("");
+  const [showRail, setShowRail] = useState(false);
   const logoActive = isHome && (activeSection === "" || activeSection === "hero");
 
   useEffect(() => {
     if (!isHome) {
       setActiveSection("");
+      setShowRail(false);
       return;
     }
 
@@ -67,6 +77,7 @@ export default function Nav() {
       }
 
       setActiveSection(current);
+      setShowRail(window.scrollY > window.innerHeight * 0.38);
     };
 
     window.addEventListener("scroll", update, { passive: true });
@@ -98,14 +109,12 @@ export default function Nav() {
       <nav className="flex items-center gap-6">
         {isHome
           ? homeLinks.map(({ href, label, id }) => {
-              const active = activeSection === id;
               return (
                 <a
                   key={href}
                   href={href}
-                  aria-current={active ? "location" : undefined}
-                  className="inline-flex items-center rounded-[999px] px-3 py-1.5 font-mono text-[13px] transition-colors duration-200"
-                  style={getNavItemStyle(active)}
+                  className="inline-flex items-center font-mono text-[13px] transition-colors duration-200"
+                  style={{ color: activeSection === id ? "var(--text-primary)" : "var(--text-muted)" }}
                 >
                   {label}
                 </a>
@@ -126,6 +135,48 @@ export default function Nav() {
               );
             })}
       </nav>
+
+      {isHome && (
+        <aside
+          className="pointer-events-none fixed right-6 top-1/2 z-40 hidden -translate-y-1/2 lg:block"
+          style={{
+            opacity: showRail ? 1 : 0,
+            transform: `translateY(-50%) translateX(${showRail ? "0" : "8px"})`,
+            transition: "opacity 220ms ease, transform 220ms ease",
+          }}
+        >
+          <div
+            className="pointer-events-auto flex flex-col gap-2 rounded-[10px] p-2"
+            style={{
+              border: "1px solid color-mix(in srgb, var(--gray-800) 88%, transparent)",
+              background: "color-mix(in srgb, var(--bg-base) 82%, transparent)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+            }}
+          >
+            {railLinks.map(({ href, label, id }) => {
+              const active = activeSection === id;
+              return (
+                <a
+                  key={href}
+                  href={href}
+                  aria-current={active ? "location" : undefined}
+                  className="inline-flex min-w-[84px] items-center justify-between gap-3 rounded-[999px] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors duration-200"
+                  style={getNavItemStyle(active)}
+                >
+                  <span>{label}</span>
+                  <span
+                    className="h-[6px] w-[6px] rounded-full"
+                    style={{
+                      background: active ? "var(--violet-soft)" : "var(--gray-600)",
+                    }}
+                  />
+                </a>
+              );
+            })}
+          </div>
+        </aside>
+      )}
     </header>
   );
 }
