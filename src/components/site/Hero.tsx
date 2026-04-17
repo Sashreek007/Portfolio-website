@@ -37,16 +37,7 @@ export default function Hero() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at var(--glow-x) var(--glow-y), color-mix(in srgb, var(--violet-dim) 8%, transparent), transparent 70%)",
-        }}
-      />
-
-      {/* Subtle crosshatch texture */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.025]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, var(--gray-600) 0px, transparent 1px, transparent 32px, var(--gray-600) 32px), repeating-linear-gradient(90deg, var(--gray-600) 0px, transparent 1px, transparent 32px, var(--gray-600) 32px)",
+            "radial-gradient(ellipse 62% 52% at var(--glow-x) var(--glow-y), color-mix(in srgb, var(--violet-dim) 10%, transparent), transparent 70%)",
         }}
       />
 
@@ -61,27 +52,35 @@ export default function Hero() {
         </svg>
       </div>
 
-      <div className="relative z-10 flex w-full justify-center">
-        <div className="flex max-w-[620px] flex-col items-center text-center gap-4">
+      <div className="relative z-10 grid w-full max-w-[1160px] items-end gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
+        <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+          <p
+            className="fade-up font-mono text-[11px] font-medium tracking-[0.14em] uppercase"
+            style={{ color: "var(--text-muted)" }}
+          >
+            systems-first engineering
+          </p>
+
           <h1
-            className="fade-up font-mono font-medium leading-[1.05] tracking-[-0.03em]"
+            className="fade-up fade-up-1 mt-5 font-mono font-medium leading-[0.96] tracking-[-0.05em]"
             style={{
-              fontSize: "clamp(48px, 8vw, 72px)",
+              fontSize: "clamp(58px, 9vw, 104px)",
               color: "var(--text-primary)",
             }}
           >
-            sashreek addanki
+            <span className="block">sashreek</span>
+            <span className="block">addanki</span>
           </h1>
 
           <p
-            className="fade-up fade-up-1 font-mono text-[14px]"
+            className="fade-up fade-up-2 mt-5 font-mono text-[13px] tracking-[0.05em]"
             style={{ color: "var(--text-muted)" }}
           >
             computing science @ ualberta&nbsp;&nbsp;·&nbsp;&nbsp;ai + systems
           </p>
 
           <p
-            className="fade-up fade-up-2 text-[16px] leading-[1.75] max-w-[520px] mt-2"
+            className="fade-up fade-up-2 mt-6 max-w-[620px] text-[17px] leading-[1.85]"
             style={{
               color: "var(--text-secondary)",
               fontFamily: "var(--font-body)",
@@ -90,24 +89,35 @@ export default function Hero() {
             I understand the machine before I build on top of it.
           </p>
 
-          <div
-            className="fade-up fade-up-3 flex items-center gap-2 mt-2 font-mono text-[12px] font-medium tracking-[0.06em]"
-            style={{ color: "var(--green-bright)" }}
-          >
-            <span
-              className="w-[7px] h-[7px] rounded-full flex-shrink-0"
+          <div className="fade-up fade-up-3 mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
+            <a
+              href="#work"
+              className="font-mono text-[13px] px-5 py-2.5 transition-all duration-200 hover:-translate-y-[2px]"
               style={{
-                background: "var(--green-mid)",
-                animation: "pulse-dot 2.5s ease-in-out infinite",
+                color: "var(--bg-base)",
+                background: "var(--text-primary)",
+                border: "1px solid var(--text-primary)",
+                borderRadius: "4px",
               }}
-            />
-            available for internships
+            >
+              view work
+            </a>
+            <a
+              href="/resume"
+              className="font-mono text-[13px] px-5 py-2.5 transition-all duration-200 hover:-translate-y-[2px]"
+              style={{
+                color: "var(--text-primary)",
+                border: "1px solid var(--gray-800)",
+                borderRadius: "4px",
+              }}
+            >
+              resume
+            </a>
           </div>
 
-          <div className="fade-up fade-up-3 flex flex-wrap justify-center gap-3 mt-6">
+          <div className="fade-up fade-up-3 mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 font-mono text-[12px] lg:justify-start">
             {[
-              { href: "#work", label: "projects" },
-              { href: "#about", label: "about" },
+              { href: "/about", label: "about" },
               {
                 href: "https://github.com/Sashreek007",
                 label: "github ↗",
@@ -118,34 +128,79 @@ export default function Hero() {
                 label: "linkedin ↗",
                 external: true,
               },
-              { href: "/resume", label: "resume" },
             ].map(({ href, label, external }) => (
               <a
                 key={href}
                 href={href}
                 target={external ? "_blank" : undefined}
                 rel={external ? "noreferrer noopener" : undefined}
-                className="font-mono text-[13px] px-4 py-2 transition-all duration-200 hover:-translate-y-[2px]"
-                style={{
-                  color: "var(--text-muted)",
-                  border: "1px solid var(--gray-800)",
-                  borderRadius: "4px",
-                }}
+                className="transition-colors duration-200"
+                style={{ color: "var(--text-muted)" }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                    "color-mix(in srgb, var(--violet-soft) 50%, transparent)";
                   (e.currentTarget as HTMLAnchorElement).style.color =
                     "var(--text-primary)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                    "var(--gray-800)";
                   (e.currentTarget as HTMLAnchorElement).style.color =
                     "var(--text-muted)";
                 }}
               >
                 {label}
               </a>
+            ))}
+          </div>
+        </div>
+
+        <div
+          className="fade-up fade-up-3 hidden lg:block"
+          style={{
+            border: "1px solid color-mix(in srgb, var(--gray-800) 82%, transparent)",
+            borderRadius: "8px",
+            background: "color-mix(in srgb, var(--bg-elevated) 72%, transparent)",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <div
+            className="px-5 py-3 font-mono text-[11px] tracking-[0.12em] uppercase"
+            style={{
+              color: "var(--text-muted)",
+              borderBottom: "1px solid var(--gray-800)",
+            }}
+          >
+            signal
+          </div>
+
+          <div className="flex flex-col">
+            {[
+              { label: "available", value: "internships", tone: "var(--green-bright)" },
+              { label: "focus", value: "backend / ai systems / mlops" },
+              { label: "track", value: "co-op stream" },
+              { label: "grad", value: "2028" },
+            ].map(({ label, value, tone }, i, arr) => (
+              <div
+                key={label}
+                className="grid grid-cols-[88px_minmax(0,1fr)] gap-4 px-5 py-4"
+                style={{
+                  borderBottom:
+                    i < arr.length - 1 ? "1px solid var(--gray-800)" : "none",
+                }}
+              >
+                <span
+                  className="font-mono text-[11px] tracking-[0.08em] uppercase"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {label}
+                </span>
+                <span
+                  className="text-[14px] leading-[1.55]"
+                  style={{
+                    color: tone ?? "var(--text-primary)",
+                    fontFamily: "var(--font-body)",
+                  }}
+                >
+                  {value}
+                </span>
+              </div>
             ))}
           </div>
         </div>

@@ -28,9 +28,10 @@ const statusConfig = {
 type Props = {
   project: Project;
   index?: number;
+  featured?: boolean;
 };
 
-export default function ProjectCard({ project, index }: Props) {
+export default function ProjectCard({ project, index, featured = false }: Props) {
   const cardRef = useRef<HTMLElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const status = statusConfig[project.status] ?? statusConfig.shipped;
@@ -43,7 +44,7 @@ export default function ProjectCard({ project, index }: Props) {
     const r = card.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width;
     const y = (e.clientY - r.top) / r.height;
-    card.style.transform = `perspective(900px) rotateX(${(0.5 - y) * 5}deg) rotateY(${(x - 0.5) * 5}deg) translateY(-3px)`;
+    card.style.transform = `perspective(900px) rotateX(${(0.5 - y) * 2.5}deg) rotateY(${(x - 0.5) * 2.5}deg) translateY(-2px)`;
     card.style.borderColor = "color-mix(in srgb, var(--violet-soft) 50%, transparent)";
     if (glow) {
       glow.style.background = `radial-gradient(220px circle at ${x * 100}% ${y * 100}%, color-mix(in srgb, var(--violet-soft) 11%, transparent), transparent 70%)`;
@@ -64,12 +65,12 @@ export default function ProjectCard({ project, index }: Props) {
   return (
     <article
       ref={cardRef}
-      className="project-card group relative flex flex-col gap-4 p-6 cursor-default overflow-hidden"
+      className={`project-card group relative flex flex-col cursor-default overflow-hidden ${featured ? "gap-5 p-8" : "gap-4 p-6"}`}
       style={{
         background: "var(--bg-elevated)",
         border: "1px solid color-mix(in srgb, var(--gray-800) 60%, transparent)",
         borderRadius: "8px",
-        transition: "transform 400ms cubic-bezier(0.23, 1, 0.32, 1), border-color 200ms",
+        transition: "transform 320ms cubic-bezier(0.23, 1, 0.32, 1), border-color 200ms",
         willChange: "transform",
       }}
       onMouseMove={onMove}
@@ -87,7 +88,7 @@ export default function ProjectCard({ project, index }: Props) {
         <span
           className="pointer-events-none absolute right-5 top-3 font-mono select-none"
           style={{
-            fontSize: "44px",
+            fontSize: featured ? "64px" : "44px",
             lineHeight: 1,
             color: "var(--gray-800)",
             letterSpacing: "-0.04em",
@@ -154,7 +155,7 @@ export default function ProjectCard({ project, index }: Props) {
       {/* Title + arrow */}
       <div className="relative flex items-start justify-between gap-3">
         <h3
-          className="text-[20px] font-medium leading-[1.25]"
+          className={featured ? "text-[24px] font-medium leading-[1.2] md:text-[28px]" : "text-[20px] font-medium leading-[1.25]"}
           style={{
             color: "var(--text-primary)",
             fontFamily: "var(--font-body)",
@@ -188,7 +189,10 @@ export default function ProjectCard({ project, index }: Props) {
       />
 
       {/* Description */}
-      <p className="relative text-[14px] leading-[1.65]" style={{ color: "var(--text-secondary)" }}>
+      <p
+        className={featured ? "relative max-w-[58ch] text-[15px] leading-[1.75]" : "relative text-[14px] leading-[1.65]"}
+        style={{ color: "var(--text-secondary)" }}
+      >
         {project.description}
       </p>
 
