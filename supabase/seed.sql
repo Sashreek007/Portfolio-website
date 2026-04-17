@@ -20,20 +20,12 @@ VALUES
     'shipped', 2025, true, false, 1
   ),
   (
-    'Streaks',
-    'Social media productivity web app where people announce goals publicly and hold each other accountable to complete them.',
-    'https://github.com/Sashreek007/Streaks',
-    'https://streaks-cult-mode.vercel.app/dashboard',
-    ARRAY['Next.js','TypeScript','Supabase','TailwindCSS'],
-    'building', 2025, true, true, 2
-  ),
-  (
     'FluxAtlas — Economic Trading Engine',
     'Full-stack auction simulation platform modeling international resource trading with Vickrey auction mechanisms across 50+ simulated countries.',
     'https://github.com/Aarushb/NH25_flux_Atlas',
     NULL,
     ARRAY['FastAPI','React','PostgreSQL','Python','TypeScript'],
-    'shipped', 2025, true, false, 3
+    'shipped', 2025, true, false, 2
   ),
   (
     'Spam Detection Discord Bot',
@@ -41,7 +33,7 @@ VALUES
     'https://github.com/UndergraduateArtificialIntelligenceClub/Spam-Detection-Discord-Bot',
     NULL,
     ARRAY['Python','Discord.py','Hugging Face'],
-    'active', 2025, true, false, 4
+    'active', 2025, true, false, 3
   ),
   (
     'Balloon Popper — Gesture-Controlled Game',
@@ -49,7 +41,7 @@ VALUES
     'https://github.com/Sashreek007/fruit-ninja-hand-tracker',
     NULL,
     ARRAY['Python','MediaPipe','Pygame','OpenCV'],
-    'shipped', 2024, true, false, 5
+    'shipped', 2024, true, false, 4
   ),
   (
     'LinkedIn Profile Summarizer',
@@ -57,7 +49,7 @@ VALUES
     'https://github.com/Sashreek007/Langchain_agent',
     NULL,
     ARRAY['Python','LangChain','OpenAI API'],
-    'shipped', 2024, false, false, 6
+    'shipped', 2024, false, false, 5
   ),
   (
     'ClubMate AI',
@@ -65,5 +57,5 @@ VALUES
     'https://github.com/UndergraduateArtificialIntelligenceClub/Clubmate-AI',
     NULL,
     ARRAY['Python','LangChain','LangGraph','MCP'],
-    'building', 2025, false, true, 7
+    'building', 2025, false, true, 6
   );

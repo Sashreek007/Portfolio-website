@@ -37,22 +37,6 @@ const SEED_PROJECTS: Project[] = [
     sort_order: 1,
   },
   {
-    id: "3",
-    name: "Streaks",
-    description:
-      "Social media productivity web app where people announce goals publicly and hold each other accountable to complete them.",
-    github_url: "https://github.com/Sashreek007/Streaks",
-    demo_url: "https://streaks-cult-mode.vercel.app/dashboard",
-    image_url: null,
-    video_url: null,
-    stack: ["Next.js", "TypeScript", "Supabase", "TailwindCSS"],
-    status: "building",
-    year: 2025,
-    is_best: true,
-    is_current: true,
-    sort_order: 2,
-  },
-  {
     id: "4",
     name: "FluxAtlas — Economic Trading Engine",
     description:
@@ -66,7 +50,7 @@ const SEED_PROJECTS: Project[] = [
     year: 2025,
     is_best: true,
     is_current: false,
-    sort_order: 3,
+    sort_order: 2,
   },
   {
     id: "5",
@@ -82,7 +66,7 @@ const SEED_PROJECTS: Project[] = [
     year: 2025,
     is_best: true,
     is_current: false,
-    sort_order: 4,
+    sort_order: 3,
   },
   {
     id: "6",
@@ -98,7 +82,7 @@ const SEED_PROJECTS: Project[] = [
     year: 2024,
     is_best: true,
     is_current: false,
-    sort_order: 5,
+    sort_order: 4,
   },
   {
     id: "7",
@@ -114,7 +98,7 @@ const SEED_PROJECTS: Project[] = [
     year: 2024,
     is_best: false,
     is_current: false,
-    sort_order: 6,
+    sort_order: 5,
   },
   {
     id: "8",
@@ -130,7 +114,7 @@ const SEED_PROJECTS: Project[] = [
     year: 2025,
     is_best: false,
     is_current: true,
-    sort_order: 7,
+    sort_order: 6,
   },
 ];
 
