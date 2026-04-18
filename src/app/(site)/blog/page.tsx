@@ -64,6 +64,7 @@ export default async function BlogPage() {
           <span>
             <span style={{ color: "var(--violet-soft)" }}>##</span> blog
           </span>
+          <span className="blog-marker-r">— sashreek addanki</span>
         </div>
         <h1 className="blog-hero-h1">
           sharing<br />my<br />
