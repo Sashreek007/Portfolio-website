@@ -9,6 +9,17 @@ export type SidebarPost = {
   tags: string[];
 };
 
+export type TrendingPost = {
+  slug: string;
+  title: string;
+  views: number;
+};
+
+function formatViewCount(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10_000 ? 0 : 1)}k`;
+  return n.toLocaleString();
+}
+
 // Strip reserved series/part tags and the `__…__` highlight markup so
 // the tree reads cleanly.
 function cleanTitle(text: string) {
@@ -28,9 +39,11 @@ function primaryCategory(tags: string[]): string {
 export default function PostSidebar({
   currentSlug,
   posts,
+  trending = [],
 }: {
   currentSlug: string;
   posts: SidebarPost[];
+  trending?: TrendingPost[];
 }) {
   const [query, setQuery] = useState("");
   const [openCats, setOpenCats] = useState<Record<string, boolean>>({});
@@ -138,6 +151,35 @@ export default function PostSidebar({
           })}
         </div>
       </div>
+
+      {trending.length > 0 && (
+        <div className="blog-post-sidebar-section">
+          <div className="blog-post-sidebar-label">## trending</div>
+          <ol className="blog-trending">
+            {trending.map((t, i) => {
+              const active = t.slug === currentSlug;
+              return (
+                <li key={t.slug}>
+                  <Link
+                    href={`/blog/${t.slug}`}
+                    className={`blog-trending-item ${active ? "on" : ""}`}
+                  >
+                    <span className="blog-trending-rank">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="blog-trending-title">
+                      {cleanTitle(t.title)}
+                    </span>
+                    <span className="blog-trending-views">
+                      {formatViewCount(t.views)}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      )}
 
       <div className="blog-post-sidebar-socials">
         <a

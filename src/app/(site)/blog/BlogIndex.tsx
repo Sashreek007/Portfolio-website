@@ -12,7 +12,13 @@ export type IndexPost = {
   created_at: string;
   tags: string[];
   year: string;
+  views: number;
 };
+
+function formatViews(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10_000 ? 0 : 1)}k`;
+  return n.toLocaleString();
+}
 
 function escapeRegExp(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -212,6 +218,12 @@ export default function BlogIndex({ posts }: { posts: IndexPost[] }) {
                     {p.tags.slice(0, 2).map((t) => (
                       <span key={t}>{t}</span>
                     ))}
+                  </span>
+                  <span
+                    className={`blog-row-views ${p.views === 0 ? "none" : ""}`}
+                    title={`${p.views.toLocaleString()} views`}
+                  >
+                    {p.views > 0 ? formatViews(p.views) : "·"}
                   </span>
                   <span className="blog-row-date">{dateStr}</span>
                 </Link>

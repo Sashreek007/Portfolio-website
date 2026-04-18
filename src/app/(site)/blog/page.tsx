@@ -6,6 +6,7 @@ import {
   renderInlineMarkup,
   renderParagraphs,
 } from "@/lib/blog-profile";
+import { getBlogViewStats } from "@/lib/blog-views";
 
 export const metadata: Metadata = {
   title: "Blog | Sashreek Addanki",
@@ -43,6 +44,7 @@ export default async function BlogPage() {
         .is("project_id", null)
         .order("published_at", { ascending: false });
       if (data) {
+        const stats = await getBlogViewStats();
         posts = (data as Array<{
           id: string;
           title: string;
@@ -66,6 +68,7 @@ export default async function BlogPage() {
               (t) => !t.startsWith("series:") && !t.startsWith("part:"),
             ),
             year: iso.slice(0, 4),
+            views: stats.get(p.slug)?.views ?? 0,
           };
         });
       }

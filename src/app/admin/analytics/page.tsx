@@ -1,5 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
+import { getBlogViewStats, type PostViewStats } from "@/lib/blog-views";
 import AnalyticsChart from "./AnalyticsChart";
+import AnalyticsBoard, { type BoardPost } from "./AnalyticsBoard";
 
 export const metadata = { title: "Analytics | Admin" };
 
@@ -15,7 +17,7 @@ async function getAnalytics(): Promise<{
   uniqueLast30: number;
   totalLifetime: number;
   uniqueLifetime: number;
-  topPaths: Array<{ path: string; views: number }>;
+  posts: BoardPost[];
 }> {
   const empty = {
     rows: [] as Row[],
@@ -23,7 +25,7 @@ async function getAnalytics(): Promise<{
     uniqueLast30: 0,
     totalLifetime: 0,
     uniqueLifetime: 0,
-    topPaths: [],
+    posts: [] as BoardPost[],
   };
 
   if (
@@ -37,30 +39,40 @@ async function getAnalytics(): Promise<{
     const supabase = await createServerClient();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    // Lifetime counts. `count: exact` is cheap.
-    const [{ count: lifetimeTotal }, { data: lifetimeUniqRows }] = await Promise.all([
+    // Traffic + posts load in parallel.
+    const [
+      { count: lifetimeTotal },
+      { data: lifetimeUniqRows },
+      { data: windowRows },
+      { data: postRows },
+      viewStats,
+    ] = await Promise.all([
       supabase.from("page_views").select("*", { count: "exact", head: true }),
       supabase.from("page_views").select("visitor_id"),
+      supabase
+        .from("page_views")
+        .select("visitor_id, path, created_at")
+        .gte("created_at", thirtyDaysAgo.toISOString()),
+      supabase
+        .from("posts")
+        .select(
+          "id, title, slug, tags, is_published, published_at, created_at, project_id, show_on_writing",
+        )
+        .order("created_at", { ascending: false }),
+      getBlogViewStats(),
     ]);
 
     const uniqueLifetime = new Set(
-      (lifetimeUniqRows ?? []).map((r: { visitor_id: string }) => r.visitor_id)
+      (lifetimeUniqRows ?? []).map((r: { visitor_id: string }) => r.visitor_id),
     ).size;
 
-    // Last-30-day window for daily buckets.
-    const { data: windowRows } = await supabase
-      .from("page_views")
-      .select("visitor_id, path, created_at")
-      .gte("created_at", thirtyDaysAgo.toISOString());
     const recent = (windowRows ?? []) as Array<{
       visitor_id: string;
       path: string;
       created_at: string;
     }>;
 
-    // Aggregate by day.
     const byDay = new Map<string, { total: number; visitors: Set<string> }>();
-    const pathCounts = new Map<string, number>();
     const lifetimeUniqSet = new Set<string>();
     for (const r of recent) {
       const day = r.created_at.slice(0, 10);
@@ -69,10 +81,8 @@ async function getAnalytics(): Promise<{
       bucket.total++;
       bucket.visitors.add(r.visitor_id);
       lifetimeUniqSet.add(r.visitor_id);
-      pathCounts.set(r.path, (pathCounts.get(r.path) ?? 0) + 1);
     }
 
-    // Fill 30-day array (inclusive today, oldest → newest).
     const now = new Date();
     const rows: Row[] = [];
     for (let i = 29; i >= 0; i--) {
@@ -87,10 +97,35 @@ async function getAnalytics(): Promise<{
       });
     }
 
-    const topPaths = [...pathCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(([path, views]) => ({ path, views }));
+    const posts: BoardPost[] = ((postRows ?? []) as Array<{
+      id: string;
+      title: string;
+      slug: string;
+      tags: string[] | null;
+      is_published: boolean;
+      published_at: string | null;
+      created_at: string;
+      project_id: string | null;
+      show_on_writing: boolean;
+    }>).map((p) => {
+      const stats: PostViewStats | undefined = viewStats.get(p.slug);
+      return {
+        id: p.id,
+        title: p.title,
+        slug: p.slug,
+        tags: (p.tags ?? []).filter(
+          (t) => !t.startsWith("series:") && !t.startsWith("part:"),
+        ),
+        isPublished: p.is_published,
+        isProject: !!p.project_id,
+        isHidden: !p.show_on_writing,
+        postedAt: p.published_at ?? p.created_at,
+        views: stats?.views ?? 0,
+        uniques: stats?.uniques ?? 0,
+        views7d: stats?.views7d ?? 0,
+        viewsPrev7d: stats?.viewsPrev7d ?? 0,
+      };
+    });
 
     return {
       rows,
@@ -98,7 +133,7 @@ async function getAnalytics(): Promise<{
       uniqueLast30: lifetimeUniqSet.size,
       totalLifetime: lifetimeTotal ?? 0,
       uniqueLifetime,
-      topPaths,
+      posts,
     };
   } catch {
     return empty;
@@ -112,7 +147,7 @@ export default async function AdminAnalyticsPage() {
     uniqueLast30,
     totalLifetime,
     uniqueLifetime,
-    topPaths,
+    posts,
   } = await getAnalytics();
 
   const stats = [
@@ -123,7 +158,7 @@ export default async function AdminAnalyticsPage() {
   ];
 
   return (
-    <div className="max-w-[1100px]">
+    <div className="max-w-[1400px]">
       <div className="mb-8">
         <p
           className="font-mono text-[11px] tracking-[0.12em] uppercase mb-1"
@@ -170,9 +205,7 @@ export default async function AdminAnalyticsPage() {
       {/* Chart */}
       <section className="mb-10">
         <div className="flex items-baseline justify-between mb-4">
-          <h2
-            className="font-mono text-[14px] flex items-baseline gap-2"
-          >
+          <h2 className="font-mono text-[14px] flex items-baseline gap-2">
             <span style={{ color: "var(--violet-soft)" }}>##</span>
             <span style={{ color: "var(--text-primary)" }}>last 30 days</span>
           </h2>
@@ -195,43 +228,22 @@ export default async function AdminAnalyticsPage() {
         </div>
       </section>
 
-      {/* Top paths */}
-      {topPaths.length > 0 && (
-        <section>
-          <h2 className="font-mono text-[14px] mb-4 flex items-baseline gap-2">
+      {/* Kanban board */}
+      <section>
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="font-mono text-[14px] flex items-baseline gap-2">
             <span style={{ color: "var(--violet-soft)" }}>##</span>
-            <span style={{ color: "var(--text-primary)" }}>top paths · 30d</span>
+            <span style={{ color: "var(--text-primary)" }}>post board</span>
           </h2>
-          <div
-            className="flex flex-col"
-            style={{ border: "1px solid var(--gray-800)", borderRadius: "6px" }}
+          <span
+            className="font-mono text-[11px] tracking-[0.08em] uppercase"
+            style={{ color: "var(--text-muted)" }}
           >
-            {topPaths.map((p, i) => (
-              <div
-                key={p.path}
-                className="flex items-center justify-between px-4 py-3"
-                style={{
-                  borderBottom:
-                    i < topPaths.length - 1 ? "1px solid var(--gray-800)" : "none",
-                }}
-              >
-                <span
-                  className="font-mono text-[12px]"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  {p.path}
-                </span>
-                <span
-                  className="font-mono text-[12px] tabular-nums"
-                  style={{ color: "var(--violet-pale)" }}
-                >
-                  {p.views.toLocaleString()}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+            by lifetime views
+          </span>
+        </div>
+        <AnalyticsBoard posts={posts} />
+      </section>
     </div>
   );
 }

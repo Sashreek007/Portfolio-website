@@ -10,7 +10,8 @@ import { common, createLowlight } from "lowlight";
 import hljs from "highlight.js";
 import PostScroll from "./PostScroll";
 import BlogToc, { type TocItem } from "./BlogToc";
-import PostSidebar, { type SidebarPost } from "./PostSidebar";
+import PostSidebar, { type SidebarPost, type TrendingPost } from "./PostSidebar";
+import { getBlogViewStats, topTrendingSlugs } from "@/lib/blog-views";
 
 const lowlight = createLowlight(common);
 
@@ -204,6 +205,23 @@ export default async function BlogPostPage({ params }: Props) {
     tags: s.tags ?? [],
   }));
 
+  // Trending pulls from the public `page_views` aggregate. We scope
+  // to the same sibling set so hidden/project posts don't leak into
+  // the rail.
+  const viewStats = await getBlogViewStats();
+  const siblingSlugs = new Set(siblings.map((s) => s.slug));
+  const titleBySlug = new Map(siblings.map((s) => [s.slug, s.title] as const));
+  const trending: TrendingPost[] = topTrendingSlugs(
+    viewStats,
+    siblingSlugs,
+    5,
+  ).map((s) => ({
+    slug: s.slug,
+    title: titleBySlug.get(s.slug) ?? s.slug,
+    views: s.views,
+  }));
+  const currentViews = viewStats.get(slug)?.views ?? 0;
+
   let html = "";
   if (typedPost.content) {
     try {
@@ -273,6 +291,15 @@ export default async function BlogPostPage({ params }: Props) {
           <span>{formatDate(postedAt)}</span>
           <span className="blog-dot">·</span>
           <span>{readTime} min read</span>
+          {currentViews > 0 && (
+            <>
+              <span className="blog-dot">·</span>
+              <span className="blog-post-views">
+                {currentViews.toLocaleString()}{" "}
+                {currentViews === 1 ? "view" : "views"}
+              </span>
+            </>
+          )}
           {seriesLabel && (
             <>
               <span className="blog-dot">·</span>
@@ -326,7 +353,7 @@ export default async function BlogPostPage({ params }: Props) {
       <PostScroll />
       </div>
 
-      <PostSidebar currentSlug={slug} posts={sidebarPosts} />
+      <PostSidebar currentSlug={slug} posts={sidebarPosts} trending={trending} />
     </div>
   );
 }
