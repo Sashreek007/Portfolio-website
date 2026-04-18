@@ -17,16 +17,18 @@ export default function PostScroll() {
   useEffect(() => {
     const handlers: Array<() => void> = [];
     document.querySelectorAll<HTMLButtonElement>(".blog-code-copy").forEach((btn) => {
+      const originalIcon = btn.innerHTML;
       const onClick = () => {
         const code =
-          btn.parentElement?.querySelector("code")?.textContent ?? "";
+          btn.closest(".blog-code")?.querySelector("code")?.textContent ?? "";
         navigator.clipboard
           .writeText(code)
           .then(() => {
-            btn.textContent = "copied";
+            btn.innerHTML =
+              '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8 L7 12 L13 4"/></svg>';
             btn.classList.add("copied");
             setTimeout(() => {
-              btn.textContent = "copy";
+              btn.innerHTML = originalIcon;
               btn.classList.remove("copied");
             }, 1200);
           })

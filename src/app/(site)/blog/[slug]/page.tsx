@@ -10,6 +10,7 @@ import { common, createLowlight } from "lowlight";
 import hljs from "highlight.js";
 import PostScroll from "./PostScroll";
 import BlogToc, { type TocItem } from "./BlogToc";
+import PostSidebar, { type SidebarPost } from "./PostSidebar";
 
 const lowlight = createLowlight(common);
 
@@ -45,24 +46,14 @@ function applyCodeHighlighting(html: string): string {
           lang && hljs.getLanguage(lang)
             ? hljs.highlight(body, { language: lang, ignoreIllegals: true })
             : hljs.highlightAuto(body);
-        const highlighted = result.value;
-        // Split highlighted HTML into lines. Each line becomes its own
-        // <span class="blog-code-line">; paired with a gutter <span>
-        // carrying the line number via CSS counter.
-        const lines = highlighted.split("\n");
-        const trailingBlank =
-          lines.length > 0 && lines[lines.length - 1] === "";
-        const renderedLines = (trailingBlank ? lines.slice(0, -1) : lines)
-          .map(
-            (ln) =>
-              `<span class="blog-code-line">${ln.length === 0 ? "\u200B" : ln}</span>`,
-          )
-          .join("\n");
+        const highlighted = result.value.replace(/\n+$/, "");
 
-        const langLabel = filename
+        const label = filename
           ? `<span class="blog-code-file">${filename}</span>`
-          : `<span class="blog-code-lang">${lang || ""}</span>`;
-        return `<div class="blog-code" data-lang="${lang || ""}">${langLabel}<button class="blog-code-copy" type="button">copy</button><pre><code>${renderedLines}</code></pre></div>`;
+          : `<span class="blog-code-lang"><span class="blog-code-lang-mark">&lt;/&gt;</span>${lang || "code"}</span>`;
+        // Inline SVG copy icon, swapped in JS with a check on success.
+        const copyIcon = `<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="9" height="9" rx="1.5"/><path d="M10 4V2.5a1 1 0 0 0-1-1H3.5a1 1 0 0 0-1 1V10"/></svg>`;
+        return `<div class="blog-code" data-lang="${lang || ""}"><div class="blog-code-head">${label}<button class="blog-code-copy" type="button" aria-label="Copy code">${copyIcon}</button></div><pre><code>${highlighted}</code></pre></div>`;
       } catch {
         return _;
       }
@@ -192,16 +183,26 @@ export default async function BlogPostPage({ params }: Props) {
   // one on the index (newer in time), "next" = the one below (older).
   const { data: sibData } = await supabase
     .from("posts")
-    .select("slug, title, published_at, created_at, project_id, show_on_writing, is_published")
+    .select("slug, title, tags, published_at, created_at, project_id, show_on_writing, is_published")
     .eq("is_published", true)
     .eq("show_on_writing", true)
     .is("project_id", null)
     .order("published_at", { ascending: false });
-  const siblings = (sibData ?? []) as Array<{ slug: string; title: string }>;
+  const siblings = (sibData ?? []) as Array<{
+    slug: string;
+    title: string;
+    tags: string[] | null;
+  }>;
   const idx = siblings.findIndex((s) => s.slug === slug);
   const prev = idx > 0 ? siblings[idx - 1] : null;
   const next =
     idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+
+  const sidebarPosts: SidebarPost[] = siblings.map((s) => ({
+    slug: s.slug,
+    title: s.title,
+    tags: s.tags ?? [],
+  }));
 
   let html = "";
   if (typedPost.content) {
@@ -255,8 +256,10 @@ export default async function BlogPostPage({ params }: Props) {
       : seriesSlug ?? null;
 
   return (
-    <div className="blog-shell">
+    <div className="blog-post-layout">
       <BlogToc items={toc} />
+
+      <div className="blog-shell">
       <Link href="/blog" className="blog-back">
         ← back to blog
       </Link>
@@ -321,6 +324,9 @@ export default async function BlogPostPage({ params }: Props) {
 
       {/* Client-side scroll-to-top floater + copy-button wiring */}
       <PostScroll />
+      </div>
+
+      <PostSidebar currentSlug={slug} posts={sidebarPosts} />
     </div>
   );
 }

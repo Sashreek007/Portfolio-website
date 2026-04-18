@@ -9,6 +9,10 @@ import { usePathname } from "next/navigation";
 export default function BlogNav() {
   const pathname = usePathname();
   const onIndex = pathname === "/blog";
+  // Post pages get the full-height sidebar navigation, so the top
+  // bar is redundant and would double up on brand.
+  const onPost = pathname?.startsWith("/blog/") ?? false;
+  if (onPost) return null;
 
   const scrollToAbout = (e: React.MouseEvent) => {
     e.preventDefault();
