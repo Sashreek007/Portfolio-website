@@ -64,12 +64,12 @@ export default async function BlogPage() {
           <span>
             <span style={{ color: "var(--violet-soft)" }}>##</span> blog
           </span>
-          <span className="blog-marker-r">— sashreek addanki</span>
         </div>
         <h1 className="blog-hero-h1">
           sharing<br />my<br />
           <span style={{ color: "var(--amber-bright)" }}>thoughts.</span>
         </h1>
+        <div className="blog-byline">— sashreek addanki</div>
       </section>
 
       <BlogIndex posts={posts} />
