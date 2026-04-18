@@ -30,7 +30,12 @@ export default function Hero() {
               color: "var(--text-primary)",
             }}
           >
-            sashreek<br />addanki
+            {/* "shrek" hidden inside the full name: s-a-[shre]-e-[k] */}
+            sa
+            <span style={{ color: "var(--amber-bright)" }}>shre</span>
+            e
+            <span style={{ color: "var(--amber-bright)" }}>k</span>
+            <br />addanki
           </h1>
 
           {/* Hairline divider */}
