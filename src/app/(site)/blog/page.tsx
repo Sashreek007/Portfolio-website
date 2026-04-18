@@ -1,5 +1,10 @@
 import { createServerClient } from "@/lib/supabase/server";
 import BlogIndex, { type IndexPost } from "./BlogIndex";
+import {
+  BLOG_PROFILE_DEFAULT,
+  renderInlineMarkup,
+  renderParagraphs,
+} from "@/lib/blog-profile";
 
 export const metadata = {
   title: "Blog | Sashreek Addanki",
@@ -7,6 +12,7 @@ export const metadata = {
 
 export default async function BlogPage() {
   let posts: IndexPost[] = [];
+  let profile = { ...BLOG_PROFILE_DEFAULT };
 
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -14,6 +20,18 @@ export default async function BlogPage() {
   ) {
     try {
       const supabase = await createServerClient();
+
+      const { data: profileRow } = await supabase
+        .from("blog_profile")
+        .select("heading, body")
+        .eq("id", 1)
+        .maybeSingle();
+      if (profileRow)
+        profile = {
+          heading: profileRow.heading ?? profile.heading,
+          body: profileRow.body ?? profile.body,
+        };
+
       const { data } = await supabase
         .from("posts")
         .select(
@@ -76,65 +94,14 @@ export default async function BlogPage() {
             <span style={{ color: "var(--violet-soft)" }}>##</span> about
           </span>
         </div>
-        <div className="blog-about-body">
-          <div>
-            <h2 className="blog-about-h2">
-              i write to understand the{" "}
-              <span style={{ color: "var(--amber-bright)" }}>machine</span>{" "}
-              before i build on top of it.
-            </h2>
-            <p className="blog-about-p">
-              this is the slow-running companion to my work — essays, build
-              logs, and paper notes from the edge of{" "}
-              <span style={{ color: "var(--violet-pale)" }}>
-                AI systems engineering
-              </span>
-              .
-            </p>
-          </div>
-          <div>
-            <dl className="blog-about-dl">
-              <dt>author</dt>
-              <dd>sashreek addanki</dd>
-              <dt>based</dt>
-              <dd>edmonton, ab</dd>
-              <dt>at</dt>
-              <dd>
-                <span style={{ color: "var(--amber-bright)" }}>ualberta</span>{" "}
-                — cs,{" "}
-                <span style={{ color: "var(--amber-bright)" }}>2nd year</span>
-              </dd>
-              <dt>topics</dt>
-              <dd>
-                systems,{" "}
-                <span style={{ color: "var(--violet-pale)" }}>ml-infra</span>,{" "}
-                <span style={{ color: "var(--green-bright)" }}>papers</span>
-              </dd>
-              <dt>contact</dt>
-              <dd>sashreek.addanki@gmail</dd>
-              <dt>elsewhere</dt>
-              <dd>
-                <a
-                  href="https://github.com/Sashreek007"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  style={{ color: "inherit" }}
-                >
-                  github
-                </a>
-                ,{" "}
-                <a
-                  href="https://www.linkedin.com/in/sashreek-addanki-121471257/"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  style={{ color: "inherit" }}
-                >
-                  linkedin
-                </a>
-              </dd>
-            </dl>
-          </div>
-        </div>
+        <div
+          className="blog-about-heading"
+          dangerouslySetInnerHTML={{ __html: renderInlineMarkup(profile.heading) }}
+        />
+        <div
+          className="blog-about-body-text"
+          dangerouslySetInnerHTML={{ __html: renderParagraphs(profile.body) }}
+        />
       </section>
     </div>
   );

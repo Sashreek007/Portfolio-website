@@ -38,6 +38,13 @@ export default async function AdminBlogPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link
+            href="/admin/blog/profile"
+            className="font-mono text-[12px] px-3 py-2 transition-colors duration-150"
+            style={{ color: "var(--text-muted)", border: "1px solid var(--gray-800)", borderRadius: "4px" }}
+          >
+            profile
+          </Link>
+          <Link
             href="/admin/blog/help"
             className="font-mono text-[12px] px-3 py-2 transition-colors duration-150"
             style={{ color: "var(--text-muted)", border: "1px solid var(--gray-800)", borderRadius: "4px" }}
