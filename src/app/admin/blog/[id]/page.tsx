@@ -56,6 +56,8 @@ export default async function EditPostPage({ params }: Props) {
           project_id: (post as any).project_id ?? null,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           show_on_writing: (post as any).show_on_writing ?? true,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          tags: (post as any).tags ?? [],
         }}
       />
     </div>

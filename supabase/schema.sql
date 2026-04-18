@@ -29,12 +29,14 @@ CREATE TABLE IF NOT EXISTS posts (
   published_at    TIMESTAMPTZ,
   project_id      UUID REFERENCES projects(id) ON DELETE CASCADE,
   show_on_writing BOOLEAN NOT NULL DEFAULT true,
+  tags            TEXT[] NOT NULL DEFAULT '{}',
   created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS posts_project_id_idx ON posts (project_id);
 CREATE UNIQUE INDEX IF NOT EXISTS posts_project_id_unique_idx
   ON posts (project_id) WHERE project_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS posts_tags_gin_idx ON posts USING gin (tags);
 
 -- ─── Page views (analytics) ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS page_views (

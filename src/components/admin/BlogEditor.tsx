@@ -202,6 +202,7 @@ type Post = {
   cover_image_url: string | null; is_published: boolean; published_at: string | null;
   project_id?: string | null;
   show_on_writing?: boolean;
+  tags?: string[];
 };
 type Props = { post?: Post; mode: "new" | "edit" };
 
@@ -504,6 +505,7 @@ export default function BlogEditor({ post, mode }: Props) {
   const [coverUrl, setCoverUrl] = useState(post?.cover_image_url ?? "");
   const [isPublished, setIsPublished] = useState(post?.is_published ?? false);
   const [showOnWriting, setShowOnWriting] = useState(post?.show_on_writing ?? true);
+  const [tagsStr, setTagsStr] = useState((post?.tags ?? []).join(", "));
   const isProjectPost = !!post?.project_id;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -667,6 +669,10 @@ export default function BlogEditor({ post, mode }: Props) {
         ? new Date().toISOString()
         : post?.published_at ?? null,
       show_on_writing: showOnWriting,
+      tags: tagsStr
+        .split(",")
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean),
     };
 
     const { error: dbError } = mode === "new"
@@ -814,6 +820,20 @@ export default function BlogEditor({ post, mode }: Props) {
           <img src={coverUrl} alt="" className="mt-1 rounded object-cover"
             style={{ maxHeight: "140px", border: "1px solid var(--gray-800)" }} />
         )}
+      </div>
+
+      {/* Tags */}
+      <div className="flex flex-col gap-2">
+        <label style={labelSt}>Tags (comma-separated)</label>
+        <input
+          value={tagsStr}
+          onChange={(e) => setTagsStr(e.target.value)}
+          placeholder="systems, postgres, papers"
+          className="px-3 py-2 text-[13px] font-mono outline-none transition-colors duration-150 w-full"
+          style={inputSt}
+          onFocus={(e) => ((e.target as HTMLInputElement).style.borderColor = "var(--violet-mid)")}
+          onBlur={(e) => ((e.target as HTMLInputElement).style.borderColor = "var(--gray-800)")}
+        />
       </div>
 
       {/* Writing-page visibility toggle */}

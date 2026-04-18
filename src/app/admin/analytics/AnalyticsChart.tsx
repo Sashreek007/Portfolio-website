@@ -19,8 +19,8 @@ export default function AnalyticsChart({ rows }: { rows: DayRow[] }) {
   }
 
   const width = 960;
-  const height = 240;
-  const pad = { top: 16, right: 16, bottom: 32, left: 40 };
+  const height = 260;
+  const pad = { top: 16, right: 16, bottom: 48, left: 64 };
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
 
@@ -42,6 +42,33 @@ export default function AnalyticsChart({ rows }: { rows: DayRow[] }) {
         preserveAspectRatio="none"
         style={{ display: "block" }}
       >
+        {/* Y-axis title (rotated) */}
+        <text
+          x={14}
+          y={pad.top + plotH / 2}
+          transform={`rotate(-90 14 ${pad.top + plotH / 2})`}
+          textAnchor="middle"
+          fontSize="10"
+          fontFamily="var(--font-mono)"
+          letterSpacing="0.12em"
+          fill="var(--text-muted)"
+        >
+          VIEWS / DAY
+        </text>
+
+        {/* X-axis title */}
+        <text
+          x={pad.left + plotW / 2}
+          y={height - 6}
+          textAnchor="middle"
+          fontSize="10"
+          fontFamily="var(--font-mono)"
+          letterSpacing="0.12em"
+          fill="var(--text-muted)"
+        >
+          DATE (MM-DD)
+        </text>
+
         {/* Y-axis gridlines + labels */}
         {ticks.map((t) => (
           <g key={t}>

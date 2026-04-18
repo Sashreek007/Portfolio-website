@@ -1,76 +1,13 @@
-import { createServerClient } from "@/lib/supabase/server";
-import SectionLabel from "@/components/site/SectionLabel";
 import Link from "next/link";
+import { createServerClient } from "@/lib/supabase/server";
+import BlogIndex, { type IndexPost } from "./BlogIndex";
 
 export const metadata = {
-  title: "Writing | Sashreek Addanki",
+  title: "Blog | Sashreek Addanki",
 };
-
-type Post = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  published_at: string | null;
-  created_at: string;
-  project_id: string | null;
-};
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-CA", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function PostRow({ post, last }: { post: Post; last: boolean }) {
-  return (
-    <Link
-      href={`/blog/${post.slug}`}
-      className="group flex flex-col gap-2 py-6 transition-colors duration-150"
-      style={{
-        borderBottom: last ? "none" : "1px solid var(--gray-800)",
-      }}
-    >
-      <div className="flex items-baseline justify-between gap-4 flex-wrap">
-        <h2
-          className="text-[18px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-150"
-          style={{
-            color: "var(--text-primary)",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          {post.title}
-        </h2>
-        <span
-          className="font-mono text-[11px] shrink-0"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {formatDate(post.published_at ?? post.created_at)}
-        </span>
-      </div>
-      {post.excerpt && (
-        <p
-          className="text-[14px] leading-[1.65]"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          {post.excerpt}
-        </p>
-      )}
-      <span
-        className="font-mono text-[12px] mt-1 group-hover:translate-x-1 transition-transform duration-150 inline-block"
-        style={{ color: "var(--violet-soft)" }}
-      >
-        read →
-      </span>
-    </Link>
-  );
-}
 
 export default async function BlogPage() {
-  let writingPosts: Post[] = [];
-  let projectPosts: Post[] = [];
+  let posts: IndexPost[] = [];
 
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -80,113 +17,129 @@ export default async function BlogPage() {
       const supabase = await createServerClient();
       const { data } = await supabase
         .from("posts")
-        .select("id, title, slug, excerpt, published_at, created_at, project_id, show_on_writing")
+        .select(
+          "id, title, slug, excerpt, published_at, created_at, tags, project_id, show_on_writing"
+        )
         .eq("is_published", true)
+        .eq("show_on_writing", true)
+        .is("project_id", null)
         .order("published_at", { ascending: false });
-
       if (data) {
-        const all = data as (Post & { show_on_writing: boolean })[];
-        writingPosts = all.filter((p) => !p.project_id && p.show_on_writing);
-        projectPosts = all.filter((p) => !!p.project_id);
+        posts = (data as Array<{
+          id: string;
+          title: string;
+          slug: string;
+          excerpt: string | null;
+          published_at: string | null;
+          created_at: string;
+          tags: string[] | null;
+        }>).map((p) => {
+          const iso = p.published_at ?? p.created_at;
+          return {
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            excerpt: p.excerpt,
+            published_at: p.published_at,
+            created_at: p.created_at,
+            tags: p.tags ?? [],
+            year: iso.slice(0, 4),
+          };
+        });
       }
     } catch {
-      // silence
+      // silence — renders empty state
     }
   }
 
-  const hasAny = writingPosts.length + projectPosts.length > 0;
-
   return (
-    <div className="px-[6vw] py-16 w-full max-w-[960px] mx-auto">
-      <SectionLabel>Writing</SectionLabel>
-      <h1
-        className="text-[28px] font-medium leading-[1.3] mb-4"
-        style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-      >
-        Writing
-      </h1>
-      <p
-        className="text-[15px] leading-[1.7] mb-12"
-        style={{ color: "var(--text-secondary)" }}
-      >
-        Notes on systems, AI, and the things I&apos;m building.
-      </p>
+    <div className="blog-shell">
+      <Link href="/" className="blog-back">
+        ← home
+      </Link>
 
-      {!hasAny ? (
-        <div
-          className="font-mono text-[13px] py-16 text-center"
-          style={{
-            color: "var(--text-muted)",
-            border: "1px solid var(--gray-800)",
-            borderRadius: "6px",
-          }}
-        >
-          <p>nothing published yet</p>
-          <p className="mt-1 text-[11px]">check back soon</p>
+      {/* Hero */}
+      <section className="blog-hero">
+        <div className="blog-marker">
+          <span>
+            <span style={{ color: "var(--violet-soft)" }}>##</span> blog
+          </span>
         </div>
-      ) : (
-        <>
-          {/* Writing (non-project) */}
-          {writingPosts.length > 0 && (
-            <section className="mb-16">
-              <div className="flex items-center gap-4 mb-4">
-                <span
-                  className="font-mono text-[11px] tracking-[0.2em] uppercase"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  · essays ·
-                </span>
-                <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
-              </div>
-              <div className="flex flex-col">
-                {writingPosts.map((post, i) => (
-                  <PostRow
-                    key={post.id}
-                    post={post}
-                    last={i === writingPosts.length - 1}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+        <h1 className="blog-hero-h1">
+          sharing<br />my<br />
+          <span style={{ color: "var(--amber-bright)" }}>thoughts.</span>
+        </h1>
+      </section>
 
-          {/* Project blogs */}
-          {projectPosts.length > 0 && (
-            <section>
-              <div className="flex items-center gap-4 mb-4">
-                <span
-                  className="font-mono text-[11px] tracking-[0.2em] uppercase"
-                  style={{ color: "var(--text-muted)" }}
+      <BlogIndex posts={posts} />
+
+      {/* About */}
+      <section className="blog-about" id="about">
+        <div className="blog-marker">
+          <span>
+            <span style={{ color: "var(--violet-soft)" }}>##</span> about
+          </span>
+        </div>
+        <div className="blog-about-body">
+          <div>
+            <h2 className="blog-about-h2">
+              i write to understand the{" "}
+              <span style={{ color: "var(--amber-bright)" }}>machine</span>{" "}
+              before i build on top of it.
+            </h2>
+            <p className="blog-about-p">
+              this is the slow-running companion to my work — essays, build
+              logs, and paper notes from the edge of{" "}
+              <span style={{ color: "var(--violet-pale)" }}>
+                AI systems engineering
+              </span>
+              .
+            </p>
+          </div>
+          <div>
+            <dl className="blog-about-dl">
+              <dt>author</dt>
+              <dd>sashreek addanki</dd>
+              <dt>based</dt>
+              <dd>edmonton, ab</dd>
+              <dt>at</dt>
+              <dd>
+                <span style={{ color: "var(--amber-bright)" }}>ualberta</span>{" "}
+                — cs,{" "}
+                <span style={{ color: "var(--amber-bright)" }}>2nd year</span>
+              </dd>
+              <dt>topics</dt>
+              <dd>
+                systems,{" "}
+                <span style={{ color: "var(--violet-pale)" }}>ml-infra</span>,{" "}
+                <span style={{ color: "var(--green-bright)" }}>papers</span>
+              </dd>
+              <dt>contact</dt>
+              <dd>sashreek.addanki@gmail</dd>
+              <dt>elsewhere</dt>
+              <dd>
+                <a
+                  href="https://github.com/Sashreek007"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  style={{ color: "inherit" }}
                 >
-                  · project blogs ·
-                </span>
-                <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
-                <span
-                  className="font-mono text-[11px] tracking-[0.2em] uppercase"
-                  style={{ color: "var(--text-muted)" }}
+                  github
+                </a>
+                ,{" "}
+                <a
+                  href="https://www.linkedin.com/in/sashreek-addanki-121471257/"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  style={{ color: "inherit" }}
                 >
-                  {String(projectPosts.length).padStart(2, "0")} entries
-                </span>
-              </div>
-              <p
-                className="text-[13.5px] leading-[1.7] mb-6 max-w-[560px]"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Write-ups for each project — decisions, tradeoffs, and what broke.
-              </p>
-              <div className="flex flex-col">
-                {projectPosts.map((post, i) => (
-                  <PostRow
-                    key={post.id}
-                    post={post}
-                    last={i === projectPosts.length - 1}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-        </>
-      )}
+                  linkedin
+                </a>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
