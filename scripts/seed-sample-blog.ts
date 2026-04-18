@@ -61,6 +61,10 @@ const ul = (items: TextNode[][]) => ({
     content: [p(content)],
   })),
 });
+const img = (src: string, alt: string) => ({
+  type: "image",
+  attrs: { src, alt },
+});
 
 const doc = {
   type: "doc",
@@ -80,7 +84,7 @@ const doc = {
     ]),
     pre(
       "python",
-      "bytes_per_token = 2 * 32 * 32 * 128 * 2  # k+v, layers, heads, dim, fp16\n# = 524,288 bytes = 512 KB per token"
+      "# file: kv_math.py\n# one token, across the whole stack\nbytes_per_token = (\n    2                # k + v\n    * num_layers     # 32\n    * num_heads      # 32\n    * head_dim       # 128\n    * dtype_bytes    # fp16 -> 2\n)\nassert bytes_per_token == 524_288     # 512 KB / token\n\n# a fleet of 64 concurrent users, each holding 8k of context:\nfootprint = 64 * 8_192 * bytes_per_token\nprint(f\"{footprint / 1e9:.1f} GB just for kv\")\n# -> 274.9 GB just for kv"
     ),
     p([
       t("512KB per token sounds fine until you remember you are serving "),
@@ -89,6 +93,10 @@ const doc = {
       em("different lengths"),
       t(". if you pre-allocate max-length buffers for every slot in your batch, you get beautiful memory layout and about 12% utilization. if you pack them dynamically, you get fragmentation."),
     ]),
+    img(
+      "https://picsum.photos/seed/blog-kv-layout/1400/700",
+      "naive contiguous layout: each row is one request, shaded cells are live tokens, grey cells are wasted pre-allocation. utilization hovers near 12%.",
+    ),
 
     h(2, "why paged-attention works"),
     p([
@@ -104,6 +112,10 @@ const doc = {
     p([
       t("i implemented a toy version in triton and saw batch size jump from 12 to 38. that was the good news."),
     ]),
+    img(
+      "https://picsum.photos/seed/blog-paged-blocks/1400/700",
+      "paged-attention: each request is a linked list of 16-token blocks into a shared pool. wasted memory is now bounded by the block size, not the request's max length.",
+    ),
 
     h(2, "the less obvious problem"),
     p([
@@ -139,6 +151,15 @@ const doc = {
       t("the third one is the big one. once i stopped handing blocks back to "),
       code("cudaFree"),
       t(" and just managed a fixed arena, allocator latency went to zero and tail latency on decoding stabilized. you give up a little flexibility for a lot of predictability. on a serving box, that is always the right trade."),
+    ]),
+    pre(
+      "python",
+      "# file: arena.py\nclass BlockArena:\n    \"\"\"fixed-size pool of kv-cache blocks — never returns to cudaFree.\"\"\"\n\n    def __init__(self, n_blocks: int, block_bytes: int, device: str):\n        self.buf = torch.empty(\n            n_blocks * block_bytes, dtype=torch.uint8, device=device\n        )\n        self.free: deque[int] = deque(range(n_blocks))\n        self.block_bytes = block_bytes\n\n    def alloc(self) -> int:\n        if not self.free:\n            raise OutOfBlocks(\"arena exhausted — raise n_blocks\")\n        return self.free.popleft()\n\n    def release(self, block_id: int) -> None:\n        self.free.append(block_id)       # never free the tensor itself\n"
+    ),
+    p([
+      t("the arena never hands memory back to the driver, so the allocator path becomes a constant-time deque pop. the tradeoff: you pick "),
+      code("n_blocks"),
+      t(" at startup and live with it. for inference servers, that ceiling is known — your gpu either has the room for the configuration or it doesn't."),
     ]),
 
     h(2, "the meta-point"),

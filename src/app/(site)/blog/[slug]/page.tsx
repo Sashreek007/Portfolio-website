@@ -9,12 +9,14 @@ import Highlight from "@tiptap/extension-highlight";
 import { common, createLowlight } from "lowlight";
 import hljs from "highlight.js";
 import PostScroll from "./PostScroll";
+import BlogToc, { type TocItem } from "./BlogToc";
 
 const lowlight = createLowlight(common);
 
-// Wrap each rendered code block with a header that carries the language
-// tag (shown top-right of the block) and a copy button, then run hljs
-// over the raw source so we get syntax-highlighted spans.
+// Wrap each rendered code block with a language tag, copy button, and
+// per-line markup so CSS can hang a gutter of line numbers alongside
+// the highlighted source. Optional filename support: a leading shebang
+// comment like `// file: src/foo.ts` is lifted out as a filename label.
 function applyCodeHighlighting(html: string): string {
   return html.replace(
     /<pre><code(?:\s+class="language-([^"]*)")?>([\s\S]*?)<\/code><\/pre>/g,
@@ -25,16 +27,98 @@ function applyCodeHighlighting(html: string): string {
         .replace(/&gt;/g, ">")
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'");
+
+      // Extract an optional filename marker from the first line, so
+      // authors can tag a snippet without cluttering the rendered body.
+      let filename: string | null = null;
+      let body = code;
+      const fileMatch = body.match(
+        /^(?:\s*)(?:\/\/|#)\s*file:\s*(\S+)\s*\n/,
+      );
+      if (fileMatch) {
+        filename = fileMatch[1];
+        body = body.slice(fileMatch[0].length);
+      }
+
       try {
         const result =
           lang && hljs.getLanguage(lang)
-            ? hljs.highlight(code, { language: lang, ignoreIllegals: true })
-            : hljs.highlightAuto(code);
-        const langLabel = lang || "";
-        return `<div class="blog-code"><span class="blog-code-lang">${langLabel}</span><button class="blog-code-copy" type="button">copy</button><pre><code>${result.value}</code></pre></div>`;
+            ? hljs.highlight(body, { language: lang, ignoreIllegals: true })
+            : hljs.highlightAuto(body);
+        const highlighted = result.value;
+        // Split highlighted HTML into lines. Each line becomes its own
+        // <span class="blog-code-line">; paired with a gutter <span>
+        // carrying the line number via CSS counter.
+        const lines = highlighted.split("\n");
+        const trailingBlank =
+          lines.length > 0 && lines[lines.length - 1] === "";
+        const renderedLines = (trailingBlank ? lines.slice(0, -1) : lines)
+          .map(
+            (ln) =>
+              `<span class="blog-code-line">${ln.length === 0 ? "\u200B" : ln}</span>`,
+          )
+          .join("\n");
+
+        const langLabel = filename
+          ? `<span class="blog-code-file">${filename}</span>`
+          : `<span class="blog-code-lang">${lang || ""}</span>`;
+        return `<div class="blog-code" data-lang="${lang || ""}">${langLabel}<button class="blog-code-copy" type="button">copy</button><pre><code>${renderedLines}</code></pre></div>`;
       } catch {
         return _;
       }
+    },
+  );
+}
+
+// Derive a URL-safe slug from heading text. Must match what
+// `addHeadingIds` produces so TOC anchors resolve.
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64);
+}
+
+// Walk the rendered HTML, inject deterministic `id` attributes on h2/h3
+// elements, and return both the rewritten HTML and a flat TOC.
+function addHeadingIds(html: string): { html: string; toc: TocItem[] } {
+  const toc: TocItem[] = [];
+  const used = new Map<string, number>();
+  const out = html.replace(
+    /<(h2|h3)>([\s\S]*?)<\/(h2|h3)>/g,
+    (_, open: string, inner: string) => {
+      const text = inner
+        .replace(/<[^>]+>/g, "")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .trim();
+      let id = slugify(text) || `section-${toc.length + 1}`;
+      const n = used.get(id) ?? 0;
+      if (n > 0) id = `${id}-${n + 1}`;
+      used.set(id, n + 1);
+      toc.push({ id, text, level: open === "h2" ? 2 : 3 });
+      return `<${open} id="${id}">${inner}</${open}>`;
+    },
+  );
+  return { html: out, toc };
+}
+
+// Promote standalone images to <figure> blocks so they can carry a
+// caption (pulled from the image's alt text) and get visual treatment
+// that distinguishes them from inline imagery. Tiptap's image
+// extension renders block images as bare <img> tags at the top level,
+// so we match those rather than paragraph-wrapped ones.
+function wrapImagesInFigures(html: string): string {
+  return html.replace(
+    /(?:<p>\s*(<img\s+[^>]*?>)\s*<\/p>|(<img\s+[^>]*?>))/g,
+    (_m, wrapped: string | undefined, bare: string | undefined) => {
+      const imgTag = wrapped ?? bare ?? "";
+      const altMatch = imgTag.match(/alt="([^"]*)"/);
+      const alt = altMatch ? altMatch[1] : "";
+      const caption = alt ? `<figcaption>${alt}</figcaption>` : "";
+      return `<figure class="blog-figure">${imgTag}${caption}</figure>`;
     },
   );
 }
@@ -142,11 +226,14 @@ export default async function BlogPostPage({ params }: Props) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any);
       html = applyCodeHighlighting(raw);
+      html = wrapImagesInFigures(html);
     } catch (e) {
       console.error("[blog] generateHTML failed:", e);
       html = "<p>Content could not be rendered.</p>";
     }
   }
+  const { html: htmlWithIds, toc } = addHeadingIds(html);
+  html = htmlWithIds;
 
   const readTime = estimateReadingTime(html);
   const postedAt = typedPost.published_at ?? typedPost.created_at;
@@ -169,6 +256,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <div className="blog-shell">
+      <BlogToc items={toc} />
       <Link href="/blog" className="blog-back">
         ← back to blog
       </Link>
