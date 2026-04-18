@@ -436,7 +436,8 @@
 .blog-tag.all.on { color: var(--text-primary); border-color: var(--text-primary); }
 
 /* ===== Year group + rows ===== */
-.blog-group { margin-bottom: 48px; }
+.blog-group { margin-bottom: 0; }
+.blog-group + .blog-group { margin-top: 48px; }
 
 .blog-row {
   display: grid;
@@ -502,7 +503,7 @@
 
 /* ===== About block ===== */
 .blog-about {
-  margin-top: 88px;
+  margin-top: 72px;
   padding-top: 40px;
   border-top: 1px solid var(--gray-800);
 }

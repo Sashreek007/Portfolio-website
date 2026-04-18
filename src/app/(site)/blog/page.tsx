@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { createServerClient } from "@/lib/supabase/server";
 import BlogIndex, { type IndexPost } from "./BlogIndex";
 import {
@@ -6,7 +7,7 @@ import {
   renderParagraphs,
 } from "@/lib/blog-profile";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Blog | Sashreek Addanki",
 };
 

@@ -104,6 +104,8 @@ export default async function BlogPostPage({ params }: Props) {
 
   // Prev/next navigation — ordered newest → oldest, same filter as the
   // index so we don't surface hidden posts as navigation targets.
+  // Feed-reading convention: "previous" = the post sitting above this
+  // one on the index (newer in time), "next" = the one below (older).
   const { data: sibData } = await supabase
     .from("posts")
     .select("slug, title, published_at, created_at, project_id, show_on_writing, is_published")
@@ -113,8 +115,9 @@ export default async function BlogPostPage({ params }: Props) {
     .order("published_at", { ascending: false });
   const siblings = (sibData ?? []) as Array<{ slug: string; title: string }>;
   const idx = siblings.findIndex((s) => s.slug === slug);
-  const newer = idx > 0 ? siblings[idx - 1] : null;
-  const older = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+  const prev = idx > 0 ? siblings[idx - 1] : null;
+  const next =
+    idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
 
   let html = "";
   if (typedPost.content) {
@@ -204,18 +207,18 @@ export default async function BlogPostPage({ params }: Props) {
       />
 
       <nav className="blog-post-nav">
-        {older ? (
-          <Link href={`/blog/${older.slug}`} className="blog-prev">
+        {prev ? (
+          <Link href={`/blog/${prev.slug}`} className="blog-prev">
             <div className="blog-nav-lbl">← previous</div>
-            <div className="blog-nav-t">{older.title}</div>
+            <div className="blog-nav-t">{prev.title}</div>
           </Link>
         ) : (
           <span />
         )}
-        {newer ? (
-          <Link href={`/blog/${newer.slug}`} className="blog-next">
+        {next ? (
+          <Link href={`/blog/${next.slug}`} className="blog-next">
             <div className="blog-nav-lbl">next →</div>
-            <div className="blog-nav-t">{newer.title}</div>
+            <div className="blog-nav-t">{next.title}</div>
           </Link>
         ) : (
           <span />
