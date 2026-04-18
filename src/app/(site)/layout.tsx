@@ -1,5 +1,6 @@
 import Nav from "@/components/site/Nav";
 import ScrollControls from "@/components/site/ScrollControls";
+import TrackPageView from "@/components/site/TrackPageView";
 
 export default function SiteLayout({
   children,
@@ -9,6 +10,7 @@ export default function SiteLayout({
   return (
     <>
       <Nav />
+      <TrackPageView />
       <main className="flex-1">{children}</main>
       <ScrollControls />
       <footer

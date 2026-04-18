@@ -24,6 +24,7 @@ export default function AdminNav() {
           {[
             { href: "/admin/projects", label: "projects" },
             { href: "/admin/blog", label: "blog" },
+            { href: "/admin/analytics", label: "analytics" },
           ].map(({ href, label }) => {
             const isActive = pathname.startsWith(href);
             return (

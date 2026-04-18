@@ -36,6 +36,18 @@ CREATE INDEX IF NOT EXISTS posts_project_id_idx ON posts (project_id);
 CREATE UNIQUE INDEX IF NOT EXISTS posts_project_id_unique_idx
   ON posts (project_id) WHERE project_id IS NOT NULL;
 
+-- ─── Page views (analytics) ──────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS page_views (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  visitor_id  TEXT NOT NULL,
+  path        TEXT NOT NULL,
+  user_agent  TEXT,
+  referrer    TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS page_views_created_at_idx ON page_views (created_at DESC);
+CREATE INDEX IF NOT EXISTS page_views_visitor_id_idx ON page_views (visitor_id);
+
 -- ─── Auto-update updated_at ───────────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
@@ -92,6 +104,14 @@ CREATE POLICY "posts_auth_update"
 
 CREATE POLICY "posts_auth_delete"
   ON posts FOR DELETE
+  TO authenticated USING (true);
+
+-- Page views: authenticated admin can read; inserts go through the
+-- /api/track route using the service role key, which bypasses RLS.
+ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "page_views_auth_read"
+  ON page_views FOR SELECT
   TO authenticated USING (true);
 
 -- ─── Storage buckets ──────────────────────────────────────────────────
