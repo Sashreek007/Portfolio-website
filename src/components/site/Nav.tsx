@@ -53,6 +53,11 @@ const pageLinks = [
 
 export default function Nav() {
   const pathname = usePathname();
+
+  // /blog is a self-contained sub-site — it renders its own nav in
+  // blog/layout.tsx. Hide the portfolio nav there so the two don't stack.
+  if (pathname?.startsWith("/blog")) return null;
+
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("");
   const progress = useScrollProgress();

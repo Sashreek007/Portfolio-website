@@ -259,6 +259,49 @@
 .hljs-strong                                         { font-weight: bold; }
 
 /* ─── Blog (v5-minimal) ──────────────────────────────────────────────── */
+.blog-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--bg-base) 85%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gray-800);
+}
+.blog-nav-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 18px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.blog-nav-id {
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  font-weight: 500;
+}
+.blog-nav-links {
+  display: flex;
+  gap: 24px;
+}
+.blog-nav-link {
+  color: var(--text-muted);
+  transition: color 150ms;
+}
+.blog-nav-link:hover { color: var(--text-primary); }
+.blog-nav-link.on { color: var(--text-primary); }
+@media (max-width: 700px) {
+  .blog-nav-inner { padding: 16px 24px; }
+  .blog-nav-links { gap: 18px; }
+}
+
+
 .blog-shell {
   max-width: 760px;
   margin: 0 auto;

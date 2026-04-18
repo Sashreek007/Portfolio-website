@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
 import BlogIndex, { type IndexPost } from "./BlogIndex";
 
@@ -54,10 +53,6 @@ export default async function BlogPage() {
 
   return (
     <div className="blog-shell">
-      <Link href="/" className="blog-back">
-        ← home
-      </Link>
-
       {/* Hero */}
       <section className="blog-hero">
         <div className="blog-marker">
