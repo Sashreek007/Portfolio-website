@@ -71,8 +71,7 @@ export default function PostSidebar({
   return (
     <aside className="blog-post-sidebar" aria-label="Blog navigation">
       <Link href="/blog" className="blog-post-sidebar-brand">
-        <span className="brand-mark">~/</span>
-        <span className="brand-name">sashreek</span>
+        <span className="brand-name">home</span>
       </Link>
 
       <label className="blog-post-sidebar-search">

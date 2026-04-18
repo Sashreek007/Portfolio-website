@@ -90,10 +90,8 @@ export default async function BlogPage() {
         <div className="blog-byline">— sashreek addanki</div>
       </section>
 
-      <BlogIndex posts={posts} />
-
-      {/* About */}
-      <section className="blog-about" id="about">
+      {/* About — lead with context, then the archive */}
+      <section className="blog-about blog-about-top" id="about">
         <div className="blog-marker">
           <span>
             <span style={{ color: "var(--violet-soft)" }}>##</span> about
@@ -108,6 +106,8 @@ export default async function BlogPage() {
           dangerouslySetInnerHTML={{ __html: renderParagraphs(profile.body) }}
         />
       </section>
+
+      <BlogIndex posts={posts} />
     </div>
   );
 }

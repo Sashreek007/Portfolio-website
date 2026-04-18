@@ -507,6 +507,16 @@
   padding-top: 40px;
   border-top: 1px solid var(--gray-800);
 }
+/* When About leads the page it gets breathing room above but no top
+   border — the hero already serves as the visual anchor. */
+.blog-about.blog-about-top {
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: none;
+  padding-bottom: 40px;
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--gray-800);
+}
 .blog-about-heading {
   font-family: var(--font-mono);
   font-size: clamp(22px, 3vw, 30px);
@@ -721,11 +731,11 @@
    screens so the article never collides with the sidebars. */
 .blog-post-layout {
   display: grid;
-  grid-template-columns: 220px minmax(0, 760px) 240px;
-  gap: 48px;
-  max-width: 1360px;
+  grid-template-columns: 260px minmax(0, 820px) 300px;
+  gap: 56px;
+  max-width: 1560px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  padding: 40px 40px 80px;
   align-items: start;
 }
 .blog-post-layout > .blog-shell {
@@ -819,7 +829,15 @@
   color: var(--text-primary);
   letter-spacing: 0.02em;
 }
-.blog-post-sidebar-brand .brand-mark { color: var(--violet-soft); }
+.blog-post-sidebar-brand .brand-name {
+  font-weight: 500;
+  transition: color 150ms;
+}
+.blog-post-sidebar-brand .brand-name::before {
+  content: "← ";
+  color: var(--violet-soft);
+  margin-right: 2px;
+}
 .blog-post-sidebar-brand:hover .brand-name { color: var(--violet-soft); }
 
 .blog-post-sidebar-search {
@@ -942,14 +960,14 @@
 .blog-post-sidebar-socials a { transition: color 150ms; }
 .blog-post-sidebar-socials a:hover { color: var(--violet-soft); }
 
-@media (max-width: 1280px) {
+@media (max-width: 1360px) {
   .blog-post-layout {
-    grid-template-columns: minmax(0, 760px) 240px;
-    gap: 40px;
+    grid-template-columns: minmax(0, 820px) 280px;
+    gap: 48px;
   }
   .blog-toc { display: none; }
 }
-@media (max-width: 1040px) {
+@media (max-width: 1080px) {
   .blog-post-layout {
     grid-template-columns: minmax(0, 1fr);
     padding: 40px 24px 72px;
