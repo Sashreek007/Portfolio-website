@@ -738,6 +738,12 @@
   padding: 40px 40px 80px;
   align-items: start;
 }
+/* Short posts don't render a TOC — collapse the ghost column so the
+   article isn't pushed awkwardly right. */
+.blog-post-layout:not(:has(.blog-toc)) {
+  grid-template-columns: minmax(0, 820px) 300px;
+  max-width: 1260px;
+}
 .blog-post-layout > .blog-shell {
   max-width: none;
   margin: 0;
