@@ -59,7 +59,11 @@ export default async function BlogPage() {
             excerpt: p.excerpt,
             published_at: p.published_at,
             created_at: p.created_at,
-            tags: p.tags ?? [],
+            // Drop reserved `series:` / `part:` tags from the index view —
+            // those are rendered inline on the post detail, not as filters.
+            tags: (p.tags ?? []).filter(
+              (t) => !t.startsWith("series:") && !t.startsWith("part:"),
+            ),
             year: iso.slice(0, 4),
           };
         });

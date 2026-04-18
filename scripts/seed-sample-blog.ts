@@ -113,7 +113,7 @@ const doc = {
     ]),
     bq([
       p([
-        strong("the trap: "),
+        strong("the trap"),
         t("paged-attention eliminates "),
         em("intra-sequence"),
         t(" fragmentation. it does not eliminate "),
@@ -164,7 +164,7 @@ async function main() {
   const slug = "serving-7b-on-one-gpu";
   const payload = {
     title:
-      "serving 7B on one gpu — what nobody tells you about kv-cache fragmentation",
+      "serving __7B__ on one gpu — what nobody tells you about kv-cache fragmentation",
     slug,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     content: doc as any,
@@ -172,10 +172,17 @@ async function main() {
       "paged-attention fixes the obvious fragmentation. it does not fix the less obvious one.",
     cover_image_url: null,
     is_published: true,
-    published_at: new Date("2026-04-12").toISOString(),
+    // Noon UTC so the date lands on apr 12 in every North American tz.
+    published_at: new Date("2026-04-12T12:00:00Z").toISOString(),
     show_on_writing: true,
     project_id: null,
-    tags: ["ml-infra", "systems", "gpu"],
+    tags: [
+      "ml-infra",
+      "systems",
+      "gpu",
+      "series:serving-from-scratch",
+      "part:3",
+    ],
   };
 
   const { data: existing } = await supabase

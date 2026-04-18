@@ -50,11 +50,29 @@ export const dynamicParams = true;
 type Props = { params: Promise<{ slug: string }> };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-CA", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const d = new Date(iso);
+  const month = d
+    .toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })
+    .toLowerCase();
+  const day = d.getUTCDate();
+  const year = d.getUTCFullYear();
+  return `${month} ${day}, ${year}`;
+}
+
+// Highlight fragments of the title that the author tagged with
+// double-underscores, e.g. "serving __7B__ on one gpu" renders "7B"
+// in the accent color without touching the rest of the string.
+function renderTitle(title: string): string {
+  const escape = (s: string) =>
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  return escape(title).replace(
+    /__([^_]+)__/g,
+    (_m, inner) =>
+      `<span style="color:var(--violet-soft)">${inner}</span>`,
+  );
 }
 
 function estimateReadingTime(html: string) {
@@ -129,7 +147,22 @@ export default async function BlogPostPage({ params }: Props) {
 
   const readTime = estimateReadingTime(html);
   const postedAt = typedPost.published_at ?? typedPost.created_at;
-  const tags = (typedPost.tags as string[] | null) ?? [];
+  const allTags = (typedPost.tags as string[] | null) ?? [];
+  // Tags of the form `series:serving-from-scratch` / `part:3` get pulled
+  // out of the pill list and shown inline with the meta row as a
+  // "serving-from-scratch · pt. 3" badge.
+  let seriesSlug: string | null = null;
+  let seriesPart: string | null = null;
+  const tags: string[] = [];
+  for (const t of allTags) {
+    if (t.startsWith("series:")) seriesSlug = t.slice(7);
+    else if (t.startsWith("part:")) seriesPart = t.slice(5);
+    else tags.push(t);
+  }
+  const seriesLabel =
+    seriesSlug && seriesPart
+      ? `${seriesSlug} · pt. ${seriesPart}`
+      : seriesSlug ?? null;
 
   return (
     <div className="blog-shell">
@@ -138,22 +171,28 @@ export default async function BlogPostPage({ params }: Props) {
       </Link>
 
       <header className="blog-post-header">
-        <h1 className="blog-post-title">{typedPost.title}</h1>
+        <h1
+          className="blog-post-title"
+          dangerouslySetInnerHTML={{ __html: renderTitle(typedPost.title) }}
+        />
         <div className="blog-post-meta">
           <span>{formatDate(postedAt)}</span>
           <span className="blog-dot">·</span>
           <span>{readTime} min read</span>
-          {tags.length > 0 && (
+          {seriesLabel && (
             <>
               <span className="blog-dot">·</span>
-              <span className="blog-post-tags">
-                {tags.map((t) => (
-                  <span key={t}>{t}</span>
-                ))}
-              </span>
+              <span className="blog-post-series">{seriesLabel}</span>
             </>
           )}
         </div>
+        {tags.length > 0 && (
+          <div className="blog-post-tags">
+            {tags.map((t) => (
+              <span key={t}>{t}</span>
+            ))}
+          </div>
+        )}
         {typedPost.excerpt && (
           <p className="blog-post-excerpt">{typedPost.excerpt}</p>
         )}

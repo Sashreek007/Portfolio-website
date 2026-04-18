@@ -24,6 +24,12 @@ function highlight(text: string, q: string) {
   return text.replace(rx, "<mark>$1</mark>");
 }
 
+// Strip the `__…__` purple-highlight markup used in post titles — the
+// index row is terse enough that the accent color would be noisy.
+function cleanTitle(text: string) {
+  return text.replace(/__([^_]+)__/g, "$1");
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-CA", {
     year: "numeric",
@@ -53,7 +59,7 @@ export default function BlogIndex({ posts }: { posts: IndexPost[] }) {
       const matchTag = activeTag === "all" || p.tags.includes(activeTag);
       if (!matchTag) return false;
       if (!q) return true;
-      const haystack = `${p.title} ${p.tags.join(" ")} ${p.excerpt ?? ""}`.toLowerCase();
+      const haystack = `${cleanTitle(p.title)} ${p.tags.join(" ")} ${p.excerpt ?? ""}`.toLowerCase();
       return haystack.includes(q);
     });
   }, [posts, query, activeTag]);
@@ -182,9 +188,8 @@ export default function BlogIndex({ posts }: { posts: IndexPost[] }) {
 
             {rows.map((p, i) => {
               const dateStr = formatDate(p.published_at ?? p.created_at);
-              const titleMarkup = query
-                ? highlight(p.title, query.trim())
-                : p.title;
+              const cleaned = cleanTitle(p.title);
+              const titleMarkup = query ? highlight(cleaned, query.trim()) : cleaned;
               return (
                 <Link
                   key={p.id}
