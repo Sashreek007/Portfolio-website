@@ -1,10 +1,6 @@
-"use client";
-
-import { useEffect } from "react";
 import Link from "next/link";
 import { projectHref } from "@/lib/projects";
 import type { Project } from "@/components/site/ProjectCard";
-import { useProjectModal } from "@/components/site/ProjectModalProvider";
 
 function MediaFrame({ index }: { index: number }) {
   return (
@@ -72,18 +68,9 @@ export default function FeatureStrip({
   index: number;
 }) {
   const reversed = index % 2 === 1;
-  const { openProject, register } = useProjectModal();
-  useEffect(() => {
-    register([p]);
-  }, [p, register]);
   return (
     <Link
       href={projectHref(p)}
-      onClick={(e) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-        e.preventDefault();
-        openProject(p);
-      }}
       className="feature group grid gap-10 lg:gap-14 items-center"
       style={{
         gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 0.9fr)",
