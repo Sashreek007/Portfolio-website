@@ -87,15 +87,11 @@ export default function Nav() {
 
   return (
     <header
-      className="top-0 left-0 right-0 z-50 flex items-center justify-between px-[6vw] py-5 overflow-hidden"
+      className="glass-nav top-0 left-0 right-0 z-50 flex items-center justify-between px-[6vw] py-5 overflow-hidden"
       style={{
         // On home: fixed so it doesn't reserve space (hero fills full viewport).
         // On other pages: sticky so it occupies the top of the document normally.
         position: isHome ? "fixed" : "sticky",
-        background: "color-mix(in srgb, var(--bg-base) 85%, transparent)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderBottom: "1px solid var(--gray-800)",
         transform: visible ? "translateY(0)" : "translateY(-100%)",
         transition: "transform 350ms cubic-bezier(0.16, 1, 0.3, 1)",
         pointerEvents: visible ? "auto" : "none",

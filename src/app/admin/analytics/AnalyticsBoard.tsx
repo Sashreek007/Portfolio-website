@@ -94,12 +94,10 @@ function Card({ post, accent }: { post: BoardPost; accent: string }) {
   return (
     <Link
       href={editHref}
-      className="group flex flex-col gap-2 p-3 transition-all duration-150 hover:-translate-y-[1px]"
+      className="glass group flex flex-col gap-2 p-3 transition-transform duration-200 hover:-translate-y-[1px]"
       style={{
-        background: "var(--bg-surface)",
-        border: "1px solid var(--gray-800)",
         borderLeft: `3px solid ${accent}`,
-        borderRadius: "4px",
+        borderRadius: "10px",
       }}
     >
       {/* Status chips */}
@@ -273,13 +271,18 @@ export default function AnalyticsBoard({ posts }: { posts: BoardPost[] }) {
       {columns.map((col) => (
         <div
           key={col.key}
-          className="flex flex-col gap-3 p-3"
+          className="flex flex-col gap-3 p-4"
           style={{
-            background: "color-mix(in srgb, var(--bg-surface) 40%, transparent)",
+            background:
+              "color-mix(in srgb, var(--bg-surface) 30%, transparent)",
+            backdropFilter: "blur(14px) saturate(140%)",
+            WebkitBackdropFilter: "blur(14px) saturate(140%)",
             border: col.dashed
-              ? "1px dashed var(--gray-800)"
-              : "1px solid var(--gray-800)",
-            borderRadius: "6px",
+              ? "1px dashed color-mix(in srgb, var(--text-primary) 9%, transparent)"
+              : "1px solid color-mix(in srgb, var(--text-primary) 7%, transparent)",
+            borderRadius: "14px",
+            boxShadow:
+              "inset 0 1px 0 color-mix(in srgb, var(--text-primary) 5%, transparent)",
             minHeight: "200px",
           }}
         >

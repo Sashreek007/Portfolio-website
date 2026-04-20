@@ -39,25 +39,13 @@ export default function ScrollControls() {
       <button
         type="button"
         onClick={scrollToTop}
-        className="flex items-center justify-center w-10 h-10 transition-all duration-200 pointer-events-auto"
-        style={{
-          color: "var(--text-muted)",
-          background: "color-mix(in srgb, var(--bg-elevated) 85%, transparent)",
-          border: "1px solid var(--gray-800)",
-          borderRadius: "4px",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-        }}
+        className="glass-pill flex items-center justify-center w-11 h-11 pointer-events-auto"
+        style={{ color: "var(--text-secondary)", borderRadius: "999px" }}
         onMouseEnter={(e) => {
           e.currentTarget.style.color = "var(--text-primary)";
-          e.currentTarget.style.borderColor =
-            "color-mix(in srgb, var(--violet-soft) 50%, transparent)";
-          e.currentTarget.style.transform = "translateY(-2px)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.color = "var(--text-muted)";
-          e.currentTarget.style.borderColor = "var(--gray-800)";
-          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.color = "var(--text-secondary)";
         }}
         aria-label="Scroll to top"
       >

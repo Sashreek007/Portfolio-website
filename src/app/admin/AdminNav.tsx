@@ -9,8 +9,7 @@ export default function AdminNav() {
 
   return (
     <header
-      className="flex items-center justify-between px-6 py-4"
-      style={{ borderBottom: "1px solid var(--gray-800)" }}
+      className="glass-nav sticky top-0 z-40 flex items-center justify-between px-6 py-4"
     >
       <div className="flex items-center gap-6">
         <Link

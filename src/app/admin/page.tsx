@@ -63,12 +63,7 @@ export default async function AdminDashboard() {
           <Link
             key={label}
             href={href}
-            className="flex flex-col gap-1 p-4 transition-all duration-150 hover:-translate-y-[2px]"
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--gray-800)",
-              borderRadius: "6px",
-            }}
+            className="glass flex flex-col gap-1 p-5 transition-transform duration-200 hover:-translate-y-[2px]"
           >
             <span
               className="font-mono text-[32px] font-medium tabular-nums"
@@ -90,25 +85,24 @@ export default async function AdminDashboard() {
       <div className="flex gap-3">
         <Link
           href="/admin/projects/new"
-          className="font-mono text-[13px] px-4 py-2 transition-all duration-200 hover:-translate-y-[1px]"
+          className="font-mono text-[13px] px-[18px] py-[9px] transition-all duration-200 hover:-translate-y-[1px]"
           style={{
             color: "var(--violet-pale)",
-            background: "var(--violet-mid)",
-            borderRadius: "4px",
-            border: "none",
+            background:
+              "linear-gradient(180deg, color-mix(in srgb, var(--violet-mid) 95%, white 5%), var(--violet-mid))",
+            borderRadius: "999px",
+            border:
+              "1px solid color-mix(in srgb, var(--violet-soft) 40%, transparent)",
+            boxShadow:
+              "inset 0 1px 0 color-mix(in srgb, white 18%, transparent), 0 10px 24px -12px color-mix(in srgb, var(--violet-mid) 80%, transparent)",
           }}
         >
           + add project
         </Link>
         <Link
           href="/admin/blog/new"
-          className="font-mono text-[13px] px-4 py-2 transition-all duration-200 hover:-translate-y-[1px]"
-          style={{
-            color: "var(--text-primary)",
-            border: "1px solid var(--gray-800)",
-            borderRadius: "4px",
-            background: "transparent",
-          }}
+          className="glass-pill font-mono text-[13px] px-[18px] py-[9px]"
+          style={{ color: "var(--text-primary)" }}
         >
           + new post
         </Link>

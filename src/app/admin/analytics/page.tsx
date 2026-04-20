@@ -177,15 +177,7 @@ export default async function AdminAnalyticsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
         {stats.map(({ label, value, color }) => (
-          <div
-            key={label}
-            className="flex flex-col gap-1 p-4"
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--gray-800)",
-              borderRadius: "6px",
-            }}
-          >
+          <div key={label} className="glass flex flex-col gap-1 p-5">
             <span
               className="font-mono text-[28px] font-medium tabular-nums"
               style={{ color }}
@@ -216,14 +208,7 @@ export default async function AdminAnalyticsPage() {
             daily
           </span>
         </div>
-        <div
-          className="p-4"
-          style={{
-            background: "var(--bg-surface)",
-            border: "1px solid var(--gray-800)",
-            borderRadius: "6px",
-          }}
-        >
+        <div className="glass p-5">
           <AnalyticsChart rows={rows} />
         </div>
       </section>
