@@ -1,6 +1,10 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
 import { projectHref } from "@/lib/projects";
 import type { Project } from "@/components/site/ProjectCard";
+import { useProjectModal } from "@/components/site/ProjectModalProvider";
 
 function MediaFrame({
   project: p,
@@ -95,9 +99,24 @@ export default function ProjectMediaCard({
   project: Project;
   index: number;
 }) {
+  const { openProject, register } = useProjectModal();
+  // Register the card's project so the provider can re-open it when
+  // the page arrives with ?project=<id> already in the URL.
+  useEffect(() => {
+    register([p]);
+  }, [p, register]);
+
   return (
     <Link
       href={projectHref(p)}
+      onClick={(e) => {
+        // Let the browser handle middle/cmd-click so users can still
+        // open the full page in a new tab; intercept the plain click
+        // and open the modal instead.
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        e.preventDefault();
+        openProject(p);
+      }}
       className="media-card group relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-[2px]"
       style={{
         border: "1px solid var(--gray-800)",

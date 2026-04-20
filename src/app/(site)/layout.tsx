@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import Nav from "@/components/site/Nav";
 import ScrollControls from "@/components/site/ScrollControls";
 import TrackPageView from "@/components/site/TrackPageView";
+import ProjectModalProvider from "@/components/site/ProjectModalProvider";
 
 export default function SiteLayout({
   children,
@@ -8,11 +10,12 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Nav />
-      <TrackPageView />
-      <main className="flex-1">{children}</main>
-      <ScrollControls />
+    <Suspense fallback={null}>
+      <ProjectModalProvider>
+        <Nav />
+        <TrackPageView />
+        <main className="flex-1">{children}</main>
+        <ScrollControls />
       <footer
         className="px-[6vw] py-6 font-mono text-[11px] flex justify-between flex-wrap gap-3"
         style={{
@@ -32,6 +35,7 @@ export default function SiteLayout({
           edmonton, ab
         </span>
       </footer>
-    </>
+      </ProjectModalProvider>
+    </Suspense>
   );
 }
