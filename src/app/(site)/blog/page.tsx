@@ -78,39 +78,44 @@ export default async function BlogPage() {
   }
 
   return (
-    <div className="blog-shell">
-      {/* Hero */}
-      <section className="blog-hero">
-        <div className="blog-marker">
-          <span>
-            <span style={{ color: "var(--violet-soft)" }}>##</span> blog
-          </span>
-        </div>
-        <h1 className="blog-hero-h1">
-          sharing<br />my<br />
-          <span style={{ color: "var(--amber-bright)" }}>thoughts.</span>
-        </h1>
-        <div className="blog-byline">— sashreek addanki</div>
-      </section>
+    <>
+      {/* Magazine spread: hero title on the left, about on the right.
+          Collapses to a single column below 1080px so the narrow post
+          list underneath still feels intentional. */}
+      <div className="blog-spread">
+        <section className="blog-hero">
+          <div className="blog-marker">
+            <span>
+              <span style={{ color: "var(--violet-soft)" }}>##</span> blog
+            </span>
+          </div>
+          <h1 className="blog-hero-h1">
+            sharing<br />my<br />
+            <span style={{ color: "var(--amber-bright)" }}>thoughts.</span>
+          </h1>
+          <div className="blog-byline">— sashreek addanki</div>
+        </section>
 
-      {/* About — lead with context, then the archive */}
-      <section className="blog-about blog-about-top" id="about">
-        <div className="blog-marker">
-          <span>
-            <span style={{ color: "var(--violet-soft)" }}>##</span> about
-          </span>
-        </div>
-        <div
-          className="blog-about-heading"
-          dangerouslySetInnerHTML={{ __html: renderInlineMarkup(profile.heading) }}
-        />
-        <div
-          className="blog-about-body-text"
-          dangerouslySetInnerHTML={{ __html: renderParagraphs(profile.body) }}
-        />
-      </section>
+        <section className="blog-about blog-about-top" id="about">
+          <div className="blog-marker">
+            <span>
+              <span style={{ color: "var(--violet-soft)" }}>##</span> about
+            </span>
+          </div>
+          <div
+            className="blog-about-heading"
+            dangerouslySetInnerHTML={{ __html: renderInlineMarkup(profile.heading) }}
+          />
+          <div
+            className="blog-about-body-text"
+            dangerouslySetInnerHTML={{ __html: renderParagraphs(profile.body) }}
+          />
+        </section>
+      </div>
 
-      <BlogIndex posts={posts} />
-    </div>
+      <div className="blog-shell">
+        <BlogIndex posts={posts} />
+      </div>
+    </>
   );
 }

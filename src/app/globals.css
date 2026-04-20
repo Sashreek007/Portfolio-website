@@ -393,11 +393,50 @@
 }
 .blog-marker-r { color: var(--gray-600); }
 
+/* ===== Magazine spread (hero + about) ===== */
+/* Wider container just for the introductory block so a narrow post
+   list can follow below. On desktop the hero title and about copy
+   sit side by side with a hairline rule between; both stack on
+   narrow screens. */
+.blog-spread {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 72px 48px 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 72px;
+  align-items: start;
+  border-bottom: 1px solid var(--gray-800);
+  margin-bottom: 48px;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  position: relative;
+}
+.blog-spread::before {
+  content: "";
+  position: absolute;
+  top: 96px;
+  bottom: 48px;
+  left: 50%;
+  width: 1px;
+  background: var(--gray-800);
+  transform: translateX(calc(-50% + 4px));
+  pointer-events: none;
+}
+@media (max-width: 1080px) {
+  .blog-spread {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 56px 28px 16px;
+  }
+  .blog-spread::before { display: none; }
+}
+
 /* ===== Hero ===== */
 .blog-hero {
-  padding-bottom: 56px;
-  margin-bottom: 40px;
-  border-bottom: 1px solid var(--gray-800);
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
 }
 .blog-hero-h1 {
   font-family: var(--font-mono);
@@ -425,10 +464,22 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 2px;
-  border-top: 1px solid var(--gray-800);
-  border-bottom: 1px solid var(--gray-800);
-  margin-bottom: 20px;
+  padding: 12px 18px;
+  background: color-mix(in srgb, var(--bg-surface) 45%, transparent);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 6%, transparent);
+  margin-bottom: 24px;
+  transition: border-color 180ms, box-shadow 200ms;
+}
+.blog-search:focus-within {
+  border-color: color-mix(in srgb, var(--violet-soft) 42%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 8%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--violet-soft) 15%, transparent);
 }
 .blog-prompt {
   color: var(--violet-soft);
@@ -454,8 +505,12 @@
   color: var(--gray-600);
   font-size: 10px;
   letter-spacing: 0.1em;
-  border: 1px solid var(--gray-800);
-  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-surface) 50%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 6%, transparent);
 }
 
 .blog-tags {
@@ -472,18 +527,34 @@
   margin-right: 8px;
 }
 .blog-tag {
-  padding: 4px 10px;
+  padding: 5px 12px;
   font-size: 11px;
   color: var(--text-muted);
-  border: 1px solid var(--gray-800);
-  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--bg-surface) 35%, transparent);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 5%, transparent);
+  border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
   letter-spacing: 0.02em;
-  transition: color 150ms, border-color 150ms;
+  transition: color 180ms, border-color 180ms, background 180ms, box-shadow 200ms;
 }
-.blog-tag:hover { color: var(--text-secondary); border-color: var(--gray-600); }
-.blog-tag.on { color: var(--violet-soft); border-color: var(--violet-mid); }
+.blog-tag:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--violet-soft) 32%, transparent);
+  background: color-mix(in srgb, var(--bg-surface) 60%, transparent);
+}
+.blog-tag.on {
+  color: var(--violet-pale);
+  border-color: color-mix(in srgb, var(--violet-soft) 55%, transparent);
+  background: color-mix(in srgb, var(--violet-mid) 22%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 8%, transparent),
+    0 0 18px color-mix(in srgb, var(--violet-soft) 18%, transparent);
+}
 .blog-tag-count {
   color: var(--gray-600);
   margin-left: 6px;
@@ -573,16 +644,15 @@
   padding-top: 40px;
   border-top: 1px solid var(--gray-800);
 }
-/* When About leads the page it gets breathing room above but no top
-   border — the hero already serves as the visual anchor. */
+/* Inside the blog-spread, About is the right column — no border, no
+   vertical offset; the spread handles spacing and the center hairline. */
 .blog-about.blog-about-top {
-  margin-top: 8px;
-  padding-top: 0;
-  border-top: none;
-  padding-bottom: 40px;
-  margin-bottom: 48px;
-  border-bottom: 1px solid var(--gray-800);
+  margin: 0;
+  padding: 0;
+  border: none;
 }
+.blog-spread .blog-about-heading { max-width: 100%; }
+.blog-spread .blog-about-body-text { max-width: 100%; }
 .blog-about-heading {
   font-family: var(--font-mono);
   font-size: clamp(22px, 3vw, 30px);
