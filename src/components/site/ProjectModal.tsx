@@ -4,35 +4,40 @@ import { useEffect, useRef } from "react";
 import type { Project } from "@/components/site/ProjectCard";
 import { useProjectModal } from "@/components/site/ProjectModalProvider";
 
-// Overlay variant of the /projects/[id] detail view — same vocabulary
-// (## section markers, mono labels, violet accent, the existing glass
-// system) just hosted inside a dismissible sheet instead of a route.
-export default function ProjectModal({ project: p }: { project: Project }) {
-  const { close } = useProjectModal();
+const STATUS_LABEL: Record<Project["status"], string> = {
+  shipped: "DEPLOYED",
+  active: "LIVE",
+  building: "IN DEVELOPMENT",
+};
+
+const STATUS_DOT: Record<Project["status"], string> = {
+  shipped: "var(--green-bright)",
+  active: "var(--amber-bright)",
+  building: "var(--violet-soft)",
+};
+
+// Case-file modal — serif title on a navy field, metadata strip up top,
+// tech pills, amber section labels. Matches the "project dossier"
+// aesthetic the user wanted copied over.
+export default function ProjectModal({ project }: { project: Project }) {
+  const { close: onClose } = useProjectModal();
   const dialogRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
+  // Focus the sheet on mount so keyboard users land inside the
+  // modal rather than at the top of the underlying page.
   useEffect(() => {
     sheetRef.current?.focus();
   }, []);
 
+  // Click on the backdrop (but not the sheet itself) closes.
   const onBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === dialogRef.current) close();
+    if (e.target === dialogRef.current) onClose();
   };
 
-  const idx = String(p.sort_order + 1).padStart(2, "0");
-  const statusLabel =
-    p.status === "shipped"
-      ? "shipped"
-      : p.status === "active"
-        ? "live"
-        : "building";
-  const statusColor =
-    p.status === "shipped"
-      ? "var(--green-bright)"
-      : p.status === "active"
-        ? "var(--amber-bright)"
-        : "var(--violet-soft)";
+  const idBadge = `ID: ${String(project.sort_order + 1).padStart(2, "0")}`;
+  const status = STATUS_LABEL[project.status];
+  const dotColor = STATUS_DOT[project.status];
 
   return (
     <div
@@ -46,41 +51,44 @@ export default function ProjectModal({ project: p }: { project: Project }) {
       <div
         ref={sheetRef}
         tabIndex={-1}
-        className="project-modal-sheet glass-strong"
+        className="project-modal-sheet"
+        // Stop the mousedown here from bubbling up to the backdrop,
+        // which would otherwise close the modal when the user starts a
+        // text selection inside it.
         onMouseDown={(e) => e.stopPropagation()}
       >
-        {/* Kicker strip */}
+        {/* Masthead strip */}
         <header className="project-modal-head">
-          <div className="project-modal-kicker">
-            <span>PROJECT · {idx}</span>
-            <span className="project-modal-kicker-rule" />
+          <div className="project-modal-meta">
             <span className="project-modal-status">
               <span
                 className="project-modal-status-dot"
-                style={{ background: statusColor }}
+                style={{ background: dotColor }}
               />
-              {statusLabel}
+              {status}
             </span>
-            {p.year && (
+            <span className="project-modal-divider" />
+            <span className="project-modal-id">{idBadge}</span>
+            {project.year && (
               <>
-                <span className="project-modal-kicker-rule" />
-                <span>{p.year}</span>
+                <span className="project-modal-divider" />
+                <span className="project-modal-id">{project.year}</span>
               </>
             )}
           </div>
           <button
             type="button"
             className="project-modal-close"
-            onClick={close}
+            onClick={onClose}
             aria-label="Close project"
           >
             <svg
-              width="14"
-              height="14"
+              width="16"
+              height="16"
               viewBox="0 0 16 16"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.5"
+              strokeWidth="1.4"
               strokeLinecap="round"
             >
               <path d="M3 3l10 10M13 3L3 13" />
@@ -88,80 +96,83 @@ export default function ProjectModal({ project: p }: { project: Project }) {
           </button>
         </header>
 
-        {/* Title */}
-        <h2 id="project-modal-title" className="project-modal-title">
-          {p.name}
-        </h2>
-        <div className="project-modal-underline" />
+        {/* Title + subtitle */}
+        <div className="project-modal-hero">
+          <h2 id="project-modal-title" className="project-modal-title">
+            {project.name}
+          </h2>
+          <p className="project-modal-subtitle">
+            {project.description.split(" — ")[0]}
+            {project.description.includes(" — ") &&
+              ` — ${project.description.split(" — ").slice(1).join(" — ")}`}
+          </p>
 
-        {/* Overview */}
-        <section className="project-modal-section">
-          <h3 className="project-modal-section-h">
-            <span style={{ color: "var(--violet-soft)" }}>##</span>
-            <span style={{ color: "var(--text-primary)" }}>overview</span>
-          </h3>
-          <p className="project-modal-prose">{p.description}</p>
-        </section>
-
-        {/* Stack */}
-        {p.stack.length > 0 && (
-          <section className="project-modal-section">
-            <h3 className="project-modal-section-h">
-              <span style={{ color: "var(--violet-soft)" }}>##</span>
-              <span style={{ color: "var(--text-primary)" }}>stack</span>
-            </h3>
+          {project.stack.length > 0 && (
             <div className="project-modal-stack">
-              {p.stack.map((tech) => (
-                <span key={tech} className="project-modal-stack-item">
+              {project.stack.map((tech) => (
+                <span key={tech} className="project-modal-pill">
                   {tech}
                 </span>
               ))}
             </div>
-          </section>
-        )}
+          )}
+        </div>
 
-        {/* Links */}
-        {(p.github_url || p.demo_url) && (
+        <hr className="project-modal-rule" />
+
+        {/* Overview section */}
+        <section className="project-modal-section">
+          <h3 className="project-modal-section-label">
+            <StackIcon /> OVERVIEW
+          </h3>
+          <p className="project-modal-prose">{project.description}</p>
+        </section>
+
+        {/* Links section — rendered only if we have any */}
+        {(project.github_url || project.demo_url) && (
           <section className="project-modal-section">
-            <h3 className="project-modal-section-h">
-              <span style={{ color: "var(--violet-soft)" }}>##</span>
-              <span style={{ color: "var(--text-primary)" }}>links</span>
+            <h3 className="project-modal-section-label">
+              <LinkIcon /> LINKS
             </h3>
             <div className="project-modal-links">
-              {p.demo_url && (
+              {project.demo_url && (
                 <a
-                  href={p.demo_url}
+                  href={project.demo_url}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="project-modal-link"
                 >
-                  <span className="project-modal-link-label">live demo</span>
-                  <span className="project-modal-link-value">open ↗</span>
+                  <span>live demo</span>
+                  <span className="project-modal-link-arrow">↗</span>
                 </a>
               )}
-              {p.github_url && (
+              {project.github_url && (
                 <a
-                  href={p.github_url}
+                  href={project.github_url}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="project-modal-link"
                 >
-                  <span className="project-modal-link-label">source</span>
-                  <span className="project-modal-link-value">github ↗</span>
+                  <span>source · github</span>
+                  <span className="project-modal-link-arrow">↗</span>
                 </a>
               )}
             </div>
           </section>
         )}
 
+        {/* Full-page escape hatch */}
         <footer className="project-modal-footer">
           <a
-            href={`/projects/${p.id}`}
+            href={`/projects/${project.id}`}
             className="project-modal-footer-link"
             onClick={(e) => {
+              // Allow cmd/ctrl-click to open full page in a new tab;
+              // a plain click stays in the modal (close it so the
+              // underlying page is visible again).
               if (e.metaKey || e.ctrlKey) return;
               e.preventDefault();
-              close();
+              onClose();
             }}
             target="_blank"
             rel="noreferrer noopener"
@@ -172,5 +183,42 @@ export default function ProjectModal({ project: p }: { project: Project }) {
         </footer>
       </div>
     </div>
+  );
+}
+
+function StackIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+    >
+      <path d="M8 2 L14 5 L8 8 L2 5 Z" />
+      <path d="M2 8 L8 11 L14 8" />
+      <path d="M2 11 L8 14 L14 11" />
+    </svg>
+  );
+}
+
+function LinkIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6.5 9.5a3 3 0 0 0 4.24 0l2.12-2.12a3 3 0 0 0-4.24-4.24l-1 1" />
+      <path d="M9.5 6.5a3 3 0 0 0-4.24 0L3.14 8.62a3 3 0 0 0 4.24 4.24l1-1" />
+    </svg>
   );
 }
