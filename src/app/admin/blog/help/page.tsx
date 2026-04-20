@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Kbd from "@/components/Kbd";
 
 export const metadata = { title: "Editor Reference | Admin" };
 
@@ -26,11 +27,9 @@ function Row({ command, keys, description }: { command: string; keys?: string[];
         </code>
       </div>
       {keys && (
-        <div style={{ display: "flex", gap: "4px", width: "160px", flexShrink: 0 }}>
+        <div style={{ display: "flex", gap: "4px", width: "200px", flexShrink: 0 }}>
           {keys.map((k) => (
-            <kbd key={k} style={{ ...mono, fontSize: "11px", color: "var(--text-secondary)", background: "var(--bg-elevated)", padding: "2px 6px", borderRadius: "3px", border: "1px solid var(--gray-800)" }}>
-              {k}
-            </kbd>
+            <Kbd key={k}>{k}</Kbd>
           ))}
         </div>
       )}

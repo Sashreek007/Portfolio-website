@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useIsMac } from "@/components/Kbd";
 
 export type IndexPost = {
   id: string;
@@ -48,6 +49,8 @@ export default function BlogIndex({ posts }: { posts: IndexPost[] }) {
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string>("all");
   const qRef = useRef<HTMLInputElement>(null);
+
+  const isMac = useIsMac();
 
   // Tag counts, sorted descending by count.
   const tagList = useMemo(() => {
@@ -135,7 +138,7 @@ export default function BlogIndex({ posts }: { posts: IndexPost[] }) {
           >
             {countLabel}
           </span>
-          <span className="blog-hint">⌘K</span>
+          <span className="blog-hint">{isMac ? "⌘K" : "Ctrl K"}</span>
         </div>
 
         {tagList.length > 0 && (

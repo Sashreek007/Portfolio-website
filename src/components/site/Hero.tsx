@@ -24,9 +24,9 @@ export default function Hero() {
           <h1
             className="fade-up font-mono font-medium"
             style={{
-              fontSize: "clamp(48px, 9.5vw, 140px)",
-              lineHeight: "0.98",
-              letterSpacing: "-0.045em",
+              fontSize: "clamp(56px, 11vw, 172px)",
+              lineHeight: "0.95",
+              letterSpacing: "-0.05em",
               color: "var(--text-primary)",
             }}
           >
