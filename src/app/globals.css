@@ -420,6 +420,8 @@
   margin-top: 18px;
   max-width: 620px;
 }
+.blog-masthead-tag p { margin: 0; }
+.blog-masthead-tag p + p { margin-top: 8px; }
 
 /* Legacy hero — kept for any other views that still render it, but the
    index now uses .blog-masthead instead. */

@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { createServerClient } from "@/lib/supabase/server";
 import BlogIndex, { type IndexPost } from "./BlogIndex";
-import {
-  BLOG_PROFILE_DEFAULT,
-  renderInlineMarkup,
-  renderParagraphs,
-} from "@/lib/blog-profile";
+import { BLOG_PROFILE_DEFAULT, renderParagraphs } from "@/lib/blog-profile";
 import { getBlogViewStats } from "@/lib/blog-views";
 
 export const metadata: Metadata = {
@@ -93,32 +89,13 @@ export default async function BlogPage() {
           sharing my{" "}
           <span style={{ color: "var(--amber-bright)" }}>thoughts.</span>
         </h1>
-        <p className="blog-masthead-tag">
-          short notes on what i&apos;m learning, reading, and breaking. no
-          cadence, no funnel.
-        </p>
-      </section>
-
-      <BlogIndex posts={posts} />
-
-      {/* Full about — sits under the archive as a colophon, so the
-          intro-the-author context is available without pushing posts
-          below the fold. */}
-      <section className="blog-about blog-about-bottom" id="about">
-        <div className="blog-marker">
-          <span>
-            <span style={{ color: "var(--violet-soft)" }}>##</span> about
-          </span>
-        </div>
         <div
-          className="blog-about-heading"
-          dangerouslySetInnerHTML={{ __html: renderInlineMarkup(profile.heading) }}
-        />
-        <div
-          className="blog-about-body-text"
+          className="blog-masthead-tag"
           dangerouslySetInnerHTML={{ __html: renderParagraphs(profile.body) }}
         />
       </section>
+
+      <BlogIndex posts={posts} />
     </div>
   );
 }
