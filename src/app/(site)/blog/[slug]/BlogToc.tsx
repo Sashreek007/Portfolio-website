@@ -7,7 +7,16 @@ export type TocItem = { id: string; text: string; level: 2 | 3 };
 // Left-rail table of contents. IntersectionObserver highlights the section
 // whose heading most recently crossed into the top-third of the viewport
 // so the active marker tracks the user as they scroll.
-export default function BlogToc({ items }: { items: TocItem[] }) {
+export default function BlogToc({
+  items,
+  variant = "rail",
+}: {
+  items: TocItem[];
+  // "rail" is the left-column sticky TOC. "inline" is the same TOC
+  // slotted into the right sidebar for medium viewports where the left
+  // rail collapses but the sidebar still has room.
+  variant?: "rail" | "inline";
+}) {
   const [activeId, setActiveId] = useState<string | null>(
     items[0]?.id ?? null,
   );
@@ -58,7 +67,10 @@ export default function BlogToc({ items }: { items: TocItem[] }) {
   };
 
   return (
-    <aside className="blog-toc" aria-label="Table of contents">
+    <aside
+      className={`blog-toc blog-toc--${variant}`}
+      aria-label="Table of contents"
+    >
       <div className="blog-toc-label">## contents</div>
       <nav className="blog-toc-list">
         {items.map((it) => (

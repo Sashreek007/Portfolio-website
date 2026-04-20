@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import BlogToc, { type TocItem } from "./BlogToc";
 
 export type SidebarPost = {
   slug: string;
@@ -40,10 +41,14 @@ export default function PostSidebar({
   currentSlug,
   posts,
   trending = [],
+  toc = [],
 }: {
   currentSlug: string;
   posts: SidebarPost[];
   trending?: TrendingPost[];
+  // TOC is rendered inside the sidebar only at medium widths where the
+  // left rail collapses — hidden by CSS when the rail is visible.
+  toc?: TocItem[];
 }) {
   const [query, setQuery] = useState("");
   const [openCats, setOpenCats] = useState<Record<string, boolean>>({});
@@ -86,6 +91,8 @@ export default function PostSidebar({
       <Link href="/blog" className="blog-post-sidebar-brand">
         <span className="brand-name">home</span>
       </Link>
+
+      {toc.length >= 2 && <BlogToc items={toc} variant="inline" />}
 
       <label className="blog-post-sidebar-search">
         <input

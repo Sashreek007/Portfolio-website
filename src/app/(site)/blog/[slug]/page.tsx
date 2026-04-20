@@ -353,7 +353,12 @@ export default async function BlogPostPage({ params }: Props) {
       <PostScroll />
       </div>
 
-      <PostSidebar currentSlug={slug} posts={sidebarPosts} trending={trending} />
+      <PostSidebar
+        currentSlug={slug}
+        posts={sidebarPosts}
+        trending={trending}
+        toc={toc}
+      />
     </div>
   );
 }

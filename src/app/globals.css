@@ -822,18 +822,28 @@
 
 /* ===== Table of contents (left rail) ===== */
 .blog-toc {
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--text-muted);
+}
+.blog-toc--rail {
   position: sticky;
   top: 40px;
   align-self: start;
   max-height: calc(100vh - 60px);
   overflow-y: auto;
   padding-right: 10px;
-  font-family: var(--font-mono);
-  font-size: 14.5px;
-  line-height: 1.55;
-  letter-spacing: 0.01em;
-  color: var(--text-muted);
   z-index: 10;
+}
+/* The inline variant is used when the left rail collapses — hidden on
+   desktop (the rail is visible instead), shown in the right sidebar at
+   medium widths, and hidden again on mobile. */
+.blog-toc--inline { display: none; }
+.blog-toc--inline .blog-toc-label {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
 }
 .blog-toc-label {
   font-size: 12px;
@@ -1091,10 +1101,13 @@
 
 @media (max-width: 1440px) {
   .blog-post-layout {
-    grid-template-columns: minmax(0, 820px) 320px;
+    grid-template-columns: minmax(0, 820px) 340px;
     gap: 52px;
   }
-  .blog-toc { display: none; }
+  /* The rail TOC collapses below this width; the inline copy picks it
+     up inside the right sidebar so contents stay reachable. */
+  .blog-toc--rail { display: none; }
+  .blog-toc--inline { display: block; }
 }
 @media (max-width: 1120px) {
   .blog-post-layout {
