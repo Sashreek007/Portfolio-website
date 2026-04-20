@@ -78,44 +78,47 @@ export default async function BlogPage() {
   }
 
   return (
-    <>
-      {/* Magazine spread: hero title on the left, about on the right.
-          Collapses to a single column below 1080px so the narrow post
-          list underneath still feels intentional. */}
-      <div className="blog-spread">
-        <section className="blog-hero">
-          <div className="blog-marker">
-            <span>
-              <span style={{ color: "var(--violet-soft)" }}>##</span> blog
-            </span>
-          </div>
-          <h1 className="blog-hero-h1">
-            sharing<br />my<br />
-            <span style={{ color: "var(--amber-bright)" }}>thoughts.</span>
-          </h1>
-          <div className="blog-byline">— sashreek addanki</div>
-        </section>
+    <div className="blog-shell">
+      {/* Masthead — a single compact strip so the archive shows up
+          above the fold. The larger "about" block moves below the
+          post list, newspaper-style. */}
+      <section className="blog-masthead">
+        <div className="blog-marker">
+          <span>
+            <span style={{ color: "var(--violet-soft)" }}>##</span> blog
+          </span>
+          <span className="blog-marker-r">— sashreek addanki</span>
+        </div>
+        <h1 className="blog-masthead-h1">
+          sharing my{" "}
+          <span style={{ color: "var(--amber-bright)" }}>thoughts.</span>
+        </h1>
+        <p className="blog-masthead-tag">
+          short notes on what i&apos;m learning, reading, and breaking. no
+          cadence, no funnel.
+        </p>
+      </section>
 
-        <section className="blog-about blog-about-top" id="about">
-          <div className="blog-marker">
-            <span>
-              <span style={{ color: "var(--violet-soft)" }}>##</span> about
-            </span>
-          </div>
-          <div
-            className="blog-about-heading"
-            dangerouslySetInnerHTML={{ __html: renderInlineMarkup(profile.heading) }}
-          />
-          <div
-            className="blog-about-body-text"
-            dangerouslySetInnerHTML={{ __html: renderParagraphs(profile.body) }}
-          />
-        </section>
-      </div>
+      <BlogIndex posts={posts} />
 
-      <div className="blog-shell">
-        <BlogIndex posts={posts} />
-      </div>
-    </>
+      {/* Full about — sits under the archive as a colophon, so the
+          intro-the-author context is available without pushing posts
+          below the fold. */}
+      <section className="blog-about blog-about-bottom" id="about">
+        <div className="blog-marker">
+          <span>
+            <span style={{ color: "var(--violet-soft)" }}>##</span> about
+          </span>
+        </div>
+        <div
+          className="blog-about-heading"
+          dangerouslySetInnerHTML={{ __html: renderInlineMarkup(profile.heading) }}
+        />
+        <div
+          className="blog-about-body-text"
+          dangerouslySetInnerHTML={{ __html: renderParagraphs(profile.body) }}
+        />
+      </section>
+    </div>
   );
 }

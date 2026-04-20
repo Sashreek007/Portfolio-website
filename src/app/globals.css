@@ -393,46 +393,36 @@
 }
 .blog-marker-r { color: var(--gray-600); }
 
-/* ===== Magazine spread (hero + about) ===== */
-/* Wider container just for the introductory block so a narrow post
-   list can follow below. On desktop the hero title and about copy
-   sit side by side with a hairline rule between; both stack on
-   narrow screens. */
-.blog-spread {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 72px 48px 24px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  gap: 72px;
-  align-items: start;
+/* ===== Masthead (compact, newspaper-style) =====
+   A tight strip of ID + headline + tagline so the archive below is
+   visible on first paint. The full "about" colophon lives below the
+   list. */
+.blog-masthead {
+  padding-bottom: 32px;
+  margin-bottom: 28px;
   border-bottom: 1px solid var(--gray-800);
-  margin-bottom: 48px;
+}
+.blog-masthead-h1 {
   font-family: var(--font-mono);
+  font-size: clamp(34px, 5.2vw, 68px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
   color: var(--text-primary);
-  position: relative;
+  margin-top: 6px;
+  max-width: 100%;
 }
-.blog-spread::before {
-  content: "";
-  position: absolute;
-  top: 96px;
-  bottom: 48px;
-  left: 50%;
-  width: 1px;
-  background: var(--gray-800);
-  transform: translateX(calc(-50% + 4px));
-  pointer-events: none;
-}
-@media (max-width: 1080px) {
-  .blog-spread {
-    grid-template-columns: 1fr;
-    gap: 40px;
-    padding: 56px 28px 16px;
-  }
-  .blog-spread::before { display: none; }
+.blog-masthead-tag {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-top: 18px;
+  max-width: 620px;
 }
 
-/* ===== Hero ===== */
+/* Legacy hero — kept for any other views that still render it, but the
+   index now uses .blog-masthead instead. */
 .blog-hero {
   padding-bottom: 0;
   margin-bottom: 0;
@@ -644,15 +634,13 @@
   padding-top: 40px;
   border-top: 1px solid var(--gray-800);
 }
-/* Inside the blog-spread, About is the right column — no border, no
-   vertical offset; the spread handles spacing and the center hairline. */
-.blog-about.blog-about-top {
-  margin: 0;
-  padding: 0;
-  border: none;
+/* Colophon at the bottom of the index — sits after the archive, so
+   readers meet the posts first and the author-context is a sign-off. */
+.blog-about.blog-about-bottom {
+  margin-top: 80px;
+  padding-top: 48px;
+  padding-bottom: 16px;
 }
-.blog-spread .blog-about-heading { max-width: 100%; }
-.blog-spread .blog-about-body-text { max-width: 100%; }
 .blog-about-heading {
   font-family: var(--font-mono);
   font-size: clamp(22px, 3vw, 30px);
