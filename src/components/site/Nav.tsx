@@ -37,17 +37,17 @@ function useScrolledPastHero(threshold = 0.6) {
 const homeLinks = [
   { href: "#work",    label: "work",    id: "work" },
   { href: "#about",   label: "about",   id: "about" },
-  { href: "#writing", label: "writing", id: "writing" },
+  { href: "/blog",    label: "blog ↗",  id: "blog" },
   { href: "#contact", label: "contact", id: "contact" },
 ];
 
 // On non-home pages, nav links route back to the home page's section anchors
-// rather than to the standalone sub-pages (/work, /about, /blog, /contact).
+// rather than to the standalone sub-pages (/work, /about, /contact).
 const pageLinks = [
   { href: "/",         label: "home" },
   { href: "/#work",    label: "work" },
   { href: "/#about",   label: "about" },
-  { href: "/#writing", label: "writing" },
+  { href: "/blog",     label: "blog ↗" },
   { href: "/#contact", label: "contact" },
 ];
 
@@ -67,7 +67,7 @@ export default function Nav() {
 
   useEffect(() => {
     if (!isHome) return;
-    const ids = ["hero", "work", "about", "writing", "contact"];
+    const ids = ["hero", "work", "about", "contact"];
     const observer = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {

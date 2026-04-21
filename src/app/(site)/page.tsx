@@ -6,16 +6,6 @@ import ProjectMediaCard from "@/components/site/ProjectMediaCard";
 import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
-type Post = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  published_at: string | null;
-  created_at: string;
-};
-
 // ── Fallback projects (shown before Supabase is configured) ───────────────────
 const SEED_BEST: Project[] = [
   {
@@ -84,21 +74,11 @@ const SEED_BEST: Project[] = [
   },
 ];
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-CA", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
 const divider = <div className="gradient-divider" />;
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default async function HomePage() {
   let bestProjects: Project[] = SEED_BEST;
-  let recentPosts: Post[] = [];
 
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -114,16 +94,6 @@ export default async function HomePage() {
         .order("sort_order")
         .limit(4);
       if (projects?.length) bestProjects = projects as Project[];
-
-      const { data: posts } = await supabase
-        .from("posts")
-        .select("id, title, slug, excerpt, published_at, created_at")
-        .eq("is_published", true)
-        .eq("show_on_writing", true)
-        .is("project_id", null)
-        .order("published_at", { ascending: false })
-        .limit(3);
-      if (posts) recentPosts = posts as Post[];
     } catch {
       // silence — fallback data used
     }
@@ -364,78 +334,6 @@ export default async function HomePage() {
               view all projects →
             </Link>
           </div>
-        </div>
-      </section>
-
-      {divider}
-
-      {/* ── Writing ───────────────────────────────────────────────────────── */}
-      <section
-        id="writing"
-        className="section-hidden px-[6vw] py-24"
-        style={{ background: "var(--bg-base)" }}
-      >
-        <div className="max-w-[1200px] mx-auto">
-        <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
-          <div>
-            <SectionLabel>Writing</SectionLabel>
-            <h2
-              className="text-[26px] font-medium leading-[1.25] mt-1"
-              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-            >
-              Recent posts
-            </h2>
-          </div>
-          <Link
-            href="/blog"
-            className="font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            view all →
-          </Link>
-        </div>
-
-        {recentPosts.length === 0 ? (
-          <p className="font-mono text-[13px]" style={{ color: "var(--text-muted)" }}>
-            nothing published yet — check back soon
-          </p>
-        ) : (
-          <div className="flex flex-col gap-0 max-w-[760px]">
-            {recentPosts.map((post, i) => (
-              <Link
-                key={post.id}
-                href={`/blog/${post.slug}`}
-                className="post-item group flex items-start justify-between gap-6 py-6"
-                style={{
-                  borderBottom: i < recentPosts.length - 1 ? "1px solid var(--gray-800)" : "none",
-                }}
-              >
-                <div className="flex flex-col gap-1">
-                  <span
-                    className="text-[16px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-200"
-                    style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-                  >
-                    {post.title}
-                  </span>
-                  {post.excerpt && (
-                    <span
-                      className="text-[13px] leading-[1.6] mt-1"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      {post.excerpt}
-                    </span>
-                  )}
-                </div>
-                <span
-                  className="font-mono text-[11px] shrink-0 mt-1"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {formatDate(post.published_at ?? post.created_at)}
-                </span>
-              </Link>
-            ))}
-          </div>
-        )}
         </div>
       </section>
 
