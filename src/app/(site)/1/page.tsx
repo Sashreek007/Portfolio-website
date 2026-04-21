@@ -1,4 +1,5 @@
 import ContactVariantSwitcher from "@/components/site/ContactVariantSwitcher";
+import CopyHandle from "@/components/site/CopyHandle";
 
 // Variant 1 — Correspondence.
 // A tight editorial letter: dateline, salutation, a short note, a
@@ -114,10 +115,6 @@ export default function ContactVariant1() {
                 style={{
                   gridTemplateColumns: "90px 1fr auto",
                   borderTop: "1px dashed var(--gray-800)",
-                  borderBottom:
-                    i === channels.length - 1
-                      ? "1px dashed var(--gray-800)"
-                      : undefined,
                 }}
               >
                 <span
@@ -140,6 +137,44 @@ export default function ContactVariant1() {
                 </span>
               </a>
             ))}
+            {/* Discord has no canonical URL — render as a copy-on-click
+                row so the handle is still one gesture away. */}
+            <CopyHandle
+              value="sashreek"
+              className="group grid items-baseline gap-3 py-[10px] w-full font-mono text-[13px]"
+              style={{
+                gridTemplateColumns: "90px 1fr auto",
+                borderTop: "1px dashed var(--gray-800)",
+                borderBottom: "1px dashed var(--gray-800)",
+                background: "transparent",
+                border: "none",
+                borderTopStyle: "dashed",
+                borderBottomStyle: "dashed",
+                borderTopWidth: "1px",
+                borderBottomWidth: "1px",
+                borderTopColor: "var(--gray-800)",
+                borderBottomColor: "var(--gray-800)",
+              }}
+            >
+              <span
+                className="tracking-[0.12em] uppercase text-[10.5px]"
+                style={{ color: "var(--text-muted)" }}
+              >
+                discord
+              </span>
+              <span
+                className="group-hover:text-[var(--violet-pale)] transition-colors duration-150"
+                style={{ color: "var(--text-primary)" }}
+              >
+                sashreek
+              </span>
+              <span
+                className="text-[11px] opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                style={{ color: "var(--violet-soft)" }}
+              >
+                copy
+              </span>
+            </CopyHandle>
           </div>
 
           {/* Sign-off */}

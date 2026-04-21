@@ -1,4 +1,5 @@
 import ContactVariantSwitcher from "@/components/site/ContactVariantSwitcher";
+import CopyHandle from "@/components/site/CopyHandle";
 
 // Variant 3 — Glass card fan.
 // Three frosted-glass cards fanned out behind a short intro. Each card
@@ -62,7 +63,7 @@ export default function ContactVariant3() {
               className="font-mono text-[11px] tracking-[0.22em] uppercase mb-4"
               style={{ color: "var(--violet-soft)" }}
             >
-              ## contact · three channels
+              ## contact · four channels
             </div>
             <h1
               className="text-[44px] lg:text-[56px] leading-[1.05] font-medium tracking-[-0.015em] mb-5"
@@ -77,13 +78,13 @@ export default function ContactVariant3() {
               className="text-[15.5px] leading-[1.8]"
               style={{ color: "var(--text-secondary)" }}
             >
-              Three ways in, same person on the other side. Whichever feels
+              Four ways in, same person on the other side. Whichever feels
               right for what you&rsquo;re bringing.
             </p>
           </div>
 
-          {/* Card deck — glass cards on a 3-col grid, subtle stagger */}
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+          {/* Card deck — 2 cols on tablet, 4 cols on desktop, subtle stagger */}
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
             {cards.map(({ n, label, channel, handle, note, cta, href, ext, accent }, i) => (
               <a
                 key={channel}
@@ -93,7 +94,7 @@ export default function ContactVariant3() {
                 className="glass group relative flex flex-col p-6 transition-transform duration-300 hover:-translate-y-[4px]"
                 style={{
                   // subtle vertical stagger so the row feels fanned
-                  transform: `translateY(${i * 10}px)`,
+                  transform: `translateY(${i * 8}px)`,
                   borderTop: `2px solid ${accent}`,
                 }}
               >
@@ -161,6 +162,74 @@ export default function ContactVariant3() {
                 </div>
               </a>
             ))}
+
+            {/* Discord — copy-on-click card to match the row pattern */}
+            <CopyHandle
+              value="sashreek"
+              copiedLabel="copied to clipboard"
+              className="glass group relative flex flex-col p-6 transition-transform duration-300 hover:-translate-y-[4px] w-full"
+              style={{
+                transform: `translateY(${cards.length * 8}px)`,
+                borderTop: "2px solid var(--violet-pale)",
+                textAlign: "left",
+                background: undefined,
+              }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <span
+                  className="font-mono text-[10.5px] tracking-[0.22em] uppercase"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  № 04 · chat
+                </span>
+                <span
+                  className="w-[6px] h-[6px] rounded-full"
+                  style={{
+                    background: "var(--violet-pale)",
+                    boxShadow: "0 0 12px var(--violet-pale)",
+                  }}
+                />
+              </div>
+              <h3
+                className="text-[28px] leading-[1.1] font-medium tracking-[-0.01em] mb-3"
+                style={{
+                  color: "var(--text-primary)",
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                discord
+              </h3>
+              <div
+                className="font-mono text-[12px] mb-5 truncate"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                sashreek
+              </div>
+              <p
+                className="text-[13.5px] leading-[1.65] mb-8"
+                style={{ color: "var(--text-muted)" }}
+              >
+                quick dm — good for a back-and-forth that shouldn&rsquo;t
+                be an email thread.
+              </p>
+              <div
+                className="mt-auto pt-4 flex items-center justify-between"
+                style={{ borderTop: "1px solid var(--gray-800)" }}
+              >
+                <span
+                  className="font-mono text-[11.5px] tracking-[0.04em]"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  copy handle
+                </span>
+                <span
+                  className="font-mono text-[16px]"
+                  style={{ color: "var(--violet-pale)" }}
+                >
+                  ⧉
+                </span>
+              </div>
+            </CopyHandle>
           </div>
 
           {/* Footer line */}
@@ -168,7 +237,7 @@ export default function ContactVariant3() {
             className="font-mono text-[11px] tracking-[0.2em] uppercase mt-16 text-center"
             style={{ color: "var(--gray-600)" }}
           >
-            — three channels · one inbox · same person
+            — four channels · one inbox · same person
           </p>
         </div>
       </main>

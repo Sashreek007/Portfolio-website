@@ -1,4 +1,5 @@
 import ContactVariantSwitcher from "@/components/site/ContactVariantSwitcher";
+import CopyHandle from "@/components/site/CopyHandle";
 
 // Variant 2 — Masthead & Directory.
 // Gigantic CONTACT masthead stretched across the page, issue metadata
@@ -146,7 +147,7 @@ export default function ContactVariant2() {
                   borderBottom: "1px solid var(--gray-800)",
                 }}
               >
-                {directory.map(({ label, value, href, ext }, i) => (
+                {directory.map(({ label, value, href, ext }) => (
                   <a
                     key={label}
                     href={href}
@@ -155,8 +156,7 @@ export default function ContactVariant2() {
                     className="group grid items-baseline gap-4 py-[18px]"
                     style={{
                       gridTemplateColumns: "72px 1fr 28px",
-                      borderTop:
-                        i > 0 ? "1px solid var(--gray-800)" : undefined,
+                      borderTop: "1px solid var(--gray-800)",
                     }}
                   >
                     <span
@@ -182,6 +182,43 @@ export default function ContactVariant2() {
                     </span>
                   </a>
                 ))}
+                {/* Discord — copy-to-clipboard row, matches the
+                    directory typography exactly. */}
+                <CopyHandle
+                  value="sashreek"
+                  className="group grid items-baseline gap-4 py-[18px] w-full"
+                  style={{
+                    gridTemplateColumns: "72px 1fr 28px",
+                    borderTop: "1px solid var(--gray-800)",
+                    background: "transparent",
+                    border: "none",
+                    borderTopWidth: "1px",
+                    borderTopStyle: "solid",
+                    borderTopColor: "var(--gray-800)",
+                  }}
+                >
+                  <span
+                    className="font-mono text-[10.5px] tracking-[0.22em] uppercase"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    discord
+                  </span>
+                  <span
+                    className="text-[16px] tracking-[-0.005em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                    style={{
+                      color: "var(--text-primary)",
+                      fontFamily: "var(--font-body)",
+                    }}
+                  >
+                    sashreek
+                  </span>
+                  <span
+                    className="font-mono text-[11px] text-right tracking-[0.08em]"
+                    style={{ color: "var(--violet-soft)" }}
+                  >
+                    copy
+                  </span>
+                </CopyHandle>
               </div>
 
               <p

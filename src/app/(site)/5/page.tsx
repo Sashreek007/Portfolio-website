@@ -1,4 +1,5 @@
 import ContactVariantSwitcher from "@/components/site/ContactVariantSwitcher";
+import CopyHandle from "@/components/site/CopyHandle";
 
 // Variant 5 — Monument.
 // Negative-space take: a towering headline, one sentence, three glass
@@ -67,7 +68,7 @@ export default function ContactVariant5() {
           want to argue about a paper — pick a channel and start talking.
         </p>
 
-        {/* Three glass pills */}
+        {/* Four glass pills */}
         <div className="flex flex-wrap gap-3 justify-center">
           {channels.map(({ label, href, ext }) => (
             <a
@@ -89,6 +90,16 @@ export default function ContactVariant5() {
               </span>
             </a>
           ))}
+          <CopyHandle
+            value="sashreek"
+            className="glass-pill font-mono text-[13px] px-6 py-3 inline-flex items-center gap-3"
+            style={{ color: "var(--text-primary)" }}
+          >
+            <span>discord</span>
+            <span style={{ color: "var(--violet-soft)", fontSize: "14px" }}>
+              ⧉
+            </span>
+          </CopyHandle>
         </div>
 
         {/* Bottom signature */}

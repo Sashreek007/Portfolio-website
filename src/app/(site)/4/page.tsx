@@ -1,4 +1,5 @@
 import ContactVariantSwitcher from "@/components/site/ContactVariantSwitcher";
+import CopyHandle from "@/components/site/CopyHandle";
 
 // Variant 4 — Dossier.
 // Press-kit style spread: a narrow left rail of status metadata
@@ -140,6 +141,61 @@ export default function ContactVariant4() {
                   </span>
                 </a>
               ))}
+
+              {/* 04 · discord — copy-on-click row, matches the others */}
+              <CopyHandle
+                value="sashreek"
+                copiedLabel="copied to clipboard"
+                className="group grid gap-6 py-8 w-full"
+                style={{
+                  gridTemplateColumns: "50px 1fr 40px",
+                  borderBottom: "1px solid var(--gray-800)",
+                  background: "transparent",
+                  border: "none",
+                  borderBottomStyle: "solid",
+                  borderBottomWidth: "1px",
+                  borderBottomColor: "var(--gray-800)",
+                }}
+              >
+                <span
+                  className="font-mono text-[11px] tracking-[0.2em] uppercase pt-[6px]"
+                  style={{ color: "var(--violet-soft)" }}
+                >
+                  04
+                </span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-baseline gap-4">
+                    <span
+                      className="font-mono text-[10.5px] tracking-[0.2em] uppercase"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      discord
+                    </span>
+                    <span
+                      className="text-[24px] lg:text-[28px] leading-[1.1] tracking-[-0.01em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                      style={{
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      sashreek
+                    </span>
+                  </div>
+                  <p
+                    className="text-[14px] leading-[1.65] max-w-[560px]"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Quick DMs. Click the handle to copy — Discord has no
+                    canonical profile URL to link out to.
+                  </p>
+                </div>
+                <span
+                  className="font-mono text-[18px] pt-[6px]"
+                  style={{ color: "var(--violet-soft)" }}
+                >
+                  ⧉
+                </span>
+              </CopyHandle>
             </div>
           </div>
         </div>
