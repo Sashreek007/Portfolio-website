@@ -123,7 +123,6 @@ export default function ProjectMediaCard({
           style={{
             color: "var(--text-primary)",
             fontFamily: "var(--font-body)",
-            cursor: "crosshair",
           }}
         >
           {p.name}

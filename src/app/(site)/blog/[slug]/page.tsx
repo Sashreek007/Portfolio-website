@@ -167,11 +167,17 @@ export default async function BlogPostPage({ params }: Props) {
   }
 
   const supabase = await createServerClient();
+  // Hidden posts (show_on_writing=false) and project-linked posts are
+  // intentionally not part of the public blog archive, so they should
+  // 404 on direct slug access too — otherwise the hidden flag only
+  // removes them from the index but not the URL.
   const { data } = await supabase
     .from("posts")
     .select("*")
     .eq("slug", slug)
     .eq("is_published", true)
+    .eq("show_on_writing", true)
+    .is("project_id", null)
     .single();
 
   if (!data) notFound();

@@ -55,9 +55,11 @@ export default function Hero() {
           {/* CTA buttons */}
           <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
             {[
-              { href: "#about",  label: "about" },
-              { href: "#work",   label: "projects" },
-              { href: "/resume", label: "resume" },
+              { href: "#about",   label: "about" },
+              { href: "#work",    label: "projects" },
+              { href: "#writing", label: "writing" },
+              { href: "/blog",    label: "blog ↗" },
+              { href: "/resume",  label: "resume" },
               { href: "https://github.com/Sashreek007", label: "github ↗", ext: true },
               { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true },
             ].map(({ href, label, ext }) => (

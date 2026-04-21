@@ -95,7 +95,6 @@ export default function FeatureStrip({
           style={{
             color: "var(--text-primary)",
             fontFamily: "var(--font-body)",
-            cursor: "crosshair",
           }}
         >
           {p.name}
