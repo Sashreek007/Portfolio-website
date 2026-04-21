@@ -1,280 +1,200 @@
-import Link from "next/link";
-import AboutVariantSwitcher from "@/components/site/AboutVariantSwitcher";
+import ContactVariantSwitcher from "@/components/site/ContactVariantSwitcher";
 
-// Variant 2 — IDE Buffer
-// Neovim-style left file tree + editor buffer with line numbers.
-// Three "files" stacked: about.md, stack.yaml, experience.log.
+// Variant 2 — Masthead & Directory.
+// Gigantic CONTACT masthead stretched across the page, issue metadata
+// below, then a two-column body: left = availability blurb, right =
+// bordered contact directory with hairline rules (matches the blog
+// archive's editorial typography).
 
-export const metadata = { title: "About v2 — IDE" };
+export const metadata = {
+  title: "Contact · masthead | Sashreek Addanki",
+};
 
-type TreeNode = { name: string; kind: "dir" | "file"; active?: boolean; children?: TreeNode[] };
-
-const tree: TreeNode[] = [
+const directory = [
   {
-    name: "about/",
-    kind: "dir",
-    children: [
-      { name: "bio.md",         kind: "file", active: true },
-      { name: "stack.yaml",     kind: "file", active: true },
-      { name: "experience.log", kind: "file", active: true },
-      { name: "photo.webp",     kind: "file" },
-    ],
+    label: "email",
+    value: "sashreek.addanki@gmail.com",
+    href: "mailto:sashreek.addanki@gmail.com",
   },
-  { name: "README.md",   kind: "file" },
-  { name: "resume.pdf",  kind: "file" },
+  {
+    label: "github",
+    value: "github.com/Sashreek007",
+    href: "https://github.com/Sashreek007",
+    ext: true,
+  },
+  {
+    label: "linkedin",
+    value: "linkedin.com/in/sashreek-addanki",
+    href: "https://www.linkedin.com/in/sashreek-addanki-121471257/",
+    ext: true,
+  },
 ];
 
-function Tree({ nodes, indent = 0 }: { nodes: TreeNode[]; indent?: number }) {
+export default function ContactVariant2() {
   return (
-    <div className="flex flex-col">
-      {nodes.map((n) => (
-        <div key={n.name}>
+    <>
+      <main
+        className="min-h-screen w-full px-[6vw] py-20"
+        style={{ background: "var(--bg-base)" }}
+      >
+        <div className="max-w-[1280px] mx-auto flex flex-col">
+          {/* Issue metadata row */}
           <div
-            className="flex items-center gap-[6px] py-[2px]"
-            style={{
-              paddingLeft: 8 + indent * 12,
-              color: n.active
-                ? "var(--violet-pale)"
-                : n.kind === "dir"
-                  ? "var(--text-secondary)"
-                  : "var(--text-muted)",
-              background: n.active ? "color-mix(in srgb, var(--violet-dim) 35%, transparent)" : "transparent",
-            }}
-          >
-            <span style={{ color: n.kind === "dir" ? "var(--amber-bright)" : "var(--gray-600)" }}>
-              {n.kind === "dir" ? "▾" : "●"}
-            </span>
-            <span>{n.name}</span>
-          </div>
-          {n.children && <Tree nodes={n.children} indent={indent + 1} />}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Line({ n, children }: { n: number; children: React.ReactNode }) {
-  return (
-    <div className="flex gap-4">
-      <span
-        className="text-right select-none w-[22px] shrink-0"
-        style={{ color: "var(--gray-600)" }}
-      >
-        {n}
-      </span>
-      <span className="flex-1">{children}</span>
-    </div>
-  );
-}
-
-function FileHeader({ name, lang }: { name: string; lang: string }) {
-  return (
-    <div
-      className="flex items-center justify-between px-4 py-[6px] mt-6 first:mt-0"
-      style={{
-        background: "var(--bg-elevated)",
-        borderTop: "1px solid var(--gray-800)",
-        borderBottom: "1px solid var(--gray-800)",
-      }}
-    >
-      <span className="font-mono text-[12px]" style={{ color: "var(--violet-pale)" }}>
-        {name}
-      </span>
-      <span className="font-mono text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--text-muted)" }}>
-        {lang}
-      </span>
-    </div>
-  );
-}
-
-const K = ({ children }: { children: React.ReactNode }) => (
-  <span style={{ color: "var(--violet-soft)" }}>{children}</span>
-);
-const S = ({ children }: { children: React.ReactNode }) => (
-  <span style={{ color: "var(--green-bright)" }}>{children}</span>
-);
-const N = ({ children }: { children: React.ReactNode }) => (
-  <span style={{ color: "var(--amber-bright)" }}>{children}</span>
-);
-const C = ({ children }: { children: React.ReactNode }) => (
-  <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>{children}</span>
-);
-
-export default function AboutVariant2() {
-  return (
-    <div
-      className="min-h-screen w-full py-16 px-[4vw] flex items-start justify-center"
-      style={{ background: "var(--bg-base)" }}
-    >
-      <div
-        className="w-full max-w-[1100px] rounded-lg overflow-hidden grid"
-        style={{
-          gridTemplateColumns: "220px 1fr",
-          border: "1px solid var(--gray-800)",
-          background: "var(--bg-surface)",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.4)",
-          minHeight: "75vh",
-        }}
-      >
-        {/* Left — file tree */}
-        <aside
-          className="py-4 font-mono text-[12px]"
-          style={{
-            background: "var(--bg-elevated)",
-            borderRight: "1px solid var(--gray-800)",
-          }}
-        >
-          <p
-            className="px-3 pb-3 text-[10px] tracking-[0.14em] uppercase"
+            className="flex items-center justify-between font-mono text-[11px] tracking-[0.22em] uppercase mb-10"
             style={{ color: "var(--text-muted)" }}
           >
-            NVIM · ~/about
-          </p>
-          <Tree nodes={tree} />
-          <div
-            className="mt-6 pt-3 px-3 flex flex-col gap-1"
-            style={{ borderTop: "1px solid var(--gray-800)", color: "var(--text-muted)" }}
-          >
-            <span>— status —</span>
             <span>
-              <span style={{ color: "var(--green-bright)" }}>●</span> available · ai + systems
+              vol. 02 &nbsp; · &nbsp; issue 04 &nbsp; · &nbsp; spring 2026
             </span>
-          </div>
-        </aside>
-
-        {/* Right — editor */}
-        <main className="font-mono text-[13px]" style={{ color: "var(--text-primary)" }}>
-          {/* Tabs */}
-          <div
-            className="flex items-center px-2 h-[34px]"
-            style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--gray-800)" }}
-          >
-            {[
-              { n: "bio.md", active: true },
-              { n: "stack.yaml" },
-              { n: "experience.log" },
-            ].map((t) => (
-              <div
-                key={t.n}
-                className="px-3 h-full flex items-center gap-2 text-[12px]"
-                style={{
-                  color: t.active ? "var(--violet-pale)" : "var(--text-muted)",
-                  borderBottom: t.active ? "2px solid var(--violet-mid)" : "2px solid transparent",
-                  background: t.active ? "var(--bg-surface)" : "transparent",
-                }}
-              >
-                <span style={{ color: "var(--amber-bright)" }}>●</span>
-                {t.n}
-              </div>
-            ))}
+            <span>—</span>
+            <span>edmonton, ab</span>
           </div>
 
-          {/* bio.md */}
-          <FileHeader name="~/about/bio.md" lang="markdown" />
-          <div className="px-4 py-4 leading-[1.8]">
-            <Line n={1}><span style={{ color: "var(--violet-pale)" }}># sashreek addanki</span></Line>
-            <Line n={2}><C>&gt; computing science @ ualberta · ai + systems</C></Line>
-            <Line n={3}>&nbsp;</Line>
-            <Line n={4}>
-              <span style={{ color: "var(--text-secondary)" }}>
-                My work spans backend systems, low-level programming, and AI-driven
-                features that move beyond research demos into usable software.
-              </span>
-            </Line>
-            <Line n={5}>&nbsp;</Line>
-            <Line n={6}>
-              <span style={{ color: "var(--text-secondary)" }}>
-                I learn bottom-up — the mechanism before the abstraction.
-                Kurose &amp; Ross before FastAPI. RISC-V before operating systems.
-              </span>
-            </Line>
-            <Line n={7}><C>// second year · co-op stream · graduating 2028</C></Line>
-          </div>
-
-          {/* stack.yaml */}
-          <FileHeader name="~/about/stack.yaml" lang="yaml" />
-          <div className="px-4 py-4 leading-[1.8]">
-            {[
-              { n: 1, k: "languages", v: "python, go, c++, typescript, rust, c" },
-              { n: 2, k: "ml_ai",     v: "pytorch, langchain, langgraph, mcp, huggingface, ollama" },
-              { n: 3, k: "infra",     v: "docker, redis, postgres, supabase, fastapi, linux" },
-              { n: 4, k: "systems",   v: "risc-v, neovim, go-stdlib, opencv, mediapipe" },
-            ].map(({ n, k, v }) => (
-              <Line key={n} n={n}>
-                <K>{k}</K>
-                <span style={{ color: "var(--text-secondary)" }}>: </span>
-                <S>[{v.split(", ").map((t, i, a) => (
-                  <span key={t}>{`"${t}"`}{i < a.length - 1 ? ", " : ""}</span>
-                ))}]</S>
-              </Line>
-            ))}
-          </div>
-
-          {/* experience.log */}
-          <FileHeader name="~/about/experience.log" lang="log" />
-          <div className="px-4 py-4 leading-[1.8] pb-8">
-            {[
-              {
-                date: "2025-09",
-                level: "CURRENT",
-                color: "var(--green-bright)",
-                msg: "project lead · undergrad ai society · clubmate ai + spam-detection bot",
-              },
-              {
-                date: "2025-09",
-                level: "INFO",
-                color: "var(--violet-soft)",
-                msg: "teaching assistant · cmput 274 · 200+ students in linux + python",
-              },
-              {
-                date: "2025-01",
-                level: "INFO",
-                color: "var(--violet-soft)",
-                msg: "nathacks ecotech · fluxatlas auction engine (fastapi + c++)",
-              },
-            ].map((e, i) => (
-              <Line key={i} n={i + 1}>
-                <N>[{e.date}]</N>{" "}
-                <span style={{ color: e.color }}>{e.level}</span>{" "}
-                <span style={{ color: "var(--text-secondary)" }}>{e.msg}</span>
-              </Line>
-            ))}
-            <Line n={4}>&nbsp;</Line>
-            <Line n={5}>
-              <C>// </C>
-              <Link
-                href="/about"
-                className="underline underline-offset-2"
-                style={{ color: "var(--violet-pale)" }}
-              >
-                :open full bio
-              </Link>
-              <span
-                className="ml-[6px] inline-block w-[8px] h-[13px] align-middle"
-                style={{
-                  background: "var(--violet-pale)",
-                  animation: "blink-cursor 1s steps(1) infinite",
-                }}
-              />
-            </Line>
-          </div>
-
-          {/* Status bar */}
-          <div
-            className="px-4 py-[6px] flex items-center justify-between text-[11px]"
+          {/* Masthead — one giant word, justified */}
+          <h1
+            className="font-mono font-medium leading-[0.9] tracking-[-0.05em] mb-4"
             style={{
-              background: "var(--violet-dim)",
-              color: "var(--violet-pale)",
-              borderTop: "1px solid var(--gray-800)",
+              fontSize: "clamp(96px, 22vw, 360px)",
+              color: "var(--text-primary)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
             }}
           >
-            <span>NORMAL · ~/about/bio.md</span>
-            <span>markdown · utf-8 · unix · 7:1</span>
-          </div>
-        </main>
-      </div>
+            <span>C</span>
+            <span>O</span>
+            <span>N</span>
+            <span>T</span>
+            <span style={{ color: "var(--amber-bright)" }}>A</span>
+            <span>C</span>
+            <span>T</span>
+          </h1>
 
-      <AboutVariantSwitcher current={2} />
-    </div>
+          <div
+            className="h-px mb-20"
+            style={{ background: "var(--gray-800)" }}
+          />
+
+          {/* Body spread */}
+          <div className="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-20">
+            {/* Left — availability prose */}
+            <article className="flex flex-col gap-6">
+              <div
+                className="font-mono text-[11px] tracking-[0.2em] uppercase"
+                style={{ color: "var(--violet-soft)" }}
+              >
+                ## open for correspondence
+              </div>
+              <h2
+                className="text-[28px] lg:text-[34px] leading-[1.2] font-medium tracking-[-0.01em]"
+                style={{
+                  color: "var(--text-primary)",
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                Reach out for internship opportunities, a collaboration,
+                or a long email about something you can&rsquo;t stop
+                thinking about.
+              </h2>
+              <p
+                className="text-[15px] leading-[1.85] max-w-[480px]"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                I reply from{" "}
+                <span style={{ color: "var(--text-primary)" }}>MST</span>, so
+                expect a response inside{" "}
+                <span style={{ color: "var(--amber-bright)" }}>24–48h</span>.
+                I&rsquo;m especially interested in backend systems, MLOps,
+                and anything where AI research has to meet a real machine.
+              </p>
+              <div
+                className="flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] uppercase mt-2"
+                style={{ color: "var(--green-bright)" }}
+              >
+                <span
+                  className="w-[6px] h-[6px] rounded-full inline-block"
+                  style={{
+                    background: "var(--green-bright)",
+                    animation: "pulse-dot 2.5s ease-in-out infinite",
+                  }}
+                />
+                accepting new mail
+              </div>
+            </article>
+
+            {/* Right — directory */}
+            <aside>
+              <div className="flex items-baseline justify-between mb-4">
+                <span
+                  className="font-mono text-[11px] tracking-[0.2em] uppercase"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  — the directory
+                </span>
+                <span
+                  className="font-mono text-[10px] tracking-[0.12em] uppercase"
+                  style={{ color: "var(--gray-600)" }}
+                >
+                  pp. 03
+                </span>
+              </div>
+
+              <div
+                className="flex flex-col"
+                style={{
+                  borderTop: "1px solid var(--gray-800)",
+                  borderBottom: "1px solid var(--gray-800)",
+                }}
+              >
+                {directory.map(({ label, value, href, ext }, i) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target={ext ? "_blank" : undefined}
+                    rel={ext ? "noreferrer noopener" : undefined}
+                    className="group grid items-baseline gap-4 py-[18px]"
+                    style={{
+                      gridTemplateColumns: "72px 1fr 28px",
+                      borderTop:
+                        i > 0 ? "1px solid var(--gray-800)" : undefined,
+                    }}
+                  >
+                    <span
+                      className="font-mono text-[10.5px] tracking-[0.22em] uppercase"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {label}
+                    </span>
+                    <span
+                      className="text-[16px] tracking-[-0.005em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                      style={{
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      {value}
+                    </span>
+                    <span
+                      className="font-mono text-[14px] text-right transition-transform duration-200 group-hover:translate-x-[2px]"
+                      style={{ color: "var(--violet-soft)" }}
+                    >
+                      {ext ? "↗" : "→"}
+                    </span>
+                  </a>
+                ))}
+              </div>
+
+              <p
+                className="font-mono text-[10px] tracking-[0.2em] uppercase mt-5"
+                style={{ color: "var(--gray-600)" }}
+              >
+                — sashreek addanki, editor &amp; sole correspondent
+              </p>
+            </aside>
+          </div>
+        </div>
+      </main>
+      <ContactVariantSwitcher current={2} />
+    </>
   );
 }
