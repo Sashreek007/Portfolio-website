@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/server";
 import Hero from "@/components/site/Hero";
-import SectionLabel from "@/components/site/SectionLabel";
+import SectionKicker from "@/components/site/SectionKicker";
 import { type Project } from "@/components/site/ProjectCard";
 import ProjectMediaCard from "@/components/site/ProjectMediaCard";
 import RevealSections from "@/components/site/RevealSections";
@@ -110,22 +110,7 @@ export default async function HomePage() {
         className="section-hidden px-[6vw] py-24"
         style={{ background: "var(--bg-base)" }}
       >
-        {/* Kicker */}
-        <div className="flex items-center gap-4 mb-14 max-w-[1200px] mx-auto">
-          <span
-            className="font-mono text-[11px] tracking-[0.2em] uppercase"
-            style={{ color: "var(--text-muted)" }}
-          >
-            ABOUT
-          </span>
-          <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
-          <span
-            className="font-mono text-[11px] tracking-[0.2em] uppercase"
-            style={{ color: "var(--text-muted)" }}
-          >
-            readme.md
-          </span>
-        </div>
+        <SectionKicker label="ABOUT" meta="readme.md" />
 
         <div className="grid gap-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1200px] mx-auto">
           {/* LEFT — essay */}
@@ -294,10 +279,10 @@ export default async function HomePage() {
         className="section-hidden px-[6vw] py-24"
         style={{ background: "var(--bg-base)" }}
       >
+        <SectionKicker label="WORK" meta="selected.md" />
         <div className="max-w-[1200px] mx-auto">
           <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
             <div>
-              <SectionLabel>Work</SectionLabel>
               <h2
                 className="text-[26px] font-medium leading-[1.25] mt-1"
                 style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
@@ -345,8 +330,8 @@ export default async function HomePage() {
         className="section-hidden px-[6vw] py-24"
         style={{ background: "var(--bg-base)" }}
       >
+        <SectionKicker label="CONTACT" meta="reach.md" />
         <div className="max-w-[1200px] mx-auto">
-        <SectionLabel>Contact</SectionLabel>
         <h2
           className="text-[26px] font-medium leading-[1.25] mt-1 mb-4"
           style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
