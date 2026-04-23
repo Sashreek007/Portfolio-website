@@ -40,6 +40,7 @@ export type Database = {
           cover_image_url: string | null;
           is_published: boolean;
           published_at: string | null;
+          title_accent: string | null;
           created_at: string;
           updated_at: string;
         };

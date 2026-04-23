@@ -24,6 +24,13 @@ import type { Editor, Range } from "@tiptap/core";
 import { common, createLowlight } from "lowlight";
 import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/utils";
+import {
+  DEFAULT_TITLE_ACCENT,
+  TITLE_ACCENTS,
+  escapeTitleHTML,
+  highlightTitleFragments,
+  type TitleAccent,
+} from "@/lib/title-accent";
 
 const lowlight = createLowlight(common);
 
@@ -272,6 +279,7 @@ type Post = {
   project_id?: string | null;
   show_on_writing?: boolean;
   tags?: string[];
+  title_accent?: string | null;
 };
 type Props = { post?: Post; mode: "new" | "edit" };
 
@@ -560,19 +568,24 @@ function SlashPopup({ editorEl }: { editorEl: HTMLDivElement | null }) {
 // ── Preview ────────────────────────────────────────────────────────────────────
 // Renders inside the actual `.blog-post-body` class, so the preview
 // is visually identical to what /blog/<slug> publishes. The title
-// mirrors the reader's `renderTitle` helper so __highlight__ spans
-// show up live here too.
-function previewTitle(title: string): string {
-  const escape = (s: string) =>
-    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return escape(title).replace(
-    /__([^_]+)__/g,
-    (_m, inner) => `<span style="color:var(--violet-soft)">${inner}</span>`,
-  );
+// uses the shared title-accent helper so the highlight colour matches
+// whatever the author picked.
+function previewTitle(title: string, accent: TitleAccent): string {
+  return highlightTitleFragments(escapeTitleHTML(title), accent);
 }
 
-function BlogPreview({ title, excerpt, html, coverUrl }: {
-  title: string; excerpt: string; html: string; coverUrl: string;
+function BlogPreview({
+  title,
+  excerpt,
+  html,
+  coverUrl,
+  accent,
+}: {
+  title: string;
+  excerpt: string;
+  html: string;
+  coverUrl: string;
+  accent: TitleAccent;
 }) {
   return (
     <div style={{ maxWidth: "820px", margin: "0 auto", padding: "40px 16px" }}>
@@ -595,7 +608,7 @@ function BlogPreview({ title, excerpt, html, coverUrl }: {
         className="blog-post-title"
         dangerouslySetInnerHTML={{
           __html: title
-            ? previewTitle(title)
+            ? previewTitle(title, accent)
             : '<span style="color:var(--text-muted)">Untitled</span>',
         }}
       />
@@ -633,6 +646,12 @@ export default function BlogEditor({ post, mode }: Props) {
   const editorWrapperRef = useRef<HTMLDivElement>(null);
 
   const [title, setTitle] = useState(post?.title ?? "");
+  const [titleAccent, setTitleAccent] = useState<TitleAccent>(() => {
+    const saved = post?.title_accent ?? null;
+    return saved && saved in TITLE_ACCENTS
+      ? (saved as TitleAccent)
+      : DEFAULT_TITLE_ACCENT;
+  });
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [coverUrl, setCoverUrl] = useState(post?.cover_image_url ?? "");
   const [isPublished, setIsPublished] = useState(post?.is_published ?? false);
@@ -892,6 +911,9 @@ export default function BlogEditor({ post, mode }: Props) {
         .split(",")
         .map((t) => t.trim().toLowerCase())
         .filter(Boolean),
+      // Store the default as NULL so the DB stays sparse and older
+      // rows don't need a one-off backfill.
+      title_accent: titleAccent === DEFAULT_TITLE_ACCENT ? null : titleAccent,
     };
 
     const { error: dbError } = mode === "new"
@@ -927,7 +949,13 @@ export default function BlogEditor({ post, mode }: Props) {
             ← back to editor
           </button>
         </div>
-        <BlogPreview title={title} excerpt={excerpt} html={previewHtml} coverUrl={coverUrl} />
+        <BlogPreview
+          title={title}
+          excerpt={excerpt}
+          html={previewHtml}
+          coverUrl={coverUrl}
+          accent={titleAccent}
+        />
       </div>
     );
   }
@@ -1022,6 +1050,51 @@ export default function BlogEditor({ post, mode }: Props) {
           onFocus={(e) => ((e.target as HTMLInputElement).style.borderColor = "var(--violet-mid)")}
           onBlur={(e) => ((e.target as HTMLInputElement).style.borderColor = "var(--gray-800)")}
         />
+
+        {/* Accent colour — one swatch per option in the shared palette.
+            The active one has a violet ring + pale check. */}
+        <div className="flex items-center gap-2 mt-1">
+          <span style={{ ...labelSt, letterSpacing: "0.08em" }}>accent</span>
+          {(Object.entries(TITLE_ACCENTS) as Array<[TitleAccent, { label: string; color: string }]>).map(
+            ([key, meta]) => {
+              const active = titleAccent === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setTitleAccent(key)}
+                  title={meta.label}
+                  className="inline-flex items-center gap-[6px] px-2 py-[5px] transition-colors"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "11px",
+                    color: active ? "var(--text-primary)" : "var(--text-muted)",
+                    background: active
+                      ? "color-mix(in srgb, var(--violet-mid) 14%, transparent)"
+                      : "transparent",
+                    border: `1px solid ${active ? "var(--violet-mid)" : "var(--gray-800)"}`,
+                    borderRadius: "999px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    style={{
+                      display: "inline-block",
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "50%",
+                      background: meta.color,
+                      boxShadow: active ? `0 0 8px ${meta.color}` : "none",
+                    }}
+                  />
+                  {meta.label}
+                </button>
+              );
+            },
+          )}
+        </div>
+
         {/__([^_]+)__/.test(title) && (
           <div
             className="blog-post-title"
@@ -1030,7 +1103,7 @@ export default function BlogEditor({ post, mode }: Props) {
               lineHeight: 1.15,
               marginTop: "4px",
             }}
-            dangerouslySetInnerHTML={{ __html: previewTitle(title) }}
+            dangerouslySetInnerHTML={{ __html: previewTitle(title, titleAccent) }}
           />
         )}
       </div>

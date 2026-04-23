@@ -12,6 +12,10 @@ import PostScroll from "./PostScroll";
 import BlogToc, { type TocItem } from "./BlogToc";
 import PostSidebar, { type SidebarPost, type TrendingPost } from "./PostSidebar";
 import { getBlogViewStats, topTrendingSlugs } from "@/lib/blog-views";
+import {
+  escapeTitleHTML,
+  highlightTitleFragments,
+} from "@/lib/title-accent";
 
 const lowlight = createLowlight(common);
 
@@ -155,18 +159,10 @@ function formatDate(iso: string) {
 
 // Highlight fragments of the title that the author tagged with
 // double-underscores, e.g. "serving __7B__ on one gpu" renders "7B"
-// in the accent color without touching the rest of the string.
-function renderTitle(title: string): string {
-  const escape = (s: string) =>
-    s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  return escape(title).replace(
-    /__([^_]+)__/g,
-    (_m, inner) =>
-      `<span style="color:var(--violet-soft)">${inner}</span>`,
-  );
+// in whatever accent the post was saved with (stored in title_accent,
+// defaulting to violet).
+function renderTitle(title: string, accent: string | null | undefined): string {
+  return highlightTitleFragments(escapeTitleHTML(title), accent);
 }
 
 function estimateReadingTime(html: string) {
@@ -309,7 +305,9 @@ export default async function BlogPostPage({ params }: Props) {
       <header className="blog-post-header">
         <h1
           className="blog-post-title"
-          dangerouslySetInnerHTML={{ __html: renderTitle(typedPost.title) }}
+          dangerouslySetInnerHTML={{
+            __html: renderTitle(typedPost.title, typedPost.title_accent),
+          }}
         />
         <div className="blog-post-meta">
           <span>{formatDate(postedAt)}</span>

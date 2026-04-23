@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS posts (
   project_id      UUID REFERENCES projects(id) ON DELETE CASCADE,
   show_on_writing BOOLEAN NOT NULL DEFAULT true,
   tags            TEXT[] NOT NULL DEFAULT '{}',
+  title_accent    TEXT,
   created_at      TIMESTAMPTZ DEFAULT NOW(),
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
