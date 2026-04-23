@@ -17,12 +17,20 @@ const lowlight = createLowlight(common);
 
 // Wrap each rendered code block with a language tag, copy button, and
 // per-line markup so CSS can hang a gutter of line numbers alongside
-// the highlighted source. Optional filename support: a leading shebang
-// comment like `// file: src/foo.ts` is lifted out as a filename label.
+// the highlighted source. Filename support has two paths:
+//   1) Modern: the editor emits `data-filename` on <pre> via the
+//      CodeBlockLowlight schema attribute.
+//   2) Legacy: first-line "// file: foo.ts" comment, kept for posts
+//      authored before the editor upgrade.
 function applyCodeHighlighting(html: string): string {
   return html.replace(
-    /<pre><code(?:\s+class="language-([^"]*)")?>([\s\S]*?)<\/code><\/pre>/g,
-    (_, lang: string | undefined, escapedCode: string) => {
+    /<pre(?:\s+data-filename="([^"]*)")?><code(?:\s+class="language-([^"]*)")?>([\s\S]*?)<\/code><\/pre>/g,
+    (
+      _: string,
+      attrFilename: string | undefined,
+      lang: string | undefined,
+      escapedCode: string,
+    ) => {
       const code = escapedCode
         .replace(/&amp;/g, "&")
         .replace(/&lt;/g, "<")
@@ -30,16 +38,16 @@ function applyCodeHighlighting(html: string): string {
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'");
 
-      // Extract an optional filename marker from the first line, so
-      // authors can tag a snippet without cluttering the rendered body.
-      let filename: string | null = null;
+      let filename: string | null = attrFilename ? attrFilename : null;
       let body = code;
-      const fileMatch = body.match(
-        /^(?:\s*)(?:\/\/|#)\s*file:\s*(\S+)\s*\n/,
-      );
-      if (fileMatch) {
-        filename = fileMatch[1];
-        body = body.slice(fileMatch[0].length);
+      if (!filename) {
+        const fileMatch = body.match(
+          /^(?:\s*)(?:\/\/|#)\s*file:\s*(\S+)\s*\n/,
+        );
+        if (fileMatch) {
+          filename = fileMatch[1];
+          body = body.slice(fileMatch[0].length);
+        }
       }
 
       try {
@@ -99,20 +107,30 @@ function addHeadingIds(html: string): { html: string; toc: TocItem[] } {
 
 // Promote standalone images to <figure> blocks so they can carry a
 // caption (pulled from the image's alt text) and get visual treatment
-// that distinguishes them from inline imagery. Tiptap's image
-// extension renders block images as bare <img> tags at the top level,
-// so we match those rather than paragraph-wrapped ones.
+// that distinguishes them from inline imagery.
+// The upgraded editor already serializes images as <figure> directly,
+// so this only fires as a fallback for legacy posts that still store
+// bare <img> tags. Skips any <img> already inside a <figure>.
 function wrapImagesInFigures(html: string): string {
-  return html.replace(
-    /(?:<p>\s*(<img\s+[^>]*?>)\s*<\/p>|(<img\s+[^>]*?>))/g,
-    (_m, wrapped: string | undefined, bare: string | undefined) => {
-      const imgTag = wrapped ?? bare ?? "";
-      const altMatch = imgTag.match(/alt="([^"]*)"/);
-      const alt = altMatch ? altMatch[1] : "";
-      const caption = alt ? `<figcaption>${alt}</figcaption>` : "";
-      return `<figure class="blog-figure">${imgTag}${caption}</figure>`;
-    },
-  );
+  // Split on existing <figure>…</figure> blocks and only run the bare
+  // <img> wrap on the segments OUTSIDE figures. The [ even, odd, … ]
+  // shape of the split result keeps figure blocks at odd indices.
+  const parts = html.split(/(<figure[\s\S]*?<\/figure>)/g);
+  return parts
+    .map((part, i) => {
+      if (i % 2 === 1) return part; // already a <figure> block
+      return part.replace(
+        /(?:<p>\s*(<img\s+[^>]*?>)\s*<\/p>|(<img\s+[^>]*?>))/g,
+        (_m, paragraphed: string | undefined, bare: string | undefined) => {
+          const imgTag = paragraphed ?? bare ?? "";
+          const altMatch = imgTag.match(/alt="([^"]*)"/);
+          const alt = altMatch ? altMatch[1] : "";
+          const caption = alt ? `<figcaption>${alt}</figcaption>` : "";
+          return `<figure class="blog-figure">${imgTag}${caption}</figure>`;
+        },
+      );
+    })
+    .join("");
 }
 
 import type { Database } from "@/lib/supabase/types";

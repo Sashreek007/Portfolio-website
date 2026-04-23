@@ -15,6 +15,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TiptapUnderline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import Link from "@tiptap/extension-link";
 import { Extension } from "@tiptap/core";
 import Suggestion from "@tiptap/suggestion";
 import { generateHTML } from "@tiptap/html";
@@ -49,9 +50,15 @@ const LANGUAGES = [
 ];
 
 // ── Code block node view ───────────────────────────────────────────────────────
+// Matches the reader's `.blog-code` + `.blog-code-head` markup so the
+// editor renders the same chrome that publishes. Filename is an
+// explicit attribute instead of the old "// file:" first-line hack.
 function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
-  const language = (node.attrs as { language?: string }).language ?? "";
+  const attrs = node.attrs as { language?: string; filename?: string };
+  const language = attrs.language ?? "";
+  const filename = attrs.filename ?? "";
   const [copied, setCopied] = useState(false);
+  const [editingFilename, setEditingFilename] = useState(false);
 
   const copyCode = () => {
     const text = node.textContent;
@@ -62,22 +69,56 @@ function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
   };
 
   return (
-    <NodeViewWrapper style={{ position: "relative", margin: "1em 0" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "6px 12px",
-          background: "var(--bg-base)",
-          borderBottom: "1px solid var(--gray-800)",
-          borderRadius: "6px 6px 0 0",
-        }}
-      >
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-          code
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }} contentEditable={false}>
+    <NodeViewWrapper className="blog-code" data-lang={language || undefined}>
+      <div className="blog-code-head" contentEditable={false}>
+        {filename || editingFilename ? (
+          <span className="blog-code-file" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <input
+              autoFocus={editingFilename && !filename}
+              value={filename}
+              placeholder="filename.ext"
+              onChange={(e) => updateAttributes({ filename: e.target.value })}
+              onBlur={() => setEditingFilename(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === "Escape") {
+                  e.preventDefault();
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
+              style={{
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: "inherit",
+                font: "inherit",
+                padding: 0,
+                width: `${Math.max(10, filename.length || 12)}ch`,
+              }}
+            />
+            {filename && (
+              <button
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); updateAttributes({ filename: "" }); }}
+                title="Remove filename — show language badge instead"
+                style={{ color: "var(--text-muted)", background: "transparent", border: "none", cursor: "pointer", fontSize: "11px", padding: 0 }}
+              >
+                ×
+              </button>
+            )}
+          </span>
+        ) : (
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); setEditingFilename(true); }}
+            className="blog-code-lang"
+            title="Add a filename"
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "inherit", font: "inherit", padding: 0, display: "inline-flex", alignItems: "center", gap: "6px" }}
+          >
+            <span className="blog-code-lang-mark">&lt;/&gt;</span>
+            {language || "code"}
+          </button>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <select
             value={language}
             onChange={(e) => updateAttributes({ language: e.target.value })}
@@ -92,6 +133,7 @@ function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
               appearance: "none",
               WebkitAppearance: "none",
             }}
+            title="Language"
           >
             {LANGUAGES.map((l) => (
               <option key={l.value} value={l.value} style={{ background: "var(--bg-elevated)", color: "var(--text-primary)" }}>
@@ -100,7 +142,9 @@ function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
             ))}
           </select>
           <button
+            className="blog-code-copy"
             onMouseDown={(e) => { e.preventDefault(); copyCode(); }}
+            title="Copy code"
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: "10px",
@@ -116,27 +160,30 @@ function CodeBlockView({ node, updateAttributes }: ReactNodeViewProps) {
           </button>
         </div>
       </div>
-      <pre
-        style={{
-          background: "var(--bg-elevated)",
-          border: "1px solid var(--gray-800)",
-          borderTop: "none",
-          borderRadius: "0 0 6px 6px",
-          padding: "16px 20px",
-          overflowX: "auto",
-          margin: 0,
-          color: "var(--text-primary)",
-        }}
-      >
-        <NodeViewContent style={{ fontFamily: "var(--font-mono)", fontSize: "13px", lineHeight: "1.7", display: "block" }} />
+      <pre>
+        {/* Wrap in a <code> so `.blog-post-body .blog-code code`
+            selectors match both the editor and the reader. ProseMirror
+            mounts NodeViewContent inside it as a plain div — that's
+            fine, the reader regex also receives plain text content. */}
+        <code style={{ display: "block" }}>
+          <NodeViewContent />
+        </code>
       </pre>
     </NodeViewWrapper>
   );
 }
 
-// ── Resizable image node view ──────────────────────────────────────────────────
+// ── Image node view (wrapped in a figure with an editable caption) ──────────────
+// The reader wraps top-level images in .blog-figure + figcaption taken
+// from the alt attribute. We do the same here so the author sees the
+// caption live and can edit it in place instead of guessing.
 function ImageView({ node, updateAttributes, selected }: ReactNodeViewProps) {
-  const attrs = node.attrs as { src: string; alt?: string; title?: string; width?: number };
+  const attrs = node.attrs as {
+    src: string;
+    alt?: string;
+    title?: string;
+    width?: number;
+  };
   const imgRef = useRef<HTMLImageElement>(null);
   const startX = useRef(0);
   const startW = useRef(0);
@@ -158,39 +205,61 @@ function ImageView({ node, updateAttributes, selected }: ReactNodeViewProps) {
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  const caption = attrs.alt ?? "";
+
   return (
-    <NodeViewWrapper style={{ display: "block", position: "relative", lineHeight: 0 }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        ref={imgRef}
-        src={attrs.src}
-        alt={attrs.alt ?? ""}
-        style={{
-          width: attrs.width ? `${attrs.width}px` : "100%",
-          maxWidth: "100%",
-          borderRadius: "6px",
-          border: (selected as boolean) ? "2px solid var(--violet-soft)" : "1px solid var(--gray-800)",
-          display: "block",
-          margin: "1em 0",
-        }}
-      />
-      {(selected as boolean) && (
-        <div
-          onMouseDown={onResizeMouseDown}
+    <NodeViewWrapper as="figure" className="blog-figure" style={{ position: "relative" }}>
+      <div style={{ position: "relative", lineHeight: 0 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={imgRef}
+          src={attrs.src}
+          alt={caption}
           style={{
-            position: "absolute",
-            bottom: "calc(1em + 4px)",
-            right: "4px",
-            width: "14px",
-            height: "14px",
-            background: "var(--violet-soft)",
-            borderRadius: "3px",
-            cursor: "ew-resize",
-            zIndex: 10,
+            width: attrs.width ? `${attrs.width}px` : "100%",
+            maxWidth: "100%",
+            display: "block",
+            outline: (selected as boolean)
+              ? "2px solid var(--violet-soft)"
+              : "none",
+            outlineOffset: "2px",
+            borderRadius: "6px",
           }}
-          title="Drag to resize"
         />
-      )}
+        {(selected as boolean) && (
+          <div
+            onMouseDown={onResizeMouseDown}
+            style={{
+              position: "absolute",
+              bottom: "4px",
+              right: "4px",
+              width: "14px",
+              height: "14px",
+              background: "var(--violet-soft)",
+              borderRadius: "3px",
+              cursor: "ew-resize",
+              zIndex: 10,
+            }}
+            title="Drag to resize"
+          />
+        )}
+      </div>
+      <figcaption contentEditable={false}>
+        <input
+          value={caption}
+          onChange={(e) => updateAttributes({ alt: e.target.value })}
+          placeholder="caption — doubles as alt text"
+          style={{
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            color: "inherit",
+            font: "inherit",
+            width: "100%",
+            padding: 0,
+          }}
+        />
+      </figcaption>
     </NodeViewWrapper>
   );
 }
@@ -242,6 +311,42 @@ const COMMANDS: CommandItem[] = [
     command: (e, r) => e.chain().focus().deleteRange(r).setCodeBlock().run() },
   { icon: "❝", title: "Blockquote", description: "Indented quote", keywords: ["quote", "blockquote"],
     command: (e, r) => e.chain().focus().deleteRange(r).setBlockquote().run() },
+  {
+    icon: "⚑",
+    title: "Quote w/ label",
+    description: "Labelled callout — bold title + body",
+    keywords: ["callout", "label", "titled", "note", "warning"],
+    // Inserts the two-paragraph shape the reader's CSS uses to flip
+    // a blockquote into its bordered-card variant. Author edits both
+    // paragraphs in place.
+    command: (e, r) =>
+      e
+        .chain()
+        .focus()
+        .deleteRange(r)
+        .insertContent({
+          type: "blockquote",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                { type: "text", marks: [{ type: "bold" }], text: "THE TRAP" },
+              ],
+            },
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text:
+                    "Body of the note. The reader styles this blockquote as a full border box when the first child is a strong label.",
+                },
+              ],
+            },
+          ],
+        })
+        .run(),
+  },
   { icon: "—", title: "Divider", description: "Horizontal rule", keywords: ["hr", "divider", "rule"],
     command: (e, r) => e.chain().focus().deleteRange(r).setHorizontalRule().run() },
   { icon: "▣", title: "Image", description: "Upload image at cursor", keywords: ["image", "img", "upload", "photo"],
@@ -453,44 +558,72 @@ function SlashPopup({ editorEl }: { editorEl: HTMLDivElement | null }) {
 }
 
 // ── Preview ────────────────────────────────────────────────────────────────────
+// Renders inside the actual `.blog-post-body` class, so the preview
+// is visually identical to what /blog/<slug> publishes. The title
+// mirrors the reader's `renderTitle` helper so __highlight__ spans
+// show up live here too.
+function previewTitle(title: string): string {
+  const escape = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return escape(title).replace(
+    /__([^_]+)__/g,
+    (_m, inner) => `<span style="color:var(--violet-soft)">${inner}</span>`,
+  );
+}
+
 function BlogPreview({ title, excerpt, html, coverUrl }: {
   title: string; excerpt: string; html: string; coverUrl: string;
 }) {
   return (
-    <div style={{ maxWidth: "720px", margin: "0 auto", padding: "40px 16px" }}>
+    <div style={{ maxWidth: "820px", margin: "0 auto", padding: "40px 16px" }}>
       {coverUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={coverUrl} alt="" style={{ width: "100%", borderRadius: "6px", marginBottom: "2rem", maxHeight: "360px", objectFit: "cover", border: "1px solid var(--gray-800)" }} />
+        <img
+          src={coverUrl}
+          alt=""
+          style={{
+            width: "100%",
+            borderRadius: "6px",
+            marginBottom: "2rem",
+            maxHeight: "360px",
+            objectFit: "cover",
+            border: "1px solid var(--gray-800)",
+          }}
+        />
       )}
-      <h1 style={{ color: "var(--text-primary)", fontSize: "32px", fontWeight: 500, lineHeight: 1.25, marginBottom: "1rem", fontFamily: "var(--font-body)" }}>
-        {title || <span style={{ color: "var(--text-muted)" }}>Untitled</span>}
-      </h1>
-      {excerpt && <p style={{ color: "var(--text-secondary)", fontSize: "16px", lineHeight: 1.7, marginBottom: "2rem" }}>{excerpt}</p>}
-      <div style={{ height: "1px", background: "var(--gray-800)", marginBottom: "2rem" }} />
-      <div className="prose-preview" dangerouslySetInnerHTML={{ __html: html || "<p style='color:var(--text-muted)'>No content.</p>" }}
-        style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)", fontSize: "16px", lineHeight: "1.8" }} />
-      <style>{proseCSS("prose-preview")}</style>
+      <h1
+        className="blog-post-title"
+        dangerouslySetInnerHTML={{
+          __html: title
+            ? previewTitle(title)
+            : '<span style="color:var(--text-muted)">Untitled</span>',
+        }}
+      />
+      {excerpt && (
+        <p
+          className="blog-post-excerpt"
+          style={{ fontFamily: "var(--font-body)" }}
+        >
+          {excerpt}
+        </p>
+      )}
+      <div
+        style={{
+          height: "1px",
+          background: "var(--gray-800)",
+          margin: "32px 0",
+        }}
+      />
+      <div
+        className="blog-post-body"
+        dangerouslySetInnerHTML={{
+          __html:
+            html ||
+            '<p style="color:var(--text-muted)">No content.</p>',
+        }}
+      />
     </div>
   );
-}
-
-function proseCSS(cls: string) {
-  return `
-    .${cls} h1,.${cls} h2,.${cls} h3{color:var(--text-primary);font-family:var(--font-mono);margin-top:2em;margin-bottom:0.5em;line-height:1.3}
-    .${cls} h1{font-size:26px}.${cls} h2{font-size:20px}.${cls} h3{font-size:17px}
-    .${cls} p{margin-bottom:1.25em}
-    .${cls} a{color:var(--violet-soft);text-decoration:underline}
-    .${cls} strong{color:var(--text-primary);font-weight:600}
-    .${cls} em{color:var(--text-secondary);font-style:italic}
-    .${cls} code{font-family:var(--font-mono);font-size:13px;background:var(--bg-elevated);color:var(--amber-bright);padding:2px 6px;border-radius:3px;border:1px solid var(--gray-800)}
-    .${cls} pre{background:var(--bg-elevated);border:1px solid var(--gray-800);border-radius:6px;padding:20px;overflow-x:auto;margin-bottom:1.25em}
-    .${cls} pre code{background:transparent;border:none;padding:0;color:var(--text-primary);font-size:13px;line-height:1.7}
-    .${cls} ul,.${cls} ol{padding-left:1.5em;margin-bottom:1.25em}
-    .${cls} li{margin-bottom:0.4em;color:var(--text-secondary)}
-    .${cls} blockquote{border-left:2px solid var(--violet-mid);padding-left:1.25em;margin:1.5em 0;color:var(--text-secondary);font-style:italic}
-    .${cls} img{max-width:100%;border-radius:6px;border:1px solid var(--gray-800);margin:1.5em 0}
-    .${cls} hr{border:none;height:1px;background:var(--gray-800);margin:2em 0}
-  `;
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
@@ -498,7 +631,6 @@ export default function BlogEditor({ post, mode }: Props) {
   const router = useRouter();
   const coverRef = useRef<HTMLInputElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
-  const editorInstanceRef = useRef<ReturnType<typeof useEditor>>(null);
 
   const [title, setTitle] = useState(post?.title ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
@@ -533,23 +665,67 @@ export default function BlogEditor({ post, mode }: Props) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ codeBlock: false }),
+      // Filename travels as a node attribute and serializes to
+      // `<pre data-filename="...">`. The reader picks it up from there
+      // (see applyCodeHighlighting in blog/[slug]/page.tsx).
       CodeBlockLowlight.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            filename: {
+              default: null,
+              parseHTML: (el) =>
+                (el as HTMLElement).getAttribute("data-filename") || null,
+              renderHTML: (attrs) => {
+                const f = (attrs as { filename?: string | null }).filename;
+                return f ? { "data-filename": f } : {};
+              },
+            },
+          };
+        },
         addNodeView() {
           return ReactNodeViewRenderer(CodeBlockView);
         },
       }).configure({ lowlight }),
+      // Images render as <figure class="blog-figure"><img/><figcaption>
+      // alt</figcaption></figure> on serialization, matching the
+      // reader 1:1. The node view shows the same structure live.
       TiptapImage.extend({
         addAttributes() {
           return {
             ...this.parent?.(),
-            width: { default: null, renderHTML: (a) => a.width ? { width: a.width } : {} },
+            width: {
+              default: null,
+              renderHTML: (a) => (a.width ? { width: a.width } : {}),
+            },
           };
         },
-        addNodeView() { return ReactNodeViewRenderer(ImageView); },
+        renderHTML({ HTMLAttributes }) {
+          const { alt, ...rest } = HTMLAttributes as {
+            alt?: string;
+            [k: string]: unknown;
+          };
+          const caption = (alt ?? "").toString();
+          return [
+            "figure",
+            { class: "blog-figure" },
+            ["img", { ...rest, alt: caption }],
+            ...(caption ? [["figcaption", {}, caption] as const] : []),
+          ];
+        },
+        addNodeView() {
+          return ReactNodeViewRenderer(ImageView);
+        },
       }).configure({ inline: false, allowBase64: false }),
       TiptapUnderline,
       Highlight.configure({ multicolor: false }),
       HorizontalRule,
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        linkOnPaste: true,
+        HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
+      }),
       Placeholder.configure({
         placeholder: "Start writing… or type / for commands",
         includeChildren: true,
@@ -558,7 +734,14 @@ export default function BlogEditor({ post, mode }: Props) {
     ],
     content: post?.content ?? undefined,
     editorProps: {
-      attributes: { class: "blog-editor-content", spellcheck: "true" },
+      // Use the public reader class directly so every .blog-post-body
+      // rule (h2 `##` prefix, labelled blockquote, figure caption,
+      // etc.) renders live in the editor. The editor-specific tweaks
+      // live under the .blog-editor-surface modifier.
+      attributes: {
+        class: "blog-post-body blog-editor-surface",
+        spellcheck: "true",
+      },
       handlePaste(view, event) {
         const files = event.clipboardData?.files;
         if (files?.length) {
@@ -630,17 +813,53 @@ export default function BlogEditor({ post, mode }: Props) {
     if (content) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // Keep the preview extensions in lockstep with the live editor
+        // so what `preview` shows is byte-identical to what gets saved
+        // and then rendered on /blog/<slug>.
         const html = generateHTML(content, [
           StarterKit.configure({ codeBlock: false }),
-          CodeBlockLowlight.configure({ lowlight }),
+          CodeBlockLowlight.extend({
+            addAttributes() {
+              return {
+                ...this.parent?.(),
+                filename: {
+                  default: null,
+                  renderHTML: (attrs) => {
+                    const f = (attrs as { filename?: string | null }).filename;
+                    return f ? { "data-filename": f } : {};
+                  },
+                },
+              };
+            },
+          }).configure({ lowlight }),
           TiptapImage.extend({
             addAttributes() {
-              return { ...this.parent?.(), width: { default: null, renderHTML: (a) => a.width ? { width: a.width } : {} } };
+              return {
+                ...this.parent?.(),
+                width: {
+                  default: null,
+                  renderHTML: (a) => (a.width ? { width: a.width } : {}),
+                },
+              };
+            },
+            renderHTML({ HTMLAttributes }) {
+              const { alt, ...rest } = HTMLAttributes as {
+                alt?: string;
+                [k: string]: unknown;
+              };
+              const caption = (alt ?? "").toString();
+              return [
+                "figure",
+                { class: "blog-figure" },
+                ["img", { ...rest, alt: caption }],
+                ...(caption ? [["figcaption", {}, caption] as const] : []),
+              ];
             },
           }),
           TiptapUnderline,
           Highlight,
           HorizontalRule,
+          Link.configure({ openOnClick: false }),
         ] as any);
         setPreviewHtml(html);
       } catch {
@@ -709,7 +928,6 @@ export default function BlogEditor({ post, mode }: Props) {
           </button>
         </div>
         <BlogPreview title={title} excerpt={excerpt} html={previewHtml} coverUrl={coverUrl} />
-        <style>{proseCSS("prose-preview")}</style>
       </div>
     );
   }
@@ -717,71 +935,104 @@ export default function BlogEditor({ post, mode }: Props) {
   return (
     <div className="max-w-[800px] flex flex-col gap-5">
       <style>{`
-        .blog-editor-content {
+        /* The editor uses the real .blog-post-body styles from globals
+           so WYSIWYG is exact. This block adds ONLY editor-specific
+           chrome: the writable outline, the empty-state placeholder,
+           and editing affordances on figure/code-block node views. */
+        .blog-editor-surface {
           padding: 20px 24px;
           min-height: 380px;
-          color: var(--text-primary);
-          font-family: var(--font-body);
-          font-size: 15px;
-          line-height: 1.75;
           outline: none;
         }
-        .blog-editor-content p.is-editor-empty:first-child::before {
+        .blog-editor-surface p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
           color: var(--text-muted);
           pointer-events: none;
           float: left;
           height: 0;
         }
-        .blog-editor-content h1,.blog-editor-content h2,.blog-editor-content h3{
-          color:var(--text-primary);font-family:var(--font-mono);
-          margin-top:1.5em;margin-bottom:0.3em;font-weight:500;
+        /* Remove the top-margin from the very first heading/paragraph
+           so the first block sits flush with the editor top edge. */
+        .blog-editor-surface > :first-child { margin-top: 0; }
+
+        /* Figure caption — borrow the reader's figcaption look but
+           give the input a dotted outline on focus so the author can
+           see it's editable. */
+        .blog-editor-surface .blog-figure figcaption input {
+          display: block;
+          width: 100%;
+          transition: border-color 120ms;
+          border-radius: 3px;
         }
-        .blog-editor-content h1{font-size:26px}
-        .blog-editor-content h2{font-size:20px}
-        .blog-editor-content h3{font-size:17px}
-        .blog-editor-content p{margin-bottom:1em}
-        .blog-editor-content strong{color:var(--text-primary);font-weight:600}
-        .blog-editor-content em{color:var(--text-secondary)}
-        .blog-editor-content a{color:var(--violet-soft);text-decoration:underline}
-        .blog-editor-content code{
-          font-family:var(--font-mono);font-size:13px;
-          background:var(--bg-elevated);color:var(--amber-bright);
-          padding:2px 6px;border-radius:3px;border:1px solid var(--gray-800);
+        .blog-editor-surface .blog-figure figcaption input::placeholder {
+          color: var(--gray-600);
+          font-style: italic;
         }
-        /* pre/code handled by CodeBlockView node view */
-        .blog-editor-content blockquote{
-          border-left:2px solid var(--violet-mid);padding-left:1.25em;
-          color:var(--text-secondary);font-style:italic;margin:1.25em 0;
+        .blog-editor-surface .blog-figure figcaption input:focus {
+          outline: 1px dashed
+            color-mix(in srgb, var(--violet-soft) 50%, transparent);
+          outline-offset: 2px;
         }
-        .blog-editor-content ul,.blog-editor-content ol{padding-left:1.5em;margin-bottom:1em}
-        .blog-editor-content li{color:var(--text-secondary);margin-bottom:0.3em}
-        .blog-editor-content img{max-width:100%;border-radius:6px;margin:1em 0;border:1px solid var(--gray-800)}
-        .blog-editor-content hr{border:none;height:1px;background:var(--gray-800);margin:1.5em 0}
-        /* Bubble menu */
-        .bubble-menu{
-          display:flex;align-items:center;gap:1px;padding:3px;
-          background:var(--bg-elevated);border:1px solid var(--gray-800);
-          border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);
+
+        /* Code block — node view renders .blog-code directly so the
+           reader styles apply; only the header dropdown/input needs
+           a bit of editor-specific polish. */
+        .blog-editor-surface .blog-code .blog-code-head select:focus {
+          outline: 1px dashed
+            color-mix(in srgb, var(--violet-soft) 50%, transparent);
+          outline-offset: 2px;
+          border-radius: 3px;
         }
-        .bubble-btn{
-          padding:4px 9px;border-radius:4px;font-family:var(--font-mono);
-          font-size:12px;color:var(--text-secondary);background:transparent;
-          border:none;cursor:pointer;transition:background 120ms,color 120ms;
+
+        /* Bubble menu ---------------------------------------------- */
+        .bubble-menu {
+          display: flex; align-items: center; gap: 1px; padding: 3px;
+          background: var(--bg-elevated);
+          border: 1px solid var(--gray-800);
+          border-radius: 6px;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         }
-        .bubble-btn:hover,.bubble-btn.is-active{background:var(--violet-mid);color:var(--violet-pale)}
+        .bubble-btn {
+          padding: 4px 9px; border-radius: 4px;
+          font-family: var(--font-mono); font-size: 12px;
+          color: var(--text-secondary); background: transparent;
+          border: none; cursor: pointer;
+          transition: background 120ms, color 120ms;
+        }
+        .bubble-btn:hover, .bubble-btn.is-active {
+          background: var(--violet-mid); color: var(--violet-pale);
+        }
       `}</style>
 
       {/* Title */}
       <div className="flex flex-col gap-2">
-        <label style={labelSt}>Title *</label>
+        <label style={labelSt}>
+          Title *
+          <span
+            className="ml-2 normal-case tracking-normal"
+            style={{ color: "var(--gray-600)" }}
+          >
+            — wrap words in __double-underscores__ to accent them
+          </span>
+        </label>
         <input value={title} onChange={(e) => setTitle(e.target.value)}
-          placeholder="Post title"
+          placeholder="Post title — e.g. serving __7B__ on one gpu"
           className="px-3 py-2 text-[20px] font-medium outline-none transition-colors w-full"
           style={{ ...inputSt, fontFamily: "var(--font-body)" }}
           onFocus={(e) => ((e.target as HTMLInputElement).style.borderColor = "var(--violet-mid)")}
           onBlur={(e) => ((e.target as HTMLInputElement).style.borderColor = "var(--gray-800)")}
         />
+        {/__([^_]+)__/.test(title) && (
+          <div
+            className="blog-post-title"
+            style={{
+              fontSize: "28px",
+              lineHeight: 1.15,
+              marginTop: "4px",
+            }}
+            dangerouslySetInnerHTML={{ __html: previewTitle(title) }}
+          />
+        )}
       </div>
 
       {/* Excerpt */}
@@ -904,6 +1155,35 @@ export default function BlogEditor({ post, mode }: Props) {
                   {label}
                 </button>
               ))}
+              {/* Link — separate because the action is bimodal: add/edit
+                  if no link on selection, remove if link is active. */}
+              <button
+                key="link"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  if (editor.isActive("link")) {
+                    editor.chain().focus().unsetLink().run();
+                    return;
+                  }
+                  const current = (editor.getAttributes("link") as { href?: string }).href ?? "";
+                  const url = window.prompt("URL", current || "https://");
+                  if (url === null) return;
+                  if (url === "") {
+                    editor.chain().focus().unsetLink().run();
+                    return;
+                  }
+                  editor
+                    .chain()
+                    .focus()
+                    .extendMarkRange("link")
+                    .setLink({ href: url })
+                    .run();
+                }}
+                className={`bubble-btn${editor.isActive("link") ? " is-active" : ""}`}
+                title={editor.isActive("link") ? "Remove link" : "Add link"}
+              >
+                ↗
+              </button>
             </BubbleMenu>
           )}
 
