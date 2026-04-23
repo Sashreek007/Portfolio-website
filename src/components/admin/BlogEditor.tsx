@@ -521,7 +521,15 @@ const SlashCommandExtension = Extension.create({
 });
 
 // ── Slash popup (positioned near cursor) ──────────────────────────────────────
-function SlashPopup({ editorEl }: { editorEl: HTMLDivElement | null }) {
+// Takes the ref itself so we can read editorRef.current at render time.
+// Passing `.current` as a prop was stale on first render — the parent
+// hadn't re-rendered yet, so the popup bailed with editorEl=null and
+// the menu silently dropped your first `/`.
+function SlashPopup({
+  editorRef,
+}: {
+  editorRef: React.RefObject<HTMLDivElement | null>;
+}) {
   const [state, setState] = useState<SlashState>(null);
   const stateRef = useRef<SlashState>(null);
   const menuRef = useRef<SlashMenuRef | null>(null);
@@ -542,8 +550,11 @@ function SlashPopup({ editorEl }: { editorEl: HTMLDivElement | null }) {
 
   if (!state || !state.clientRect) return null;
 
+  const editorEl = editorRef.current;
+  if (!editorEl) return null;
+
   const rect = state.clientRect();
-  if (!rect || !editorEl) return null;
+  if (!rect) return null;
 
   const editorRect = editorEl.getBoundingClientRect();
   const top = rect.bottom - editorRect.top + editorEl.scrollTop + 4;
@@ -555,6 +566,7 @@ function SlashPopup({ editorEl }: { editorEl: HTMLDivElement | null }) {
         ref={menuRef}
         items={state.items}
         command={(item) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const editor = (window as any).__tiptapEditorRef?.current;
           const range = stateRef.current?.range;
           setSlashState(null);
@@ -1260,10 +1272,81 @@ export default function BlogEditor({ post, mode }: Props) {
             </BubbleMenu>
           )}
 
+          {/* Block toolbar — always-visible fallback for the slash
+              menu so you can still insert blocks when Tiptap's
+              Suggestion plugin loses track of the cursor (e.g. right
+              after a figure node view). Buttons map 1:1 to COMMANDS. */}
+          {editor && (
+            <div
+              className="flex flex-wrap items-center gap-1 px-2 py-[6px]"
+              style={{
+                borderBottom: "1px solid var(--gray-800)",
+                background:
+                  "color-mix(in srgb, var(--bg-elevated) 60%, transparent)",
+                borderRadius: "6px 6px 0 0",
+              }}
+            >
+              {COMMANDS.map((cmd) => (
+                <button
+                  key={cmd.title}
+                  type="button"
+                  title={`${cmd.title} — ${cmd.description}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    const { from, to } = editor.state.selection;
+                    cmd.command(editor, { from, to });
+                  }}
+                  className="font-mono text-[12px] px-[8px] py-[4px] transition-colors duration-150"
+                  style={{
+                    color: "var(--text-secondary)",
+                    background: "transparent",
+                    border: "1px solid transparent",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    minWidth: "28px",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background =
+                      "color-mix(in srgb, var(--violet-mid) 18%, transparent)";
+                    (e.currentTarget as HTMLButtonElement).style.color =
+                      "var(--violet-pale)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background =
+                      "transparent";
+                    (e.currentTarget as HTMLButtonElement).style.color =
+                      "var(--text-secondary)";
+                  }}
+                >
+                  {cmd.icon}
+                </button>
+              ))}
+              <span
+                className="font-mono text-[10.5px] ml-auto pr-2"
+                style={{
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                hover for name · or type{" "}
+                <kbd
+                  style={{
+                    background: "var(--bg-elevated)",
+                    padding: "1px 5px",
+                    borderRadius: "3px",
+                    border: "1px solid var(--gray-800)",
+                  }}
+                >
+                  /
+                </kbd>
+              </span>
+            </div>
+          )}
+
           <EditorContent editor={editor} />
 
           {/* Slash command popup — absolutely positioned inside the editor wrapper */}
-          <SlashPopup editorEl={editorWrapperRef.current} />
+          <SlashPopup editorRef={editorWrapperRef} />
         </div>
 
         {lastSaved && (
@@ -1285,6 +1368,21 @@ export default function BlogEditor({ post, mode }: Props) {
           {saving ? "saving..." : isPublished ? "save" : "publish"}
         </button>
 
+        {/* Save draft — always available so you can stash a WIP without
+            flipping it public. For edit mode on an already-published
+            post, this also acts as "unpublish" visually — but we keep
+            that as its own button to avoid surprise. */}
+        {!isPublished && (
+          <button
+            onClick={() => handleSave(false)}
+            disabled={saving || !title.trim()}
+            className="font-mono text-[13px] px-5 py-2 transition-all disabled:opacity-50"
+            style={btnMuted}
+          >
+            {saving ? "saving..." : "save draft"}
+          </button>
+        )}
+
         <button onClick={handlePreview} className="font-mono text-[13px] px-5 py-2 transition-all" style={btnMuted}>
           preview
         </button>
@@ -1294,12 +1392,6 @@ export default function BlogEditor({ post, mode }: Props) {
             className="font-mono text-[13px] px-5 py-2 transition-all disabled:opacity-50"
             style={{ color: "var(--amber-bright)", border: "1px solid color-mix(in srgb, var(--amber-bright) 30%, transparent)", borderRadius: "4px", background: "transparent", cursor: "pointer", fontFamily: "var(--font-mono)" }}>
             unpublish
-          </button>
-        )}
-        {!isPublished && mode === "edit" && (
-          <button onClick={() => handleSave(false)} disabled={saving}
-            className="font-mono text-[13px] px-5 py-2 transition-all disabled:opacity-50" style={btnMuted}>
-            save draft
           </button>
         )}
         <button onClick={() => router.back()} className="font-mono text-[13px] px-5 py-2 transition-all" style={btnMuted}>
