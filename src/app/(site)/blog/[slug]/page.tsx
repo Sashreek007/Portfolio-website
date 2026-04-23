@@ -147,14 +147,20 @@ export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string }> };
 
+// Render post dates in the author's local timezone. Using UTC meant a
+// post published at 6 pm MST rolled over to the next day on screen.
+const AUTHOR_TZ = "America/Edmonton";
 function formatDate(iso: string) {
   const d = new Date(iso);
-  const month = d
-    .toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })
-    .toLowerCase();
-  const day = d.getUTCDate();
-  const year = d.getUTCFullYear();
-  return `${month} ${day}, ${year}`;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: AUTHOR_TZ,
+  }).formatToParts(d);
+  const get = (t: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("month").toLowerCase()} ${get("day")}, ${get("year")}`;
 }
 
 // Highlight fragments of the title that the author tagged with

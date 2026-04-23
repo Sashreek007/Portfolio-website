@@ -37,11 +37,15 @@ function cleanTitle(text: string) {
   return text.replace(/__([^_]+)__/g, "$1");
 }
 
+// Pin to Edmonton (MST/MDT) so dates read the same day the post was
+// actually written, regardless of where the reader is. UTC would flip
+// over at 5 pm local and mislabel the post.
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-CA", {
     year: "numeric",
     month: "short",
     day: "numeric",
+    timeZone: "America/Edmonton",
   });
 }
 
