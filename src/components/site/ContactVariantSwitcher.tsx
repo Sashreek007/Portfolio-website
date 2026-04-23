@@ -8,6 +8,10 @@ const VARIANTS = [
   { n: 3, tag: "cards" },
   { n: 4, tag: "dossier" },
   { n: 5, tag: "monument" },
+  { n: 6, tag: "ledger" },
+  { n: 7, tag: "postcard" },
+  { n: 8, tag: "rolodex" },
+  { n: 9, tag: "liner" },
 ];
 
 // Tiny floating switcher — numbers only, tag name via title attr.

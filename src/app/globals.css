@@ -221,6 +221,14 @@
     0 0 22px color-mix(in srgb, var(--violet-soft) 20%, transparent);
   transform: translateY(-1px);
 }
+/* Rolodex strip — slides right and lifts on hover, ring-binder feel. */
+.rolodex-strip:hover {
+  transform: translateX(8px) translateY(-1px);
+  background: var(--bg-elevated);
+  border-color: color-mix(in srgb, var(--violet-soft) 35%, var(--gray-800));
+}
+.rolodex-strip:active { transform: translateX(6px) translateY(0); }
+
 .glass-nav {
   background: color-mix(in srgb, var(--bg-base) 68%, transparent);
   backdrop-filter: blur(20px) saturate(160%);

@@ -1,201 +1,236 @@
-import Link from "next/link";
-import AboutVariantSwitcher from "@/components/site/AboutVariantSwitcher";
+import ContactVariantSwitcher from "@/components/site/ContactVariantSwitcher";
+import CopyHandle from "@/components/site/CopyHandle";
 
-// Variant 7 — Editorial Split · "README"
-// Same skeleton as /3 but the right column reads like a rendered README.md —
-// markdown-style ## headings, a bullet list for stack, and a plain timeline.
+// Variant 7 — Postcard.
+// The back of a postal card: stamp corner in the upper right, address
+// block on the right, a short hand-written-style message on the left,
+// and a dashed vertical centerline splitting the two. Channels live
+// where the address would — one per line.
 
-export const metadata = { title: "About v7 — README" };
+export const metadata = {
+  title: "Contact · postcard | Sashreek Addanki",
+};
 
-const PROFILE: [string, React.ReactNode][] = [
-  ["identity",  <>Computing science · UAlberta</>],
-  ["focus",     <>AI + systems engineering</>],
-  ["year",      <>2nd · co-op stream</>],
-  ["graduating",<>2028</>],
-  [
-    "status",
-    <span className="inline-flex items-center gap-[6px]">
-      <span
-        className="w-[6px] h-[6px] rounded-full inline-block"
+const channels = [
+  {
+    label: "email",
+    value: "sashreek.addanki@gmail.com",
+    href: "mailto:sashreek.addanki@gmail.com",
+  },
+  {
+    label: "github",
+    value: "github.com/Sashreek007",
+    href: "https://github.com/Sashreek007",
+    ext: true,
+  },
+  {
+    label: "linkedin",
+    value: "linkedin.com/in/sashreek-addanki",
+    href: "https://www.linkedin.com/in/sashreek-addanki-121471257/",
+    ext: true,
+  },
+  {
+    label: "discord",
+    value: "sashreek",
+    copy: true,
+  },
+];
+
+export default function ContactVariant7() {
+  return (
+    <>
+      <main
+        className="min-h-screen w-full flex items-center justify-center px-[6vw] py-24"
         style={{
-          background: "var(--green-mid)",
-          animation: "pulse-dot 2.5s ease-in-out infinite",
+          background:
+            "radial-gradient(1200px circle at 30% 80%, color-mix(in srgb, var(--amber-deep) 10%, transparent), transparent 55%), var(--bg-base)",
         }}
-      />
-      open to internships
-    </span>,
-  ],
-  ["location",  <>Edmonton, AB</>],
-];
-
-const STACK_ROWS: [string, string[]][] = [
-  ["languages", ["python", "go", "c++", "typescript", "rust", "c"]],
-  ["ml / ai",   ["pytorch", "langchain", "langgraph", "mcp", "huggingface", "ollama"]],
-  ["infra",     ["docker", "redis", "postgres", "supabase", "fastapi", "linux"]],
-  ["systems",   ["risc-v", "neovim", "go-stdlib", "opencv", "mediapipe"]],
-];
-
-const XP = [
-  { year: "2025 →", role: "project lead · undergraduate ai society", current: true },
-  { year: "2025",   role: "teaching assistant · cmput 274" },
-];
-
-function MdHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="font-mono text-[14px] mb-3 flex items-baseline gap-2">
-      <span style={{ color: "var(--violet-soft)" }}>##</span>
-      <span style={{ color: "var(--text-primary)" }}>{children}</span>
-    </h2>
-  );
-}
-
-export default function AboutVariant7() {
-  return (
-    <div
-      className="min-h-screen w-full py-24 px-[6vw]"
-      style={{ background: "var(--bg-base)" }}
-    >
-      {/* Kicker */}
-      <div className="flex items-center gap-4 mb-14 max-w-[1200px] mx-auto">
-        <span
-          className="font-mono text-[11px] tracking-[0.2em] uppercase"
-          style={{ color: "var(--text-muted)" }}
+      >
+        {/* The postcard sheet */}
+        <article
+          className="glass-strong w-full max-w-[960px] aspect-[16/10] p-10 lg:p-14 relative flex"
+          style={{
+            fontFamily: "var(--font-mono)",
+          }}
         >
-          ABOUT · ISSUE 04
-        </span>
-        <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
-        <span
-          className="font-mono text-[11px] tracking-[0.2em] uppercase"
-          style={{ color: "var(--text-muted)" }}
-        >
-          readme.md
-        </span>
-      </div>
-
-      <div className="grid gap-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1200px] mx-auto">
-        {/* LEFT — essay */}
-        <article>
-          <h1
-            className="text-[36px] lg:text-[44px] font-medium leading-[1.15] mb-10 tracking-[-0.015em]"
-            style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-          >
-            Computing science @ UAlberta, building at the intersection of{" "}
-            <span style={{ color: "var(--violet-pale)" }}>AI</span>{" "}
-            and{" "}
-            <span style={{ color: "var(--amber-bright)" }}>systems</span>.
-          </h1>
-
+          {/* Postmark stamp in upper-right */}
           <div
-            className="flex flex-col gap-5 text-[15px] leading-[1.85] max-w-[560px]"
-            style={{ color: "var(--text-secondary)" }}
+            className="absolute top-8 right-8 flex flex-col items-center justify-center"
+            style={{
+              width: "96px",
+              height: "112px",
+              border: "2px solid var(--amber-bright)",
+              borderRadius: "4px",
+              background:
+                "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--amber-deep) 60%, transparent), transparent 75%)",
+              boxShadow:
+                "inset 0 0 0 3px color-mix(in srgb, var(--amber-deep) 40%, transparent)",
+            }}
           >
-            <p>
-              My work spans backend systems, low-level programming, and AI-driven
-              features that move beyond research demos into usable software. I&apos;m
-              especially interested in the engineering required to bridge AI research
-              ideas with real systems.
-            </p>
-
-            <p>
-              I learn bottom-up — the mechanism before the abstraction. Kurose &amp;
-              Ross before FastAPI. Induction proofs before statistical packages. RISC-V
-              before operating systems. Using something I don&apos;t understand makes me
-              uncomfortable.
-            </p>
-
-            <p style={{ color: "var(--text-muted)" }}>
-              Currently in my second year, co-op stream, graduating 2028. Each project
-              is a deliberate rung — not a random one.
-            </p>
-          </div>
-
-          <div className="mt-10 flex items-center gap-4">
-            <Link
-              href="/about"
-              className="font-mono text-[13px] px-4 py-[10px] transition-all hover:-translate-y-[1px]"
+            <span
+              className="text-[10px] tracking-[0.22em] uppercase"
+              style={{ color: "var(--amber-bright)" }}
+            >
+              SA
+            </span>
+            <span
+              className="text-[22px] font-medium my-1"
               style={{
-                border: "1px solid var(--violet-mid)",
-                color: "var(--violet-pale)",
-                background: "color-mix(in srgb, var(--violet-dim) 30%, transparent)",
-                borderRadius: "4px",
+                color: "var(--amber-bright)",
+                fontFamily: "var(--font-body)",
+                lineHeight: 1,
               }}
             >
-              read full bio →
-            </Link>
-            <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
-              approx. 4 min read
+              2026
+            </span>
+            <span
+              className="text-[9px] tracking-[0.22em] uppercase"
+              style={{ color: "var(--amber-bright)" }}
+            >
+              YEG → you
             </span>
           </div>
-        </article>
 
-        {/* RIGHT — rendered README */}
-        <aside
-          className="flex flex-col gap-10 pl-6"
-          style={{ borderLeft: "1px solid var(--gray-800)" }}
-        >
-          {/* profile */}
-          <section>
-            <MdHeading>profile</MdHeading>
-            <dl className="flex flex-col gap-[6px] font-mono text-[12px]">
-              {PROFILE.map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[110px_1fr] items-baseline gap-2">
-                  <dt
-                    className="tracking-[0.08em] uppercase text-[11px]"
-                    style={{ color: "var(--text-muted)" }}
+          {/* Divider line */}
+          <span
+            className="absolute top-10 bottom-10 left-1/2 -translate-x-1/2"
+            style={{
+              width: 0,
+              borderLeft: "1px dashed var(--gray-800)",
+            }}
+            aria-hidden
+          />
+
+          {/* LEFT — the message */}
+          <div className="flex-1 pr-10 flex flex-col">
+            <div
+              className="text-[10.5px] tracking-[0.22em] uppercase mb-6"
+              style={{ color: "var(--text-muted)" }}
+            >
+              — postcard № 01
+            </div>
+            <p
+              className="text-[22px] lg:text-[26px] leading-[1.35] tracking-[-0.005em] mb-6"
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-body)",
+                fontWeight: 500,
+              }}
+            >
+              Hey —
+            </p>
+            <p
+              className="text-[15px] lg:text-[16px] leading-[1.8] mb-auto"
+              style={{
+                color: "var(--text-secondary)",
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              Edmonton&rsquo;s cold. Projects are warm. If you want to talk
+              about either, or about building AI systems that actually run,
+              one of the addresses across the way will reach me.
+            </p>
+            <div className="mt-8">
+              <div
+                className="text-[10.5px] tracking-[0.22em] uppercase mb-2"
+                style={{ color: "var(--text-muted)" }}
+              >
+                — sent from
+              </div>
+              <div
+                className="text-[13px]"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Edmonton, Alberta · MST
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT — the address block (channels) */}
+          <div className="flex-1 pl-10 flex flex-col">
+            <div
+              className="text-[10.5px] tracking-[0.22em] uppercase mb-6 text-right"
+              style={{ color: "var(--text-muted)" }}
+            >
+              addresses ——
+            </div>
+            <div className="flex flex-col gap-[14px]">
+              {channels.map((c) =>
+                c.copy ? (
+                  <CopyHandle
+                    key={c.label}
+                    value={c.value}
+                    className="group grid items-baseline gap-4 py-[6px] w-full"
+                    style={{
+                      gridTemplateColumns: "72px 1fr 22px",
+                      background: "transparent",
+                      border: "none",
+                      borderBottom: "1px dashed var(--gray-800)",
+                    }}
                   >
-                    {k}
-                  </dt>
-                  <dd style={{ color: "var(--text-primary)" }}>
-                    <span style={{ color: "var(--text-muted)" }}>→ </span>
-                    {v}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-
-          {/* stack */}
-          <section>
-            <MdHeading>stack</MdHeading>
-            <ul className="flex flex-col gap-[6px] font-mono text-[12px]">
-              {STACK_ROWS.map(([label, items]) => (
-                <li key={label} className="grid grid-cols-[110px_1fr] items-baseline gap-2">
-                  <span style={{ color: "var(--amber-bright)" }}>
-                    - {label}
-                  </span>
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    {items.join(", ")}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* timeline */}
-          <section>
-            <MdHeading>timeline</MdHeading>
-            <ul className="flex flex-col gap-[8px] font-mono text-[12px]">
-              {XP.map((e, i) => (
-                <li key={i} className="grid grid-cols-[80px_1fr] items-baseline gap-2">
-                  <span style={{ color: e.current ? "var(--green-bright)" : "var(--text-muted)" }}>
-                    {e.year}
-                  </span>
-                  <span style={{ color: "var(--text-primary)" }}>
-                    {e.role}
-                    {e.current && (
-                      <span className="ml-2" style={{ color: "var(--green-bright)" }}>
-                        [current]
-                      </span>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </aside>
-      </div>
-
-      <AboutVariantSwitcher current={7} />
-    </div>
+                    <span
+                      className="text-[10px] tracking-[0.2em] uppercase"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {c.label}
+                    </span>
+                    <span
+                      className="text-[14px] transition-colors duration-150 group-hover:text-[var(--violet-pale)] truncate"
+                      style={{
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      {c.value}
+                    </span>
+                    <span
+                      className="text-[13px] text-right"
+                      style={{ color: "var(--violet-soft)" }}
+                    >
+                      ⧉
+                    </span>
+                  </CopyHandle>
+                ) : (
+                  <a
+                    key={c.label}
+                    href={c.href}
+                    target={c.ext ? "_blank" : undefined}
+                    rel={c.ext ? "noreferrer noopener" : undefined}
+                    className="group grid items-baseline gap-4 py-[6px]"
+                    style={{
+                      gridTemplateColumns: "72px 1fr 22px",
+                      borderBottom: "1px dashed var(--gray-800)",
+                    }}
+                  >
+                    <span
+                      className="text-[10px] tracking-[0.2em] uppercase"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {c.label}
+                    </span>
+                    <span
+                      className="text-[14px] transition-colors duration-150 group-hover:text-[var(--violet-pale)] truncate"
+                      style={{
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      {c.value}
+                    </span>
+                    <span
+                      className="text-[13px] text-right"
+                      style={{ color: "var(--violet-soft)" }}
+                    >
+                      {c.ext ? "↗" : "→"}
+                    </span>
+                  </a>
+                ),
+              )}
+            </div>
+          </div>
+        </article>
+      </main>
+      <ContactVariantSwitcher current={7} />
+    </>
   );
 }

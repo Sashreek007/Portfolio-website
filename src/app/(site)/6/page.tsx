@@ -1,247 +1,223 @@
-import Link from "next/link";
-import AboutVariantSwitcher from "@/components/site/AboutVariantSwitcher";
+import ContactVariantSwitcher from "@/components/site/ContactVariantSwitcher";
+import CopyHandle from "@/components/site/CopyHandle";
 
-// Variant 6 — Editorial Split · "Dossier"
-// Same editorial skeleton as /3 but the right column is a numbered dossier
-// (01 / 02 / 03 …) instead of a boxed fact table.
+// Variant 6 — Ledger.
+// Accounting-register treatment: a tabulated book with channel name,
+// handle, response time, and a posted-since date. Alternating row tint
+// and tabular-nums everywhere so it reads as a balance sheet.
 
-export const metadata = { title: "About v6 — Dossier" };
+export const metadata = {
+  title: "Contact · ledger | Sashreek Addanki",
+};
 
-const DOSSIER: [string, React.ReactNode][] = [
-  ["identity", <>computing science · ualberta</>],
-  ["focus",    <>ai + systems engineering</>],
-  ["year",     <>2nd · co-op stream</>],
-  ["grad",     <>2028</>],
-  [
-    "status",
-    <span className="flex items-center gap-[6px]">
-      <span
-        className="w-[6px] h-[6px] rounded-full inline-block"
-        style={{
-          background: "var(--green-mid)",
-          animation: "pulse-dot 2.5s ease-in-out infinite",
-        }}
-      />
-      open to internships
-    </span>,
-  ],
-  ["location", <>edmonton, ab</>],
+const rows = [
+  {
+    label: "email",
+    handle: "sashreek.addanki@gmail.com",
+    response: "24–48h",
+    since: "2022-09",
+    href: "mailto:sashreek.addanki@gmail.com",
+  },
+  {
+    label: "github",
+    handle: "Sashreek007",
+    response: "1–2 days",
+    since: "2021-06",
+    href: "https://github.com/Sashreek007",
+    ext: true,
+  },
+  {
+    label: "linkedin",
+    handle: "sashreek-addanki",
+    response: "2–4 days",
+    since: "2023-02",
+    href: "https://www.linkedin.com/in/sashreek-addanki-121471257/",
+    ext: true,
+  },
+  {
+    label: "discord",
+    handle: "sashreek",
+    response: "~same day",
+    since: "2020-03",
+    copy: true,
+  },
 ];
 
-const STACK_ROWS: [string, string[]][] = [
-  ["languages", ["Python", "Go", "C++", "TypeScript", "Rust", "C"]],
-  ["ml / ai",   ["PyTorch", "LangChain", "LangGraph", "MCP", "HuggingFace", "Ollama"]],
-  ["infra",     ["Docker", "Redis", "Postgres", "Supabase", "FastAPI", "Linux"]],
-  ["systems",   ["RISC-V", "Neovim", "Go stdlib", "OpenCV", "MediaPipe"]],
-];
-
-const XP = [
-  { year: "2025 →", role: "project lead · undergraduate ai society", current: true },
-  { year: "2025",   role: "teaching assistant · cmput 274" },
-  { year: "2025",   role: "nathacks ecotech · fluxatlas engine" },
-];
-
-export default function AboutVariant6() {
+export default function ContactVariant6() {
   return (
-    <div
-      className="min-h-screen w-full py-24 px-[6vw]"
-      style={{ background: "var(--bg-base)" }}
-    >
-      {/* Kicker */}
-      <div className="flex items-center gap-4 mb-14 max-w-[1200px] mx-auto">
-        <span
-          className="font-mono text-[11px] tracking-[0.2em] uppercase"
-          style={{ color: "var(--text-muted)" }}
-        >
-          ABOUT · ISSUE 03
-        </span>
-        <span className="h-px flex-1" style={{ background: "var(--gray-800)" }} />
-        <span
-          className="font-mono text-[11px] tracking-[0.2em] uppercase"
-          style={{ color: "var(--text-muted)" }}
-        >
-          six-entry dossier
-        </span>
-      </div>
-
-      <div className="grid gap-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1200px] mx-auto">
-        {/* LEFT — essay */}
-        <article>
-          <h1
-            className="text-[44px] lg:text-[56px] font-medium leading-[1.02] mb-10 tracking-[-0.02em]"
-            style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-          >
-            Building at the seam <br />
-            between{" "}
-            <span style={{ color: "var(--violet-pale)" }}>ai</span>{" "}
-            and{" "}
-            <span style={{ color: "var(--amber-bright)" }}>systems</span>.
-          </h1>
-
-          <div
-            className="flex flex-col gap-5 text-[15px] leading-[1.85] max-w-[560px]"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            <p className="first-letter:float-left first-letter:text-[44px] first-letter:leading-[0.9] first-letter:pr-2 first-letter:mt-1 first-letter:text-[var(--violet-pale)] first-letter:font-medium">
-              My work spans backend systems, low-level programming, and AI-driven
-              features that move beyond research demos into usable software. I care
-              about the engineering required to bridge AI research ideas with real
-              systems.
-            </p>
-
-            <p>
-              I learn bottom-up — the mechanism before the abstraction.
-              Kurose &amp; Ross before FastAPI. RISC-V before operating systems.
-              Using something I don&apos;t understand makes me uncomfortable.
-            </p>
-
-            <blockquote
-              className="pl-5 my-2 text-[16px] italic"
-              style={{
-                borderLeft: "2px solid var(--violet-mid)",
-                color: "var(--violet-pale)",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              &ldquo;Each project is a deliberate rung — not a random one.&rdquo;
-            </blockquote>
-          </div>
-
-          <div className="mt-10 flex items-center gap-4">
-            <Link
-              href="/about"
-              className="font-mono text-[13px] px-4 py-[10px] transition-all hover:-translate-y-[1px]"
-              style={{
-                border: "1px solid var(--violet-mid)",
-                color: "var(--violet-pale)",
-                background: "color-mix(in srgb, var(--violet-dim) 30%, transparent)",
-                borderRadius: "4px",
-              }}
-            >
-              read full bio →
-            </Link>
-            <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
-              approx. 4 min read
-            </span>
-          </div>
-        </article>
-
-        {/* RIGHT — dossier + stack + recent */}
-        <aside className="flex flex-col gap-12">
-          {/* Numbered dossier */}
-          <section>
-            <p
-              className="font-mono text-[11px] tracking-[0.16em] uppercase mb-5"
+    <>
+      <main
+        className="min-h-screen w-full px-[6vw] py-24"
+        style={{ background: "var(--bg-base)" }}
+      >
+        <div className="max-w-[980px] mx-auto">
+          {/* Masthead */}
+          <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
+            <div>
+              <p
+                className="font-mono text-[11px] tracking-[0.22em] uppercase mb-3"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Contact · Ledger
+              </p>
+              <h1
+                className="text-[44px] lg:text-[54px] leading-[1.05] font-medium tracking-[-0.015em]"
+                style={{
+                  color: "var(--text-primary)",
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                The channel register.
+              </h1>
+            </div>
+            <div
+              className="font-mono text-[11px] tracking-[0.12em] uppercase text-right"
               style={{ color: "var(--text-muted)" }}
             >
-              dossier
-            </p>
-            <ol className="flex flex-col">
-              {DOSSIER.map(([k, v], i) => (
-                <li
-                  key={k}
-                  className="grid grid-cols-[32px_90px_1fr] items-baseline py-[10px] gap-4"
-                  style={{
-                    borderTop: "1px solid var(--gray-800)",
-                    borderBottom: i === DOSSIER.length - 1 ? "1px solid var(--gray-800)" : "none",
-                  }}
-                >
+              <div>FY 2026 · Q2</div>
+              <div style={{ color: "var(--gray-600)" }}>posted by SA</div>
+            </div>
+          </div>
+
+          {/* Register */}
+          <div
+            className="font-mono text-[12px]"
+            style={{
+              border: "1px solid var(--gray-800)",
+              borderRadius: "4px",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header row */}
+            <div
+              className="grid items-baseline gap-4 px-5 py-3 tracking-[0.14em] uppercase text-[10.5px]"
+              style={{
+                gridTemplateColumns: "100px 1fr 120px 90px 32px",
+                background: "var(--bg-elevated)",
+                color: "var(--text-muted)",
+                borderBottom: "1px solid var(--gray-800)",
+              }}
+            >
+              <span>channel</span>
+              <span>handle</span>
+              <span>response</span>
+              <span className="text-right tabular-nums">posted</span>
+              <span />
+            </div>
+
+            {/* Entries */}
+            {rows.map((r, i) => {
+              const rowStyle: React.CSSProperties = {
+                gridTemplateColumns: "100px 1fr 120px 90px 32px",
+                background:
+                  i % 2 === 0
+                    ? "transparent"
+                    : "color-mix(in srgb, var(--bg-elevated) 35%, transparent)",
+                borderBottom:
+                  i < rows.length - 1
+                    ? "1px solid var(--gray-800)"
+                    : undefined,
+                textAlign: "left",
+              };
+              const body = (
+                <>
                   <span
-                    className="font-mono text-[11px]"
-                    style={{ color: "var(--amber-bright)" }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span
-                    className="font-mono text-[11px] tracking-[0.1em] uppercase"
+                    className="tracking-[0.14em] uppercase text-[10.5px]"
                     style={{ color: "var(--text-muted)" }}
                   >
-                    {k}
+                    {r.label}
                   </span>
                   <span
-                    className="font-mono text-[12px]"
+                    className="transition-colors duration-150 truncate"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    {v}
+                    {r.handle}
                   </span>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          {/* Stack */}
-          <section>
-            <p
-              className="font-mono text-[11px] tracking-[0.16em] uppercase mb-5"
-              style={{ color: "var(--text-muted)" }}
-            >
-              stack
-            </p>
-            <div className="flex flex-col gap-4">
-              {STACK_ROWS.map(([label, items]) => (
-                <div key={label}>
-                  <p
-                    className="font-mono text-[10px] tracking-[0.14em] uppercase mb-2"
+                  <span
+                    className="tabular-nums"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {r.response}
+                  </span>
+                  <span
+                    className="text-right tabular-nums"
                     style={{ color: "var(--text-muted)" }}
                   >
-                    {label}
-                  </p>
-                  <div className="flex flex-wrap gap-[6px]">
-                    {items.map((t) => (
-                      <span
-                        key={t}
-                        className="font-mono text-[11px] px-[10px] py-[4px]"
-                        style={{
-                          border: "1px solid var(--gray-800)",
-                          color: "var(--text-secondary)",
-                          borderRadius: "3px",
-                          background: "var(--bg-elevated)",
-                        }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Recent */}
-          <section>
-            <p
-              className="font-mono text-[11px] tracking-[0.16em] uppercase mb-5"
-              style={{ color: "var(--text-muted)" }}
-            >
-              recent
-            </p>
-            <ul className="flex flex-col">
-              {XP.map((e, i) => (
-                <li
-                  key={i}
-                  className="grid grid-cols-[80px_1fr] items-center py-[10px]"
-                  style={{
-                    borderTop: i === 0 ? "1px solid var(--gray-800)" : "none",
-                    borderBottom: "1px solid var(--gray-800)",
-                  }}
-                >
+                    {r.since}
+                  </span>
                   <span
-                    className="font-mono text-[12px]"
-                    style={{ color: e.current ? "var(--green-bright)" : "var(--text-muted)" }}
+                    className="text-right"
+                    style={{ color: "var(--violet-soft)" }}
                   >
-                    {e.year}
+                    {r.copy ? "⧉" : r.ext ? "↗" : "→"}
                   </span>
-                  <span className="text-[13px]" style={{ color: "var(--text-primary)" }}>
-                    {e.role}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </aside>
-      </div>
+                </>
+              );
 
-      <AboutVariantSwitcher current={6} />
-    </div>
+              if (r.copy) {
+                return (
+                  <CopyHandle
+                    key={r.label}
+                    value={r.handle}
+                    className="group grid items-baseline gap-4 px-5 py-4 w-full hover:bg-[color-mix(in_srgb,var(--violet-dim)_10%,transparent)] transition-colors"
+                    style={{
+                      ...rowStyle,
+                      border: "none",
+                    }}
+                  >
+                    {body}
+                  </CopyHandle>
+                );
+              }
+
+              return (
+                <a
+                  key={r.label}
+                  href={r.href}
+                  target={r.ext ? "_blank" : undefined}
+                  rel={r.ext ? "noreferrer noopener" : undefined}
+                  className="group grid items-baseline gap-4 px-5 py-4 hover:bg-[color-mix(in_srgb,var(--violet-dim)_10%,transparent)] transition-colors"
+                  style={rowStyle}
+                >
+                  {body}
+                </a>
+              );
+            })}
+
+            {/* Totals row */}
+            <div
+              className="grid items-baseline gap-4 px-5 py-3 tracking-[0.14em] uppercase text-[10.5px]"
+              style={{
+                gridTemplateColumns: "100px 1fr 120px 90px 32px",
+                background: "var(--bg-elevated)",
+                color: "var(--text-muted)",
+                borderTop: "1px solid var(--gray-800)",
+              }}
+            >
+              <span>total</span>
+              <span style={{ color: "var(--text-primary)" }}>
+                4 channels · 1 author
+              </span>
+              <span className="tabular-nums">—</span>
+              <span
+                className="text-right tabular-nums"
+                style={{ color: "var(--green-bright)" }}
+              >
+                balanced
+              </span>
+              <span />
+            </div>
+          </div>
+
+          <p
+            className="font-mono text-[10.5px] tracking-[0.22em] uppercase mt-4"
+            style={{ color: "var(--gray-600)" }}
+          >
+            — entries stay open until closed. mailbox active.
+          </p>
+        </div>
+      </main>
+      <ContactVariantSwitcher current={6} />
+    </>
   );
 }
