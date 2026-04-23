@@ -10,49 +10,64 @@ const VARIANTS = [
   { n: 5, tag: "monument" },
 ];
 
+// Tiny floating switcher — numbers only, tag name via title attr.
+// Sits above the global footer so it doesn't crowd content on any
+// particular variant.
 export default function ContactVariantSwitcher({
   current,
 }: {
   current: number;
 }) {
+  const currentTag = VARIANTS.find((v) => v.n === current)?.tag ?? "";
   return (
     <div
-      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-3 py-2 rounded-full font-mono text-[11px]"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-[2px] px-[8px] py-[4px] rounded-full font-mono text-[10px]"
       style={{
-        background: "color-mix(in srgb, var(--bg-elevated) 85%, transparent)",
+        background: "color-mix(in srgb, var(--bg-elevated) 80%, transparent)",
         border: "1px solid var(--gray-800)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        letterSpacing: "0.04em",
       }}
+      // Announce the active variant to screen readers via aria-label
+      // since the numbers on their own aren't descriptive.
+      aria-label={`Contact variant ${current} — ${currentTag}`}
     >
-      <span className="pr-2 pl-1" style={{ color: "var(--text-muted)" }}>
-        contact ·
-      </span>
-      {VARIANTS.map(({ n, tag }) => (
-        <Link
-          key={n}
-          href={`/${n}`}
-          className="transition-colors duration-150 inline-flex items-center gap-[6px]"
-          style={{
-            color: current === n ? "var(--violet-pale)" : "var(--text-muted)",
-            padding: "3px 8px",
-            borderRadius: "999px",
-            background: current === n ? "var(--violet-dim)" : "transparent",
-          }}
-        >
-          <span style={{ fontWeight: current === n ? 500 : 400 }}>{n}</span>
-          <span style={{ opacity: 0.75 }}>{tag}</span>
-        </Link>
-      ))}
-      <span className="px-2" style={{ color: "var(--gray-800)" }}>
-        |
+      {VARIANTS.map(({ n, tag }) => {
+        const active = current === n;
+        return (
+          <Link
+            key={n}
+            href={`/${n}`}
+            title={tag}
+            className="transition-colors duration-150 inline-flex items-center justify-center tabular-nums"
+            style={{
+              color: active ? "var(--violet-pale)" : "var(--text-muted)",
+              width: "18px",
+              height: "18px",
+              borderRadius: "999px",
+              background: active ? "var(--violet-dim)" : "transparent",
+              fontWeight: active ? 500 : 400,
+            }}
+          >
+            {n}
+          </Link>
+        );
+      })}
+      <span className="mx-[4px]" style={{ color: "var(--gray-800)" }}>
+        ·
       </span>
       <Link
         href="/"
-        className="px-2 hover:text-[var(--text-primary)] transition-colors"
-        style={{ color: "var(--text-muted)" }}
+        title="home"
+        className="transition-colors duration-150 inline-flex items-center justify-center"
+        style={{
+          color: "var(--text-muted)",
+          padding: "0 6px",
+          height: "18px",
+        }}
       >
-        home ↩
+        ↩
       </Link>
     </div>
   );
