@@ -1,6 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 import Hero from "@/components/site/Hero";
 import SectionKicker from "@/components/site/SectionKicker";
+import CopyHandle from "@/components/site/CopyHandle";
 import { type Project } from "@/components/site/ProjectCard";
 import ProjectMediaCard from "@/components/site/ProjectMediaCard";
 import RevealSections from "@/components/site/RevealSections";
@@ -324,70 +325,167 @@ export default async function HomePage() {
 
       {divider}
 
-      {/* ── Contact ───────────────────────────────────────────────────────── */}
+      {/* ── Contact (/4 dossier layout, centered) ────────────────────────── */}
       <section
         id="contact"
         className="section-hidden px-[6vw] py-24"
         style={{ background: "var(--bg-base)" }}
       >
         <SectionKicker label="CONTACT" meta="reach.md" />
-        <div className="max-w-[1200px] mx-auto">
-        <h2
-          className="text-[26px] font-medium leading-[1.25] mt-1 mb-4"
-          style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-        >
-          Get in touch
-        </h2>
-        <p
-          className="text-[15px] leading-[1.7] mb-10 max-w-[480px]"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          Open to internship opportunities in backend, MLOps, and AI systems.
-          If you&apos;re working on something interesting, reach out.
-        </p>
+        <div className="max-w-[860px] mx-auto flex flex-col items-center text-center">
+          <h2
+            className="text-[38px] lg:text-[46px] leading-[1.1] font-medium tracking-[-0.015em] mb-12"
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-body)",
+            }}
+          >
+            How to reach me, in{" "}
+            <span style={{ color: "var(--violet-pale)" }}>one page</span>.
+          </h2>
 
-        <div
-          className="flex flex-col gap-0 max-w-[480px]"
-          style={{ border: "1px solid var(--gray-800)", borderRadius: "6px" }}
-        >
-          {[
-            { label: "email", value: "sashreek.addanki@gmail.com", href: "mailto:sashreek.addanki@gmail.com", external: false },
-            { label: "github", value: "Sashreek007", href: "https://github.com/Sashreek007", external: true },
-            { label: "linkedin", value: "sashreek-addanki", href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", external: true },
-          ].map(({ label, value, href, external }, i, arr) => (
-            <a
-              key={label}
-              href={href}
-              target={external ? "_blank" : undefined}
-              rel={external ? "noreferrer noopener" : undefined}
-              className="group flex items-center justify-between px-5 py-4 transition-colors duration-150"
-              style={{
-                borderBottom: i < arr.length - 1 ? "1px solid var(--gray-800)" : "none",
-              }}
+          <div className="w-full flex flex-col items-stretch">
+            <h3 className="font-mono text-[13px] flex items-baseline justify-center gap-2 mb-8">
+              <span style={{ color: "var(--violet-soft)" }}>##</span>
+              <span style={{ color: "var(--text-primary)" }}>channels</span>
+            </h3>
+
+            <div
+              className="flex flex-col"
+              style={{ borderTop: "1px solid var(--gray-800)" }}
             >
-              <span
-                className="font-mono text-[11px] tracking-[0.10em] uppercase"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {label}
-              </span>
-              <span
-                className="text-[14px] font-medium group-hover:text-[var(--violet-pale)] transition-colors duration-150"
-                style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-              >
-                {value}
-                {external && (
+              {[
+                {
+                  n: "01",
+                  label: "email",
+                  value: "sashreek.addanki@gmail.com",
+                  blurb:
+                    "Fastest route — long or short, I read everything. Mark [urgent] in the subject if it actually is.",
+                  href: "mailto:sashreek.addanki@gmail.com",
+                },
+                {
+                  n: "02",
+                  label: "github",
+                  value: "Sashreek007",
+                  blurb:
+                    "Projects, half-finished experiments, and the occasional issue reply. Pull requests welcome.",
+                  href: "https://github.com/Sashreek007",
+                  ext: true,
+                },
+                {
+                  n: "03",
+                  label: "linkedin",
+                  value: "sashreek-addanki",
+                  blurb:
+                    "Recruiter-facing. The place for formal intros, referrals, and co-op conversations.",
+                  href: "https://www.linkedin.com/in/sashreek-addanki-121471257/",
+                  ext: true,
+                },
+              ].map(({ n, label, value, blurb, href, ext }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target={ext ? "_blank" : undefined}
+                  rel={ext ? "noreferrer noopener" : undefined}
+                  className="group grid gap-6 py-8 text-left transition-colors duration-200"
+                  style={{
+                    gridTemplateColumns: "50px 1fr 40px",
+                    borderBottom: "1px solid var(--gray-800)",
+                  }}
+                >
                   <span
-                    className="ml-2 font-mono text-[11px] opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                    className="font-mono text-[11px] tracking-[0.2em] uppercase pt-[6px]"
                     style={{ color: "var(--violet-soft)" }}
                   >
-                    ↗
+                    {n}
                   </span>
-                )}
-              </span>
-            </a>
-          ))}
-        </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-baseline gap-4 flex-wrap">
+                      <span
+                        className="font-mono text-[10.5px] tracking-[0.2em] uppercase"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {label}
+                      </span>
+                      <span
+                        className="text-[22px] lg:text-[26px] leading-[1.1] tracking-[-0.01em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                        style={{
+                          color: "var(--text-primary)",
+                          fontFamily: "var(--font-body)",
+                        }}
+                      >
+                        {value}
+                      </span>
+                    </div>
+                    <p
+                      className="text-[14px] leading-[1.65] max-w-[560px]"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {blurb}
+                    </p>
+                  </div>
+                  <span
+                    className="font-mono text-[18px] pt-[6px] transition-transform duration-200 group-hover:translate-x-[3px]"
+                    style={{ color: "var(--violet-soft)" }}
+                  >
+                    {ext ? "↗" : "→"}
+                  </span>
+                </a>
+              ))}
+
+              {/* 04 · discord — copy-on-click, matches the editorial row pattern */}
+              <CopyHandle
+                value="sashreek"
+                copiedLabel="copied to clipboard"
+                className="group grid gap-6 py-8 w-full text-left"
+                style={{
+                  gridTemplateColumns: "50px 1fr 40px",
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: "1px solid var(--gray-800)",
+                }}
+              >
+                <span
+                  className="font-mono text-[11px] tracking-[0.2em] uppercase pt-[6px]"
+                  style={{ color: "var(--violet-soft)" }}
+                >
+                  04
+                </span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-baseline gap-4 flex-wrap">
+                    <span
+                      className="font-mono text-[10.5px] tracking-[0.2em] uppercase"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      discord
+                    </span>
+                    <span
+                      className="text-[22px] lg:text-[26px] leading-[1.1] tracking-[-0.01em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                      style={{
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      sashreek
+                    </span>
+                  </div>
+                  <p
+                    className="text-[14px] leading-[1.65] max-w-[560px]"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    Quick DMs. Click the handle to copy — Discord has no
+                    canonical profile URL to link out to.
+                  </p>
+                </div>
+                <span
+                  className="font-mono text-[18px] pt-[6px]"
+                  style={{ color: "var(--violet-soft)" }}
+                >
+                  ⧉
+                </span>
+              </CopyHandle>
+            </div>
+          </div>
         </div>
       </section>
 
