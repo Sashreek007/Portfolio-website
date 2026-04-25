@@ -749,8 +749,8 @@
 }
 .blog-post-body p { margin-bottom: 24px; }
 .blog-post-body p:first-of-type::first-line { color: var(--violet-pale); }
-.blog-post-body strong { color: var(--amber-bright); font-weight: 600; }
-.blog-post-body em { color: var(--violet-pale); font-style: italic; }
+.blog-post-body strong { color: var(--text-primary); font-weight: 600; }
+.blog-post-body em { color: var(--text-secondary); font-style: italic; }
 .blog-post-body a {
   color: var(--violet-soft);
   text-decoration: underline;
