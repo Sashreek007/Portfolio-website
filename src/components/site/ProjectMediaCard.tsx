@@ -107,19 +107,57 @@ export default function ProjectMediaCard({
     >
       <MediaFrame project={p} index={index} />
 
-      <div className="flex flex-col gap-4 p-5">
-        {p.year && (
-          <div
-            className="font-mono text-[11px] tracking-[0.08em] uppercase"
-            style={{ color: "var(--text-muted)" }}
-          >
-            {p.year}
-          </div>
-        )}
+      <div className="flex flex-col gap-4 p-6">
+        <div className="flex items-center gap-3 flex-wrap">
+          {p.year && (
+            <span
+              className="font-mono text-[12px] tracking-[0.1em] uppercase font-medium"
+              style={{ color: "var(--amber-bright)" }}
+            >
+              {p.year}
+            </span>
+          )}
+          {p.status && (
+            <>
+              <span
+                className="inline-block w-[3px] h-[3px] rounded-full"
+                style={{ background: "var(--gray-600)" }}
+              />
+              <span
+                className="font-mono text-[11px] tracking-[0.12em] uppercase inline-flex items-center gap-[6px]"
+                style={{
+                  color:
+                    p.status === "active"
+                      ? "var(--green-bright)"
+                      : p.status === "shipped"
+                      ? "var(--violet-soft)"
+                      : "var(--amber-bright)",
+                }}
+              >
+                <span
+                  className="w-[6px] h-[6px] rounded-full inline-block"
+                  style={{
+                    background:
+                      p.status === "active"
+                        ? "var(--green-mid)"
+                        : p.status === "shipped"
+                        ? "var(--violet-mid)"
+                        : "var(--amber-mid)",
+                    animation:
+                      p.status === "active"
+                        ? "pulse-dot 2.5s ease-in-out infinite"
+                        : undefined,
+                  }}
+                />
+                {p.status}
+              </span>
+            </>
+          )}
+        </div>
 
         {/* Title */}
         <h3
-          className="text-[20px] font-medium leading-[1.25] tracking-[-0.012em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+          className="text-[24px] font-medium leading-[1.2] tracking-[-0.015em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
           style={{
             color: "var(--text-primary)",
             fontFamily: "var(--font-body)",
@@ -128,12 +166,18 @@ export default function ProjectMediaCard({
           {p.name}
         </h3>
 
-        <div className="h-px w-8" style={{ background: "var(--violet-mid)" }} />
+        <div
+          className="h-[2px] w-12"
+          style={{
+            background:
+              "linear-gradient(to right, var(--violet-soft), var(--amber-bright))",
+          }}
+        />
 
         {/* Description */}
         <p
-          className="text-[13.5px] leading-[1.6]"
-          style={{ color: "var(--text-secondary)" }}
+          className="text-[15px] leading-[1.6]"
+          style={{ color: "var(--text-primary)" }}
         >
           {p.description}
         </p>
@@ -141,8 +185,8 @@ export default function ProjectMediaCard({
         {/* Stack */}
         {p.stack.length > 0 && (
           <div
-            className="font-mono text-[11px] leading-[1.6]"
-            style={{ color: "var(--text-muted)" }}
+            className="font-mono text-[12px] leading-[1.6]"
+            style={{ color: "var(--text-secondary)" }}
           >
             {p.stack.slice(0, 5).join(" · ")}
             {p.stack.length > 5 && " · …"}
@@ -151,11 +195,11 @@ export default function ProjectMediaCard({
 
         {/* open affordance */}
         <span
-          className="font-mono text-[12px] mt-1 inline-flex items-center gap-2 transition-all duration-200 group-hover:translate-x-[3px]"
+          className="font-mono text-[13px] mt-2 inline-flex items-center gap-2 transition-all duration-200 group-hover:translate-x-[3px]"
           style={{ color: "var(--violet-soft)" }}
         >
           open project
-          <span>→</span>
+          <span style={{ color: "var(--amber-bright)" }}>→</span>
         </span>
       </div>
     </Link>

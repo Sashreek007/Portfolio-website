@@ -34,48 +34,62 @@ export default function Hero() {
           </h1>
 
           {/* Hairline divider */}
-          <div className="h-px w-full mt-8 mb-6" style={{ background: "var(--gray-800)" }} />
+          <div
+            className="h-px w-full mt-8 mb-6"
+            style={{
+              background:
+                "linear-gradient(to right, color-mix(in srgb, var(--violet-mid) 80%, transparent), var(--gray-800) 60%, transparent)",
+            }}
+          />
 
           {/* Subtitle row */}
           <p
-            className="font-mono text-[13px] mb-3"
-            style={{ color: "var(--text-muted)" }}
+            className="font-mono text-[15px] mb-4 flex items-center gap-3 flex-wrap justify-center lg:justify-start"
+            style={{ color: "var(--text-secondary)" }}
           >
-            computing science @ ualberta&nbsp;&nbsp;·&nbsp;&nbsp;ai + systems
+            <span style={{ color: "var(--violet-pale)" }}>computing science</span>
+            <span style={{ color: "var(--gray-600)" }}>@</span>
+            <span>ualberta</span>
+            <span
+              className="inline-block w-[5px] h-[5px] rounded-full"
+              style={{ background: "var(--amber-bright)" }}
+            />
+            <span style={{ color: "var(--amber-bright)" }}>ai</span>
+            <span style={{ color: "var(--gray-600)" }}>+</span>
+            <span style={{ color: "var(--green-bright)" }}>systems</span>
           </p>
 
           {/* Tagline (Syne for some warmth against the mono name) */}
           <p
-            className="text-[15px] leading-[1.7] max-w-[480px] mb-7"
-            style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}
+            className="text-[19px] leading-[1.6] max-w-[540px] mb-8"
+            style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
           >
-            I understand the machine before I build on top of it.
+            I understand the{" "}
+            <span style={{ color: "var(--amber-bright)" }}>machine</span>
+            {" "}before I build on top of it.
           </p>
 
           {/* CTA buttons */}
           <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
             {[
-              { href: "#about",  label: "about" },
-              { href: "#work",   label: "projects" },
-              { href: "/blog",   label: "blog ↗" },
-              { href: "/resume", label: "resume" },
-              { href: "https://github.com/Sashreek007", label: "github ↗", ext: true },
-              { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true },
-            ].map(({ href, label, ext }) => (
+              { href: "#about",  label: "about", accent: "violet" },
+              { href: "#work",   label: "projects", accent: "violet" },
+              { href: "/blog",   label: "blog ↗", accent: "amber" },
+              { href: "/resume", label: "resume", accent: "violet" },
+              { href: "https://github.com/Sashreek007", label: "github ↗", ext: true, accent: "amber" },
+              { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true, accent: "amber" },
+            ].map(({ href, label, ext, accent }) => (
               <a
                 key={href}
                 href={href}
                 target={ext ? "_blank" : undefined}
                 rel={ext ? "noreferrer noopener" : undefined}
-                className="glass-pill font-mono text-[13px] px-[18px] py-[9px]"
-                style={{ color: "var(--text-secondary)" }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color =
-                    "var(--text-primary)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color =
-                    "var(--text-secondary)";
+                className="glass-pill font-mono text-[14px] px-[20px] py-[11px]"
+                style={{
+                  color:
+                    accent === "amber"
+                      ? "var(--amber-bright)"
+                      : "var(--violet-pale)",
                 }}
               >
                 {label}

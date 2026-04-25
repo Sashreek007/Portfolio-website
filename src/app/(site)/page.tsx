@@ -113,21 +113,40 @@ export default async function HomePage() {
       >
         <SectionKicker label="ABOUT" meta="readme.md" />
 
-        <div className="grid gap-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1200px] mx-auto">
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1320px] mx-auto">
           {/* LEFT — essay */}
           <article>
             <h2
-              className="text-[32px] lg:text-[40px] font-medium leading-[1.18] mb-10 tracking-[-0.015em]"
+              className="text-[36px] lg:text-[46px] font-medium leading-[1.16] mb-10 tracking-[-0.018em]"
               style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
             >
               Computing science @ UAlberta, building at the intersection of{" "}
-              <span style={{ color: "var(--violet-pale)" }}>AI</span>{" "}
+              <span
+                style={{
+                  color: "var(--violet-pale)",
+                  background:
+                    "linear-gradient(to top, color-mix(in srgb, var(--violet-mid) 30%, transparent) 35%, transparent 35%)",
+                  padding: "0 4px",
+                }}
+              >
+                AI
+              </span>{" "}
               and{" "}
-              <span style={{ color: "var(--amber-bright)" }}>systems</span>.
+              <span
+                style={{
+                  color: "var(--amber-bright)",
+                  background:
+                    "linear-gradient(to top, color-mix(in srgb, var(--amber-mid) 22%, transparent) 35%, transparent 35%)",
+                  padding: "0 4px",
+                }}
+              >
+                systems
+              </span>
+              .
             </h2>
 
             <div
-              className="flex flex-col gap-5 text-[15px] leading-[1.85] max-w-[560px]"
+              className="flex flex-col gap-6 text-[17px] leading-[1.8] max-w-[600px]"
               style={{ color: "var(--text-secondary)" }}
             >
               <p>
@@ -137,31 +156,46 @@ export default async function HomePage() {
                 ideas with real systems.
               </p>
               <p>
-                I learn bottom-up — the mechanism before the abstraction. Kurose &amp;
-                Ross before FastAPI. Induction proofs before statistical packages. RISC-V
-                before operating systems. Using something I don&apos;t understand makes me
-                uncomfortable.
+                I learn bottom-up — the mechanism before the abstraction.{" "}
+                <span style={{ color: "var(--violet-pale)" }}>Kurose &amp; Ross</span>{" "}
+                before FastAPI.{" "}
+                <span style={{ color: "var(--violet-pale)" }}>Induction proofs</span>{" "}
+                before statistical packages.{" "}
+                <span style={{ color: "var(--amber-bright)" }}>RISC-V</span>{" "}
+                before operating systems. Using something I don&apos;t understand
+                makes me uncomfortable.
               </p>
               <p style={{ color: "var(--text-muted)" }}>
-                Currently in my second year, co-op stream, graduating 2028. Each project
+                Currently in my second year, co-op stream, graduating{" "}
+                <span style={{ color: "var(--green-bright)" }}>2028</span>. Each project
                 is a deliberate rung — not a random one.
               </p>
             </div>
 
-            <div className="mt-10 flex items-center gap-4">
+            <div className="mt-10 flex items-center gap-5 flex-wrap">
               <Link
                 href="/about"
-                className="font-mono text-[13px] px-4 py-[10px] transition-all hover:-translate-y-[1px]"
+                className="font-mono text-[14px] px-5 py-[12px] transition-all hover:-translate-y-[1px]"
                 style={{
-                  border: "1px solid var(--violet-mid)",
+                  border: "1px solid var(--violet-soft)",
                   color: "var(--violet-pale)",
-                  background: "color-mix(in srgb, var(--violet-dim) 30%, transparent)",
+                  background:
+                    "color-mix(in srgb, var(--violet-dim) 45%, transparent)",
                   borderRadius: "4px",
+                  boxShadow:
+                    "0 0 28px color-mix(in srgb, var(--violet-soft) 18%, transparent)",
                 }}
               >
                 read full bio →
               </Link>
-              <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+              <span
+                className="font-mono text-[12px] flex items-center gap-2"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                <span
+                  className="inline-block w-[4px] h-[4px] rounded-full"
+                  style={{ background: "var(--amber-bright)" }}
+                />
                 approx. 4 min read
               </span>
             </div>
@@ -169,26 +203,28 @@ export default async function HomePage() {
 
           {/* RIGHT — rendered README */}
           <aside
-            className="flex flex-col gap-10 pl-6"
-            style={{ borderLeft: "1px solid var(--gray-800)" }}
+            className="flex flex-col gap-10 pl-7"
+            style={{
+              borderLeft: "2px solid color-mix(in srgb, var(--violet-mid) 50%, var(--gray-800))",
+            }}
           >
             {/* profile */}
             <section>
-              <h3 className="font-mono text-[14px] mb-3 flex items-baseline gap-2">
+              <h3 className="font-mono text-[16px] mb-4 flex items-baseline gap-2">
                 <span style={{ color: "var(--violet-soft)" }}>##</span>
                 <span style={{ color: "var(--text-primary)" }}>profile</span>
               </h3>
-              <dl className="flex flex-col gap-[6px] font-mono text-[12px]">
+              <dl className="flex flex-col gap-[10px] font-mono text-[14px]">
                 {[
                   ["identity",    <>Computing science · UAlberta</>],
-                  ["focus",       <>AI + systems engineering</>],
+                  ["focus",       <><span style={{ color: "var(--amber-bright)" }}>AI</span> + <span style={{ color: "var(--green-bright)" }}>systems</span> engineering</>],
                   ["year",        <>2nd · co-op stream</>],
-                  ["graduating",  <>2028</>],
+                  ["graduating",  <span style={{ color: "var(--green-bright)" }}>2028</span>],
                   [
                     "status",
-                    <span className="inline-flex items-center gap-[6px]">
+                    <span className="inline-flex items-center gap-[8px]" style={{ color: "var(--green-bright)" }}>
                       <span
-                        className="w-[6px] h-[6px] rounded-full inline-block"
+                        className="w-[7px] h-[7px] rounded-full inline-block"
                         style={{
                           background: "var(--green-mid)",
                           animation: "pulse-dot 2.5s ease-in-out infinite",
@@ -199,15 +235,15 @@ export default async function HomePage() {
                   ],
                   ["location",    <>Edmonton, AB</>],
                 ].map(([k, v], i) => (
-                  <div key={i} className="grid grid-cols-[110px_1fr] items-baseline gap-2">
+                  <div key={i} className="grid grid-cols-[120px_1fr] items-baseline gap-2">
                     <dt
-                      className="tracking-[0.08em] uppercase text-[11px]"
-                      style={{ color: "var(--text-muted)" }}
+                      className="tracking-[0.1em] uppercase text-[12px]"
+                      style={{ color: "var(--violet-soft)" }}
                     >
                       {k}
                     </dt>
                     <dd style={{ color: "var(--text-primary)" }}>
-                      <span style={{ color: "var(--text-muted)" }}>→ </span>
+                      <span style={{ color: "var(--violet-soft)" }}>→ </span>
                       {v}
                     </dd>
                   </div>
@@ -217,11 +253,11 @@ export default async function HomePage() {
 
             {/* stack */}
             <section>
-              <h3 className="font-mono text-[14px] mb-3 flex items-baseline gap-2">
+              <h3 className="font-mono text-[16px] mb-4 flex items-baseline gap-2">
                 <span style={{ color: "var(--violet-soft)" }}>##</span>
                 <span style={{ color: "var(--text-primary)" }}>stack</span>
               </h3>
-              <ul className="flex flex-col gap-[6px] font-mono text-[12px]">
+              <ul className="flex flex-col gap-[10px] font-mono text-[14px]">
                 {[
                   ["languages", ["python", "go", "c++", "typescript", "rust", "c"]],
                   ["ml / ai",   ["pytorch", "langchain", "langgraph", "mcp", "huggingface", "ollama"]],
@@ -230,10 +266,10 @@ export default async function HomePage() {
                 ].map(([label, items]) => (
                   <li
                     key={label as string}
-                    className="grid grid-cols-[110px_1fr] items-baseline gap-2"
+                    className="grid grid-cols-[120px_1fr] items-baseline gap-2"
                   >
-                    <span style={{ color: "var(--amber-bright)" }}>- {label}</span>
-                    <span style={{ color: "var(--text-secondary)" }}>
+                    <span style={{ color: "var(--amber-bright)" }} className="font-medium">- {label}</span>
+                    <span style={{ color: "var(--text-primary)" }}>
                       {(items as string[]).join(", ")}
                     </span>
                   </li>
@@ -243,23 +279,23 @@ export default async function HomePage() {
 
             {/* timeline */}
             <section>
-              <h3 className="font-mono text-[14px] mb-3 flex items-baseline gap-2">
+              <h3 className="font-mono text-[16px] mb-4 flex items-baseline gap-2">
                 <span style={{ color: "var(--violet-soft)" }}>##</span>
                 <span style={{ color: "var(--text-primary)" }}>timeline</span>
               </h3>
-              <ul className="flex flex-col gap-[8px] font-mono text-[12px]">
+              <ul className="flex flex-col gap-[10px] font-mono text-[14px]">
                 {[
                   { year: "2025 →", role: "project lead · undergraduate ai society", current: true },
                   { year: "2025",   role: "teaching assistant · cmput 274" },
                 ].map((e, i) => (
-                  <li key={i} className="grid grid-cols-[80px_1fr] items-baseline gap-2">
-                    <span style={{ color: e.current ? "var(--green-bright)" : "var(--text-muted)" }}>
+                  <li key={i} className="grid grid-cols-[90px_1fr] items-baseline gap-2">
+                    <span style={{ color: e.current ? "var(--green-bright)" : "var(--amber-bright)" }} className="font-medium">
                       {e.year}
                     </span>
                     <span style={{ color: "var(--text-primary)" }}>
                       {e.role}
                       {e.current && (
-                        <span className="ml-2" style={{ color: "var(--green-bright)" }}>
+                        <span className="ml-2 font-medium" style={{ color: "var(--green-bright)" }}>
                           [current]
                         </span>
                       )}
@@ -281,40 +317,52 @@ export default async function HomePage() {
         style={{ background: "var(--bg-base)" }}
       >
         <SectionKicker label="WORK" meta="selected.md" />
-        <div className="max-w-[1200px] mx-auto">
-          <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
+        <div className="max-w-[1320px] mx-auto">
+          <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
             <div>
               <h2
-                className="text-[26px] font-medium leading-[1.25] mt-1"
+                className="text-[36px] lg:text-[42px] font-medium leading-[1.15] tracking-[-0.018em] mt-1"
                 style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
               >
-                Selected projects
+                Selected{" "}
+                <span style={{ color: "var(--violet-pale)" }}>projects</span>
               </h2>
+              <p
+                className="mt-4 text-[16px] max-w-[520px]"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Four picks I&apos;d bring up in an interview — shipping, research, and
+                things I built end-to-end.
+              </p>
             </div>
             <Link
               href="/work"
-              className="font-mono text-[12px] transition-colors duration-150 hover:text-[var(--text-primary)]"
-              style={{ color: "var(--text-muted)" }}
+              className="font-mono text-[13px] transition-colors duration-150 inline-flex items-center gap-2"
+              style={{ color: "var(--violet-soft)" }}
             >
-              view all →
+              view all
+              <span style={{ color: "var(--amber-bright)" }}>→</span>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
             {bestProjects.slice(0, 4).map((project, i) => (
               <ProjectMediaCard key={project.id} project={project} index={i} />
             ))}
           </div>
 
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center mt-14">
             <Link
               href="/work"
-              className="font-mono text-[13px] px-5 py-[10px] transition-all duration-200 hover:-translate-y-[1px]"
+              className="font-mono text-[14px] px-6 py-[12px] transition-all duration-200 hover:-translate-y-[1px]"
               style={{
-                border: "1px solid var(--violet-mid)",
+                border: "1px solid var(--violet-soft)",
                 color: "var(--violet-pale)",
-                background: "color-mix(in srgb, var(--violet-dim) 30%, transparent)",
+                background:
+                  "color-mix(in srgb, var(--violet-dim) 45%, transparent)",
                 borderRadius: "4px",
+                boxShadow:
+                  "0 0 28px color-mix(in srgb, var(--violet-soft) 18%, transparent)",
               }}
             >
               view all projects →
@@ -332,20 +380,30 @@ export default async function HomePage() {
         style={{ background: "var(--bg-base)" }}
       >
         <SectionKicker label="CONTACT" meta="reach.md" />
-        <div className="max-w-[860px] mx-auto flex flex-col items-center text-center">
+        <div className="max-w-[960px] mx-auto flex flex-col items-center text-center">
           <h2
-            className="text-[38px] lg:text-[46px] leading-[1.1] font-medium tracking-[-0.015em] mb-12"
+            className="text-[42px] lg:text-[54px] leading-[1.08] font-medium tracking-[-0.02em] mb-14"
             style={{
               color: "var(--text-primary)",
               fontFamily: "var(--font-body)",
             }}
           >
             How to reach me, in{" "}
-            <span style={{ color: "var(--violet-pale)" }}>one page</span>.
+            <span
+              style={{
+                color: "var(--violet-pale)",
+                background:
+                  "linear-gradient(to top, color-mix(in srgb, var(--violet-mid) 30%, transparent) 35%, transparent 35%)",
+                padding: "0 6px",
+              }}
+            >
+              one page
+            </span>
+            .
           </h2>
 
           <div className="w-full flex flex-col items-stretch">
-            <h3 className="font-mono text-[13px] flex items-baseline justify-center gap-2 mb-8">
+            <h3 className="font-mono text-[15px] flex items-baseline justify-center gap-2 mb-10">
               <span style={{ color: "var(--violet-soft)" }}>##</span>
               <span style={{ color: "var(--text-primary)" }}>channels</span>
             </h3>
@@ -387,28 +445,28 @@ export default async function HomePage() {
                   href={href}
                   target={ext ? "_blank" : undefined}
                   rel={ext ? "noreferrer noopener" : undefined}
-                  className="group grid gap-6 py-8 text-left transition-colors duration-200"
+                  className="group grid gap-6 py-9 text-left transition-colors duration-200"
                   style={{
-                    gridTemplateColumns: "50px 1fr 40px",
+                    gridTemplateColumns: "60px 1fr 50px",
                     borderBottom: "1px solid var(--gray-800)",
                   }}
                 >
                   <span
-                    className="font-mono text-[11px] tracking-[0.2em] uppercase pt-[6px]"
-                    style={{ color: "var(--violet-soft)" }}
+                    className="font-mono text-[13px] tracking-[0.2em] uppercase pt-[8px] font-medium"
+                    style={{ color: "var(--amber-bright)" }}
                   >
                     {n}
                   </span>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-baseline gap-4 flex-wrap">
                       <span
-                        className="font-mono text-[10.5px] tracking-[0.2em] uppercase"
-                        style={{ color: "var(--text-muted)" }}
+                        className="font-mono text-[12px] tracking-[0.22em] uppercase font-medium"
+                        style={{ color: "var(--violet-soft)" }}
                       >
                         {label}
                       </span>
                       <span
-                        className="text-[22px] lg:text-[26px] leading-[1.1] tracking-[-0.01em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                        className="text-[26px] lg:text-[32px] leading-[1.1] tracking-[-0.012em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
                         style={{
                           color: "var(--text-primary)",
                           fontFamily: "var(--font-body)",
@@ -418,14 +476,14 @@ export default async function HomePage() {
                       </span>
                     </div>
                     <p
-                      className="text-[14px] leading-[1.65] max-w-[560px]"
+                      className="text-[16px] leading-[1.65] max-w-[620px]"
                       style={{ color: "var(--text-secondary)" }}
                     >
                       {blurb}
                     </p>
                   </div>
                   <span
-                    className="font-mono text-[18px] pt-[6px] transition-transform duration-200 group-hover:translate-x-[3px]"
+                    className="font-mono text-[22px] pt-[8px] transition-transform duration-200 group-hover:translate-x-[4px]"
                     style={{ color: "var(--violet-soft)" }}
                   >
                     {ext ? "↗" : "→"}
@@ -437,30 +495,30 @@ export default async function HomePage() {
               <CopyHandle
                 value="sashreek"
                 copiedLabel="copied to clipboard"
-                className="group grid gap-6 py-8 w-full text-left"
+                className="group grid gap-6 py-9 w-full text-left"
                 style={{
-                  gridTemplateColumns: "50px 1fr 40px",
+                  gridTemplateColumns: "60px 1fr 50px",
                   background: "transparent",
                   border: "none",
                   borderBottom: "1px solid var(--gray-800)",
                 }}
               >
                 <span
-                  className="font-mono text-[11px] tracking-[0.2em] uppercase pt-[6px]"
-                  style={{ color: "var(--violet-soft)" }}
+                  className="font-mono text-[13px] tracking-[0.2em] uppercase pt-[8px] font-medium"
+                  style={{ color: "var(--amber-bright)" }}
                 >
                   04
                 </span>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-baseline gap-4 flex-wrap">
                     <span
-                      className="font-mono text-[10.5px] tracking-[0.2em] uppercase"
-                      style={{ color: "var(--text-muted)" }}
+                      className="font-mono text-[12px] tracking-[0.22em] uppercase font-medium"
+                      style={{ color: "var(--violet-soft)" }}
                     >
                       discord
                     </span>
                     <span
-                      className="text-[22px] lg:text-[26px] leading-[1.1] tracking-[-0.01em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                      className="text-[26px] lg:text-[32px] leading-[1.1] tracking-[-0.012em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
                       style={{
                         color: "var(--text-primary)",
                         fontFamily: "var(--font-body)",
@@ -470,7 +528,7 @@ export default async function HomePage() {
                     </span>
                   </div>
                   <p
-                    className="text-[14px] leading-[1.65] max-w-[560px]"
+                    className="text-[16px] leading-[1.65] max-w-[620px]"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     Quick DMs. Click the handle to copy — Discord has no
@@ -478,7 +536,7 @@ export default async function HomePage() {
                   </p>
                 </div>
                 <span
-                  className="font-mono text-[18px] pt-[6px]"
+                  className="font-mono text-[22px] pt-[8px]"
                   style={{ color: "var(--violet-soft)" }}
                 >
                   ⧉
