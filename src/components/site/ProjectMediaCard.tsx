@@ -108,52 +108,14 @@ export default function ProjectMediaCard({
       <MediaFrame project={p} index={index} />
 
       <div className="flex flex-col gap-4 p-6">
-        <div className="flex items-center gap-3 flex-wrap">
-          {p.year && (
-            <span
-              className="font-mono text-[12px] tracking-[0.1em] uppercase font-medium"
-              style={{ color: "var(--amber-bright)" }}
-            >
-              {p.year}
-            </span>
-          )}
-          {p.status && (
-            <>
-              <span
-                className="inline-block w-[3px] h-[3px] rounded-full"
-                style={{ background: "var(--gray-600)" }}
-              />
-              <span
-                className="font-mono text-[11px] tracking-[0.12em] uppercase inline-flex items-center gap-[6px]"
-                style={{
-                  color:
-                    p.status === "active"
-                      ? "var(--green-bright)"
-                      : p.status === "shipped"
-                      ? "var(--violet-soft)"
-                      : "var(--amber-bright)",
-                }}
-              >
-                <span
-                  className="w-[6px] h-[6px] rounded-full inline-block"
-                  style={{
-                    background:
-                      p.status === "active"
-                        ? "var(--green-mid)"
-                        : p.status === "shipped"
-                        ? "var(--violet-mid)"
-                        : "var(--amber-mid)",
-                    animation:
-                      p.status === "active"
-                        ? "pulse-dot 2.5s ease-in-out infinite"
-                        : undefined,
-                  }}
-                />
-                {p.status}
-              </span>
-            </>
-          )}
-        </div>
+        {p.year && (
+          <span
+            className="font-mono text-[12px] tracking-[0.1em] uppercase font-medium"
+            style={{ color: "var(--amber-bright)" }}
+          >
+            {p.year}
+          </span>
+        )}
 
         {/* Title */}
         <h3
