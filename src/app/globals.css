@@ -1213,6 +1213,40 @@
 }
 .blog-post-body blockquote p { margin-bottom: 10px; }
 .blog-post-body blockquote p:last-child { margin-bottom: 0; }
+
+/* The Tiptap editor stores a "callout" pattern as <blockquote><h1>
+   <strong>LABEL</strong><br>body…</h1></blockquote>. Style that case as a
+   proper card with an amber label, instead of letting the h1 inherit the
+   default huge italic-blockquote look. */
+.blog-post-body blockquote:has(> h1) {
+  border: 1px solid color-mix(in srgb, var(--violet-mid) 38%, var(--gray-800));
+  border-left-width: 3px;
+  padding: 20px 24px;
+  background: color-mix(in srgb, var(--violet-mid) 6%, transparent);
+  font-style: normal;
+  border-radius: 3px;
+}
+.blog-post-body blockquote > h1 {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.65;
+  font-weight: 400;
+  font-style: normal;
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.blog-post-body blockquote > h1 > strong:first-child {
+  display: block;
+  color: var(--amber-bright);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-style: normal;
+  margin-bottom: 12px;
+}
 .blog-post-body blockquote:has(> p > strong:first-child) {
   border: 1px solid color-mix(in srgb, var(--violet-mid) 40%, var(--gray-800));
   border-left-width: 2px;
@@ -1234,14 +1268,15 @@
 .blog-post-body ul,
 .blog-post-body ol {
   margin: 0 0 22px 0;
-  padding-left: 20px;
+  padding-left: 22px;
 }
 .blog-post-body ul li,
 .blog-post-body ol li {
-  margin-bottom: 6px;
-  color: var(--text-secondary);
+  margin-bottom: 8px;
+  color: var(--text-primary);
 }
-.blog-post-body ul li::marker { color: var(--violet-soft); }
+.blog-post-body ul li::marker,
+.blog-post-body ol li::marker { color: var(--amber-bright); font-weight: 600; }
 /* Inline (non-figure) images fall back to a simple bordered block. */
 .blog-post-body > img,
 .blog-post-body p > img {
