@@ -750,7 +750,7 @@
 .blog-post-body p { margin-bottom: 24px; }
 .blog-post-body p:first-of-type::first-line { color: var(--violet-pale); }
 .blog-post-body strong { color: var(--text-primary); font-weight: 600; }
-.blog-post-body em { color: var(--text-secondary); font-style: italic; }
+.blog-post-body em { color: var(--text-primary); font-style: italic; }
 .blog-post-body a {
   color: var(--violet-soft);
   text-decoration: underline;
@@ -1202,11 +1202,17 @@
 
 .blog-post-body blockquote {
   border-left: 2px solid var(--violet-mid);
-  padding: 4px 0 4px 20px;
-  margin: 24px 0;
-  color: var(--text-secondary);
+  padding: 6px 0 6px 22px;
+  margin: 28px 0;
+  color: var(--text-primary);
   font-style: italic;
 }
+.blog-post-body blockquote em,
+.blog-post-body blockquote strong {
+  color: var(--text-primary);
+}
+.blog-post-body blockquote p { margin-bottom: 10px; }
+.blog-post-body blockquote p:last-child { margin-bottom: 0; }
 .blog-post-body blockquote:has(> p > strong:first-child) {
   border: 1px solid color-mix(in srgb, var(--violet-mid) 40%, var(--gray-800));
   border-left-width: 2px;
@@ -1217,12 +1223,12 @@
 }
 .blog-post-body blockquote:has(> p > strong:first-child) > p > strong:first-child {
   display: block;
-  color: var(--violet-soft);
-  font-size: 10px;
+  color: var(--amber-bright);
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  margin-bottom: 10px;
-  font-weight: 500;
+  margin-bottom: 12px;
+  font-weight: 600;
   font-style: normal;
 }
 .blog-post-body ul,
