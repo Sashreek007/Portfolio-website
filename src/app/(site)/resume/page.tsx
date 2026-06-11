@@ -30,8 +30,9 @@ export default function ResumePage() {
         }}
       >
         <iframe
-          src="/Sashreek Addanki.pdf"
+          src="/Sashreek Addanki.pdf#toolbar=0&navpanes=0"
           className="w-full h-full border-0"
+          style={{ colorScheme: "dark" }}
           title="Sashreek Addanki — Resume"
         />
       </div>

@@ -29,16 +29,10 @@ export default function WorkClient({ projects }: { projects: Project[] }) {
           <button
             key={key}
             onClick={() => setActive(key)}
-            className="font-mono text-[12px] px-4 py-[6px] transition-all duration-200"
-            style={{
-              color: active === key ? "var(--text-primary)" : "var(--text-muted)",
-              border: `1px solid ${active === key ? "color-mix(in srgb, var(--violet-soft) 60%, transparent)" : "var(--gray-800)"}`,
-              borderRadius: "4px",
-              background:
-                active === key
-                  ? "color-mix(in srgb, var(--violet-dim) 15%, transparent)"
-                  : "transparent",
-            }}
+            className={`${active === key ? "pill-primary" : "glass-pill"} font-mono text-[12px] px-4 py-[7px] cursor-pointer`}
+            style={
+              active === key ? undefined : { color: "var(--text-muted)" }
+            }
           >
             {label}
           </button>

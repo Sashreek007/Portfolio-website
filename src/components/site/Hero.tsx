@@ -24,7 +24,7 @@ export default function Hero() {
           <h1
             className="fade-up font-mono font-medium"
             style={{
-              fontSize: "clamp(56px, 11vw, 172px)",
+              fontSize: "clamp(56px, 10vw, 150px)",
               lineHeight: "0.95",
               letterSpacing: "-0.05em",
               color: "var(--text-primary)",
@@ -52,7 +52,7 @@ export default function Hero() {
             <span>ualberta</span>
             <span
               className="inline-block w-[5px] h-[5px] rounded-full"
-              style={{ background: "var(--amber-bright)" }}
+              style={{ background: "var(--gray-600)" }}
             />
             <span style={{ color: "var(--amber-bright)" }}>ai</span>
             <span style={{ color: "var(--gray-600)" }}>+</span>
@@ -69,32 +69,22 @@ export default function Hero() {
             {" "}before I build on top of it.
           </p>
 
-          {/* CTA buttons */}
+          {/* CTA buttons — one primary action, one secondary. Everything
+              else (about, blog, socials) already lives in the nav/contact. */}
           <div className="fade-up fade-up-4 flex flex-wrap gap-3 justify-center lg:justify-start">
-            {[
-              { href: "#about",  label: "about", accent: "violet" },
-              { href: "#work",   label: "projects", accent: "violet" },
-              { href: "/blog",   label: "blog ↗", accent: "amber" },
-              { href: "/resume", label: "resume", accent: "violet" },
-              { href: "https://github.com/Sashreek007", label: "github ↗", ext: true, accent: "amber" },
-              { href: "https://www.linkedin.com/in/sashreek-addanki-121471257/", label: "linkedin ↗", ext: true, accent: "amber" },
-            ].map(({ href, label, ext, accent }) => (
-              <a
-                key={href}
-                href={href}
-                target={ext ? "_blank" : undefined}
-                rel={ext ? "noreferrer noopener" : undefined}
-                className="glass-pill font-mono text-[14px] px-[20px] py-[11px]"
-                style={{
-                  color:
-                    accent === "amber"
-                      ? "var(--amber-bright)"
-                      : "var(--violet-pale)",
-                }}
-              >
-                {label}
-              </a>
-            ))}
+            <a
+              href="#work"
+              className="pill-primary font-mono text-[14px] px-[22px] py-[11px]"
+            >
+              view projects <span aria-hidden>→</span>
+            </a>
+            <a
+              href="/resume"
+              className="glass-pill font-mono text-[14px] px-[22px] py-[11px]"
+              style={{ color: "var(--text-primary)" }}
+            >
+              resume
+            </a>
           </div>
         </div>
 
@@ -102,7 +92,7 @@ export default function Hero() {
         <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
           <WorkspaceAnimation
             className="w-full h-auto block"
-            style={{ aspectRatio: "600 / 800" }}
+            style={{ aspectRatio: "600 / 520" }}
           />
         </div>
       </div>

@@ -60,17 +60,16 @@ function MediaFrame({
               }}
             />
           ))}
-          <div className="absolute inset-0 flex items-center justify-center">
+          {/* Typographic cover — oversized index numeral, bottom-left */}
+          <div className="absolute inset-0 flex items-end justify-between p-5">
+            <span className="media-cover-num" aria-hidden>
+              {String(index + 1).padStart(2, "0")}
+            </span>
             <span
-              className="font-mono text-[11px] tracking-[0.18em] uppercase px-3 py-[6px]"
-              style={{
-                color: "var(--text-muted)",
-                border: "1px solid var(--gray-800)",
-                borderRadius: "999px",
-                background: "color-mix(in srgb, var(--bg-base) 70%, transparent)",
-              }}
+              className="font-mono text-[11px] tracking-[0.18em] uppercase pb-2"
+              style={{ color: "var(--text-muted)" }}
             >
-              demo · reel {String(index + 1).padStart(2, "0")}
+              case file
             </span>
           </div>
           <div
@@ -123,18 +122,10 @@ export default function ProjectMediaCard({
           {p.name}
         </h3>
 
-        <div
-          className="h-[2px] w-12"
-          style={{
-            background:
-              "linear-gradient(to right, var(--violet-soft), var(--amber-bright))",
-          }}
-        />
-
-        {/* Description */}
+        {/* Description — secondary so the title stays the loudest element */}
         <p
           className="text-[15px] leading-[1.6]"
-          style={{ color: "var(--text-primary)" }}
+          style={{ color: "var(--text-secondary)" }}
         >
           {p.description}
         </p>
@@ -155,8 +146,7 @@ export default function ProjectMediaCard({
           className="font-mono text-[13px] mt-2 inline-flex items-center gap-2 transition-all duration-200 group-hover:translate-x-[3px]"
           style={{ color: "var(--violet-soft)" }}
         >
-          open project
-          <span style={{ color: "var(--amber-bright)" }}>→</span>
+          open project <span aria-hidden>→</span>
         </span>
       </div>
     </Link>

@@ -20,16 +20,26 @@ export default function SiteLayout({
           borderTop: "1px solid var(--gray-800)",
         }}
       >
-        <span>© 2026 Sashreek Addanki</span>
-        <span
-          style={{ color: "var(--text-muted)" }}
-          className="flex items-center gap-2"
-        >
-          <span
-            className="w-[5px] h-[5px] rounded-full inline-block"
-            style={{ background: "var(--green-mid)" }}
-          />
-          edmonton, ab
+        <span>
+          © 2026 Sashreek Addanki ·{" "}
+          <a
+            href="mailto:sashreek.addanki@gmail.com"
+            className="transition-colors duration-150 hover:text-[var(--violet-soft)]"
+          >
+            sashreek.addanki@gmail.com
+          </a>
+        </span>
+        <span className="flex items-center gap-4">
+          <span style={{ color: "var(--gray-600)" }}>
+            set in Geist Mono &amp; Syne
+          </span>
+          <span className="flex items-center gap-2">
+            <span
+              className="w-[5px] h-[5px] rounded-full inline-block"
+              style={{ background: "var(--green-mid)" }}
+            />
+            edmonton, ab
+          </span>
         </span>
       </footer>
     </>

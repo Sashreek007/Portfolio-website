@@ -2,10 +2,10 @@ import Link from "next/link";
 import { projectHref } from "@/lib/projects";
 import type { Project } from "@/components/site/ProjectCard";
 
-function MediaFrame({ index }: { index: number }) {
+function MediaFrame({ project: p, index }: { project: Project; index: number }) {
   return (
     <div
-      className="relative w-full overflow-hidden"
+      className="media-frame relative w-full overflow-hidden"
       style={{
         aspectRatio: "16 / 10",
         background:
@@ -14,48 +14,67 @@ function MediaFrame({ index }: { index: number }) {
         borderRadius: "6px",
       }}
     >
-      {[
-        { top: 10, left: 10 },
-        { top: 10, right: 10 },
-        { bottom: 10, left: 10 },
-        { bottom: 10, right: 10 },
-      ].map((pos, i) => (
-        <span
-          key={i}
-          className="absolute w-3 h-3"
-          style={{
-            ...pos,
-            borderTop: pos.top !== undefined ? "1px solid var(--gray-600)" : undefined,
-            borderBottom: pos.bottom !== undefined ? "1px solid var(--gray-600)" : undefined,
-            borderLeft: pos.left !== undefined ? "1px solid var(--gray-600)" : undefined,
-            borderRight: pos.right !== undefined ? "1px solid var(--gray-600)" : undefined,
-          }}
+      {p.video_url ? (
+        <video
+          src={p.video_url}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
         />
-      ))}
+      ) : p.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={p.image_url}
+          alt={p.name}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : (
+        <>
+          {[
+            { top: 10, left: 10 },
+            { top: 10, right: 10 },
+            { bottom: 10, left: 10 },
+            { bottom: 10, right: 10 },
+          ].map((pos, i) => (
+            <span
+              key={i}
+              className="absolute w-3 h-3"
+              style={{
+                ...pos,
+                borderTop: pos.top !== undefined ? "1px solid var(--gray-600)" : undefined,
+                borderBottom: pos.bottom !== undefined ? "1px solid var(--gray-600)" : undefined,
+                borderLeft: pos.left !== undefined ? "1px solid var(--gray-600)" : undefined,
+                borderRight: pos.right !== undefined ? "1px solid var(--gray-600)" : undefined,
+              }}
+            />
+          ))}
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className="font-mono text-[11px] tracking-[0.18em] uppercase px-3 py-[6px]"
-          style={{
-            color: "var(--text-muted)",
-            border: "1px solid var(--gray-800)",
-            borderRadius: "999px",
-            background: "color-mix(in srgb, var(--bg-base) 70%, transparent)",
-          }}
-        >
-          demo · reel {String(index + 1).padStart(2, "0")}
-        </div>
-      </div>
+          {/* Typographic cover — matches the home page cards */}
+          <div className="absolute inset-0 flex items-end justify-between p-5">
+            <span className="media-cover-num" aria-hidden>
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span
+              className="font-mono text-[11px] tracking-[0.18em] uppercase pb-2"
+              style={{ color: "var(--text-muted)" }}
+            >
+              case file
+            </span>
+          </div>
 
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.35]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--gray-800) 1px, transparent 1px), linear-gradient(90deg, var(--gray-800) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-          mixBlendMode: "screen",
-        }}
-      />
+          <div
+            className="media-grid absolute inset-0 pointer-events-none opacity-[0.35]"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--gray-800) 1px, transparent 1px), linear-gradient(90deg, var(--gray-800) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+              mixBlendMode: "screen",
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -78,7 +97,7 @@ export default function FeatureStrip({
       }}
     >
       <div style={{ direction: "ltr" }}>
-        <MediaFrame index={index} />
+        <MediaFrame project={p} index={index} />
       </div>
 
       <div className="flex flex-col gap-5" style={{ direction: "ltr" }}>
@@ -87,7 +106,7 @@ export default function FeatureStrip({
             project {String(index + 1).padStart(2, "0")}
           </span>
           <span style={{ color: "var(--gray-800)" }}>/</span>
-          <span style={{ color: "var(--green-bright)" }}>{p.year ?? "—"}</span>
+          <span style={{ color: "var(--amber-bright)" }}>{p.year ?? "—"}</span>
         </div>
 
         <h3

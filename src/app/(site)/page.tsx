@@ -161,13 +161,13 @@ export default async function HomePage() {
                 before FastAPI.{" "}
                 <span style={{ color: "var(--violet-pale)" }}>Induction proofs</span>{" "}
                 before statistical packages.{" "}
-                <span style={{ color: "var(--amber-bright)" }}>RISC-V</span>{" "}
+                <span style={{ color: "var(--violet-pale)" }}>RISC-V</span>{" "}
                 before operating systems. Using something I don&apos;t understand
                 makes me uncomfortable.
               </p>
               <p style={{ color: "var(--text-muted)" }}>
                 Currently in my second year, co-op stream, graduating{" "}
-                <span style={{ color: "var(--green-bright)" }}>2028</span>. Each project
+                <span style={{ color: "var(--amber-bright)" }}>2028</span>. Each project
                 is a deliberate rung — not a random one.
               </p>
             </div>
@@ -178,18 +178,9 @@ export default async function HomePage() {
             >
               <Link
                 href="/about"
-                className="font-mono text-[14px] px-5 py-[12px] transition-all hover:-translate-y-[1px]"
-                style={{
-                  border: "1px solid var(--violet-soft)",
-                  color: "var(--violet-pale)",
-                  background:
-                    "color-mix(in srgb, var(--violet-dim) 45%, transparent)",
-                  borderRadius: "4px",
-                  boxShadow:
-                    "0 0 28px color-mix(in srgb, var(--violet-soft) 18%, transparent)",
-                }}
+                className="pill-primary font-mono text-[14px] px-[22px] py-[11px]"
               >
-                read full bio →
+                read full bio <span aria-hidden>→</span>
               </Link>
               <span
                 className="font-mono text-[12px] flex items-center gap-2"
@@ -197,7 +188,7 @@ export default async function HomePage() {
               >
                 <span
                   className="inline-block w-[4px] h-[4px] rounded-full"
-                  style={{ background: "var(--amber-bright)" }}
+                  style={{ background: "var(--gray-600)" }}
                 />
                 approx. 4 min read
               </span>
@@ -221,9 +212,9 @@ export default async function HomePage() {
               <dl className="flex flex-col gap-[10px] font-mono text-[14px]">
                 {[
                   ["identity",    <>Computing science · UAlberta</>],
-                  ["focus",       <><span style={{ color: "var(--amber-bright)" }}>AI</span> + <span style={{ color: "var(--green-bright)" }}>systems</span> engineering</>],
+                  ["focus",       <>AI + systems engineering</>],
                   ["year",        <>2nd · co-op stream</>],
-                  ["graduating",  <span style={{ color: "var(--green-bright)" }}>2028</span>],
+                  ["graduating",  <>2028</>],
                   [
                     "status",
                     <span className="inline-flex items-center gap-[8px]" style={{ color: "var(--green-bright)" }}>
@@ -242,14 +233,11 @@ export default async function HomePage() {
                   <div key={i} className="grid grid-cols-[120px_1fr] items-baseline gap-2">
                     <dt
                       className="tracking-[0.1em] uppercase text-[12px]"
-                      style={{ color: "var(--violet-soft)" }}
+                      style={{ color: "var(--text-muted)" }}
                     >
                       {k}
                     </dt>
-                    <dd style={{ color: "var(--text-primary)" }}>
-                      <span style={{ color: "var(--violet-soft)" }}>→ </span>
-                      {v}
-                    </dd>
+                    <dd style={{ color: "var(--text-primary)" }}>{v}</dd>
                   </div>
                 ))}
               </dl>
@@ -272,7 +260,12 @@ export default async function HomePage() {
                     key={label as string}
                     className="grid grid-cols-[120px_1fr] items-baseline gap-2"
                   >
-                    <span style={{ color: "var(--amber-bright)" }} className="font-medium">- {label}</span>
+                    <span
+                      style={{ color: "var(--text-muted)" }}
+                      className="tracking-[0.1em] uppercase text-[12px]"
+                    >
+                      {label}
+                    </span>
                     <span style={{ color: "var(--text-primary)" }}>
                       {(items as string[]).join(", ")}
                     </span>
@@ -293,7 +286,7 @@ export default async function HomePage() {
                   { year: "2025",   role: "teaching assistant · cmput 274" },
                 ].map((e, i) => (
                   <li key={i} className="grid grid-cols-[90px_1fr] items-baseline gap-2">
-                    <span style={{ color: e.current ? "var(--green-bright)" : "var(--amber-bright)" }} className="font-medium">
+                    <span style={{ color: "var(--text-muted)" }}>
                       {e.year}
                     </span>
                     <span style={{ color: "var(--text-primary)" }}>
@@ -341,11 +334,10 @@ export default async function HomePage() {
             </div>
             <Link
               href="/work"
-              className="font-mono text-[13px] transition-colors duration-150 inline-flex items-center gap-2"
+              className="font-mono text-[13px] transition-colors duration-150 inline-flex items-center gap-2 hover:text-[var(--violet-pale)]"
               style={{ color: "var(--violet-soft)" }}
             >
-              view all
-              <span style={{ color: "var(--amber-bright)" }}>→</span>
+              view all <span aria-hidden>→</span>
             </Link>
           </div>
 
@@ -364,18 +356,9 @@ export default async function HomePage() {
           <div className="flex justify-center mt-14">
             <Link
               href="/work"
-              className="font-mono text-[14px] px-6 py-[12px] transition-all duration-200 hover:-translate-y-[1px]"
-              style={{
-                border: "1px solid var(--violet-soft)",
-                color: "var(--violet-pale)",
-                background:
-                  "color-mix(in srgb, var(--violet-dim) 45%, transparent)",
-                borderRadius: "4px",
-                boxShadow:
-                  "0 0 28px color-mix(in srgb, var(--violet-soft) 18%, transparent)",
-              }}
+              className="pill-primary font-mono text-[14px] px-[24px] py-[12px]"
             >
-              view all projects →
+              view all projects <span aria-hidden>→</span>
             </Link>
           </div>
         </div>
@@ -390,7 +373,7 @@ export default async function HomePage() {
         style={{ background: "var(--bg-base)" }}
       >
         <SectionKicker label="CONTACT" meta="reach.md" />
-        <div className="max-w-[960px] mx-auto flex flex-col items-center text-center">
+        <div className="max-w-[960px] mx-auto flex flex-col">
           <h2
             className="reveal-child text-[42px] lg:text-[54px] leading-[1.08] font-medium tracking-[-0.02em] mb-14"
             style={{
@@ -399,22 +382,12 @@ export default async function HomePage() {
             }}
           >
             How to reach me, in{" "}
-            <span
-              style={{
-                color: "var(--violet-pale)",
-                background:
-                  "linear-gradient(to top, color-mix(in srgb, var(--violet-mid) 30%, transparent) 35%, transparent 35%)",
-                padding: "0 6px",
-              }}
-            >
-              one page
-            </span>
-            .
+            <span style={{ color: "var(--violet-pale)" }}>one page</span>.
           </h2>
 
           <div className="w-full flex flex-col items-stretch">
             <h3
-              className="reveal-child font-mono text-[15px] flex items-baseline justify-center gap-2 mb-10"
+              className="reveal-child font-mono text-[15px] flex items-baseline gap-2 mb-10"
               style={{ "--ri": 1 } as React.CSSProperties}
             >
               <span style={{ color: "var(--violet-soft)" }}>##</span>

@@ -86,8 +86,8 @@ export default async function BlogPage() {
           <span className="blog-marker-r">— sashreek addanki</span>
         </div>
         <h1 className="blog-masthead-h1">
-          sharing my{" "}
-          <span style={{ color: "var(--amber-bright)" }}>thoughts.</span>
+          notes from the{" "}
+          <span style={{ color: "var(--amber-bright)" }}>machine room.</span>
         </h1>
         <div
           className="blog-masthead-tag"

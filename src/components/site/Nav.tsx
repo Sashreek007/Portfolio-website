@@ -128,10 +128,10 @@ export default function Nav() {
       />
       <a
         href={logoHref}
-        className="font-mono text-[13px] font-medium tracking-[0.12em] uppercase"
-        style={{ color: "var(--text-muted)" }}
+        className="font-mono text-[13px] font-medium tracking-[0.12em] uppercase transition-colors duration-200 hover:text-[var(--violet-pale)]"
+        style={{ color: "var(--text-primary)" }}
       >
-        SA
+        SA<span style={{ color: "var(--violet-soft)" }}>.</span>
       </a>
 
       <nav ref={navRef} className="relative flex items-center gap-6">

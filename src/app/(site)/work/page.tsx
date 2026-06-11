@@ -14,7 +14,7 @@ export default async function WorkPage() {
         className="inline-flex items-center gap-2 font-mono text-[13px] mb-10 transition-colors duration-150"
         style={{ color: "var(--violet-soft)" }}
       >
-        <span style={{ color: "var(--amber-bright)" }}>←</span> home
+        <span aria-hidden>←</span> home
       </Link>
 
       {/* Header — editorial kicker to match home + about */}
@@ -42,7 +42,7 @@ export default async function WorkPage() {
         />
         <span
           className="font-mono text-[12px] tracking-[0.18em]"
-          style={{ color: "var(--amber-bright)" }}
+          style={{ color: "var(--text-muted)" }}
         >
           {String(projects.length).padStart(2, "0")} entries
         </span>
@@ -52,17 +52,7 @@ export default async function WorkPage() {
         className="text-[42px] lg:text-[58px] font-medium leading-[1.1] mb-5 tracking-[-0.02em] max-w-[840px]"
         style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
       >
-        <span
-          style={{
-            color: "var(--green-bright)",
-            background:
-              "linear-gradient(to top, color-mix(in srgb, var(--green-deep) 55%, transparent) 35%, transparent 35%)",
-            padding: "0 6px",
-          }}
-        >
-          Projects
-        </span>
-        .
+        Projects<span style={{ color: "var(--violet-soft)" }}>.</span>
       </h1>
       <p
         className="text-[18px] leading-[1.7] mb-14 max-w-[680px]"

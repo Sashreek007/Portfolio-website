@@ -4,8 +4,6 @@
 //
 // Composition (back → front):
 //   plant (left)  ·  laptop on stand with detailed Neovim editor (center)  ·  mug (right)
-//                       realistic mechanical keyboard (front)
-//                                                       gaming mouse (front-right)
 //
 // All animations are real. The editor cycles through a full vim sequence:
 //   1. INSERT — types out an agent-harness module character-by-character
@@ -14,9 +12,8 @@
 //   4. DELETE — the selection flashes red and the line collapses out
 //   5. NORMAL — editor rests with the tidied buffer before looping
 //
-// Other ambient bits: steam wisps rise from the mug, plant leaves sway, a
-// soft violet glow pulses behind the screen, mouse RGB and keyboard
-// underglow pulse gently.
+// Other ambient bits: steam wisps rise from the mug, plant leaves sway,
+// and a soft violet glow pulses behind the screen.
 
 import { useEffect, useRef, useState } from "react";
 
@@ -169,120 +166,6 @@ const BUFFERS: Buf[] = [
   { num: 5, name: ".env" },
 ];
 
-// ── KEYBOARD LAYOUT ──────────────────────────────────────────────────────
-// Each row is a list of key descriptors. `w` is in "U" units (1U = standard).
-// `g` is gap in U units (no key drawn). `l` is optional label text.
-// `accent` flags WASD/Esc highlights for theme color.
-type K = { w: number; g?: boolean; l?: string; accent?: "esc" | "highlight" | "mod" };
-const KB_ROWS: K[][] = [
-  // Function row
-  [
-    { w: 1, l: "esc", accent: "esc" },
-    { w: 1, g: true },
-    { w: 1, l: "F1" }, { w: 1, l: "F2" }, { w: 1, l: "F3" }, { w: 1, l: "F4" },
-    { w: 0.5, g: true },
-    { w: 1, l: "F5" }, { w: 1, l: "F6" }, { w: 1, l: "F7" }, { w: 1, l: "F8" },
-    { w: 0.5, g: true },
-    { w: 1, l: "F9" }, { w: 1, l: "F10" }, { w: 1, l: "F11" }, { w: 1, l: "F12" },
-  ],
-  // Number row
-  [
-    { w: 1, l: "`" }, { w: 1, l: "1" }, { w: 1, l: "2" }, { w: 1, l: "3" }, { w: 1, l: "4" },
-    { w: 1, l: "5" }, { w: 1, l: "6" }, { w: 1, l: "7" }, { w: 1, l: "8" }, { w: 1, l: "9" },
-    { w: 1, l: "0" }, { w: 1, l: "-" }, { w: 1, l: "=" },
-    { w: 2, l: "⌫", accent: "mod" },
-  ],
-  // QWERTY
-  [
-    { w: 1.5, l: "tab", accent: "mod" },
-    { w: 1, l: "Q" }, { w: 1, l: "W", accent: "highlight" }, { w: 1, l: "E" }, { w: 1, l: "R" },
-    { w: 1, l: "T" }, { w: 1, l: "Y" }, { w: 1, l: "U" }, { w: 1, l: "I" }, { w: 1, l: "O" },
-    { w: 1, l: "P" }, { w: 1, l: "[" }, { w: 1, l: "]" },
-    { w: 1.5, l: "\\" },
-  ],
-  // ASDF (home row)
-  [
-    { w: 1.75, l: "caps", accent: "mod" },
-    { w: 1, l: "A", accent: "highlight" }, { w: 1, l: "S", accent: "highlight" },
-    { w: 1, l: "D", accent: "highlight" }, { w: 1, l: "F" }, { w: 1, l: "G" },
-    { w: 1, l: "H" }, { w: 1, l: "J" }, { w: 1, l: "K" }, { w: 1, l: "L" },
-    { w: 1, l: ";" }, { w: 1, l: "'" },
-    { w: 2.25, l: "enter", accent: "mod" },
-  ],
-  // ZXCV
-  [
-    { w: 2.25, l: "shift", accent: "mod" },
-    { w: 1, l: "Z" }, { w: 1, l: "X" }, { w: 1, l: "C" }, { w: 1, l: "V" }, { w: 1, l: "B" },
-    { w: 1, l: "N" }, { w: 1, l: "M" }, { w: 1, l: "," }, { w: 1, l: "." }, { w: 1, l: "/" },
-    { w: 2.75, l: "shift", accent: "mod" },
-  ],
-  // Bottom modifiers
-  [
-    { w: 1.25, l: "ctrl", accent: "mod" },
-    { w: 1.25, l: "win",  accent: "mod" },
-    { w: 1.25, l: "alt",  accent: "mod" },
-    { w: 6.25, l: "" },                            // spacebar
-    { w: 1.25, l: "alt",  accent: "mod" },
-    { w: 1.25, l: "fn",   accent: "mod" },
-    { w: 1.25, l: "menu", accent: "mod" },
-    { w: 1.25, l: "ctrl", accent: "mod" },
-  ],
-];
-
-// Render one keyboard key
-function KeyCap({
-  x, y, wU, h, label, accent, U,
-}: {
-  x: number; y: number; wU: number; h: number; label?: string; accent?: K["accent"]; U: number;
-}) {
-  const w = wU * U - 2; // 2px combined gap
-  const baseColor = "#171715";
-  // Cap face color (top — what user sees)
-  const capColor =
-    accent === "esc"       ? "#7E1F1B" :
-    accent === "highlight" ? "#1F2020" :
-    accent === "mod"       ? "#1A1A18" :
-                             "#1F1F1D";
-  const capHighlight =
-    accent === "esc"       ? "#A02C28" :
-    accent === "highlight" ? "#3C3489" :
-                             "#2A2A28";
-  const labelColor =
-    accent === "esc"       ? "#FFC079" :
-    accent === "highlight" ? "#7F77DD" :
-                             "#5F5E5A";
-  return (
-    <g>
-      {/* Base shadow under key */}
-      <rect x={x} y={y + 1} width={w} height={h - 1} rx={2} fill="#0A0A09" />
-      {/* Side / chamfer (slightly larger, darker) */}
-      <rect x={x} y={y} width={w} height={h - 2} rx={2} fill={baseColor} />
-      {/* Cap top (inset, lighter) */}
-      <rect x={x + 1} y={y + 0.5} width={w - 2} height={h - 5} rx={1.5} fill={capColor} />
-      {/* Top-edge highlight */}
-      <rect x={x + 1.5} y={y + 1} width={w - 3} height={0.6} rx={0.3} fill={capHighlight} opacity="0.7" />
-      {/* Label */}
-      {label && w >= 13 && (
-        <text
-          x={x + w / 2}
-          y={y + h / 2 + 1.4}
-          fontSize={Math.min(5.5, w * 0.45)}
-          fontFamily="ui-monospace, monospace"
-          fill={labelColor}
-          textAnchor="middle"
-          opacity="0.95"
-        >
-          {label}
-        </text>
-      )}
-      {/* F/J home-row bumps */}
-      {(label === "F" || label === "J") && (
-        <rect x={x + w / 2 - 2} y={y + h - 4} width={4} height={0.8} rx={0.4} fill="#5F5E5A" opacity="0.9" />
-      )}
-    </g>
-  );
-}
-
 type Phase = "typing" | "normal" | "visual" | "delete" | "post" | "reset";
 type Mode  = "INSERT" | "NORMAL" | "V-LINE";
 
@@ -403,19 +286,6 @@ export default function WorkspaceAnimation({ className, style }: Props) {
   else if (lineHidden) cursorLineIdx = Math.max(0, DELETE_LINE_IDX - 1);
   const currentLineNumber = cursorLineIdx + 1;
 
-  // ── KEYBOARD GEOMETRY ──────────────────────────────────────────────
-  const KB_X = 105;
-  const KB_Y = 530;
-  const KB_W = 390;
-  const KB_PAD = 10;
-  const KB_INNER_W = KB_W - KB_PAD * 2;
-  // Compute U size from widest row
-  const maxU = Math.max(...KB_ROWS.map(r => r.reduce((s, k) => s + k.w, 0)));
-  const U = KB_INNER_W / maxU;
-  const KEY_H = U * 0.92;
-  const ROW_GAP = 2.5;
-  const KB_H = KB_PAD * 2 + KB_ROWS.length * KEY_H + (KB_ROWS.length - 1) * ROW_GAP;
-
   return (
     <div
       ref={wrapRef}
@@ -429,7 +299,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
       aria-hidden
     >
     <svg
-      viewBox="0 0 600 800"
+      viewBox="0 0 600 520"
       xmlns="http://www.w3.org/2000/svg"
       style={{
         display: "block",
@@ -462,42 +332,10 @@ export default function WorkspaceAnimation({ className, style }: Props) {
           <stop offset="0%" stopColor="#0E0E0C" />
           <stop offset="100%" stopColor="#161614" />
         </linearGradient>
-        <linearGradient id="ws-mug" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#E8A052" />
-          <stop offset="55%" stopColor="#C97A24" />
-          <stop offset="100%" stopColor="#7E4810" />
-        </linearGradient>
-        <linearGradient id="ws-pot" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#9A4F0E" />
-          <stop offset="50%" stopColor="#C97A24" />
-          <stop offset="100%" stopColor="#7E4810" />
-        </linearGradient>
-        <linearGradient id="ws-leaf" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#0E704D" />
-          <stop offset="55%" stopColor="#1D9E75" />
-          <stop offset="100%" stopColor="#5DCAA5" />
-        </linearGradient>
-        <linearGradient id="ws-mouse" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3A3A38" />
-          <stop offset="50%" stopColor="#1F1F1D" />
-          <stop offset="100%" stopColor="#0A0A09" />
-        </linearGradient>
-        <radialGradient id="ws-mouse-shine" cx="35%" cy="20%" r="50%">
-          <stop offset="0%" stopColor="#5F5E5A" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="#3A3A38" stopOpacity="0" />
-        </radialGradient>
         <linearGradient id="ws-stand" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#3A3A38" />
           <stop offset="100%" stopColor="#1A1A18" />
         </linearGradient>
-        <linearGradient id="ws-kb-body" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#28282A" />
-          <stop offset="100%" stopColor="#0E0E0C" />
-        </linearGradient>
-        <radialGradient id="ws-rgb" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor="var(--violet-soft)" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="var(--violet-soft)" stopOpacity="0" />
-        </radialGradient>
         <style>{`
           @keyframes ws-cursor { 0%,49%{opacity:1} 50%,100%{opacity:0} }
           @keyframes ws-steam-a {
@@ -521,9 +359,6 @@ export default function WorkspaceAnimation({ className, style }: Props) {
           @keyframes ws-leaf-sway   { 0%,100% { transform: rotate(0deg) } 50% { transform: rotate(2deg) } }
           @keyframes ws-leaf-sway-r { 0%,100% { transform: rotate(0deg) } 50% { transform: rotate(-2deg) } }
           @keyframes ws-glow-pulse  { 0%,100% { opacity: 0.85 } 50% { opacity: 1 } }
-          @keyframes ws-rgb-pulse   { 0%,100% { opacity: 0.55 } 50% { opacity: 1 } }
-          @keyframes ws-mouse-led   { 0%,75%,100% { opacity: 0.55 } 85% { opacity: 1 } }
-          @keyframes ws-kb-glow     { 0%,100% { opacity: 0.4 } 50% { opacity: 0.75 } }
         `}</style>
       </defs>
 
@@ -576,14 +411,14 @@ export default function WorkspaceAnimation({ className, style }: Props) {
 
     {/* ═══ NEOVIM EDITOR — HTML overlay, rendered OUTSIDE the SVG so that
         mobile Safari scales it reliably. Positioned by percentage to match
-        the laptop screen area (x=60..540, y=50..342 within the 600×800
-        viewBox → left 10%, top 6.25%, width 80%, aspect 480/292).
+        the laptop screen area (x=60..540, y=50..342 within the 600×520
+        viewBox → left 10%, top 9.615%, width 80%, aspect 480/292).
         Container queries size the font relative to the overlay width. */}
     <div
       style={{
         position: "absolute",
         left: "10%",
-        top: "6.25%",
+        top: "9.615%",
         width: "80%",
         aspectRatio: "480 / 292",
         borderRadius: "0.8cqi",
@@ -964,11 +799,11 @@ export default function WorkspaceAnimation({ className, style }: Props) {
       </div>
     </div>
 
-    {/* ═══ FRONT SVG LAYER — plant, mug, deskpad, keyboard, mouse.
-        Rendered after the editor overlay so the plant leaves sit in
-        front of the laptop screen the way the original design intended. */}
+    {/* ═══ FRONT SVG LAYER — plant + mug. Rendered after the editor
+        overlay so the plant leaves sit in front of the laptop screen
+        the way the original design intended. */}
     <svg
-      viewBox="0 0 600 800"
+      viewBox="0 0 600 520"
       xmlns="http://www.w3.org/2000/svg"
       style={{
         display: "block",
@@ -995,23 +830,6 @@ export default function WorkspaceAnimation({ className, style }: Props) {
           <stop offset="55%" stopColor="#C97A24" />
           <stop offset="100%" stopColor="#7E4810" />
         </linearGradient>
-        <linearGradient id="ws-mouse" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3A3A38" />
-          <stop offset="50%" stopColor="#1F1F1D" />
-          <stop offset="100%" stopColor="#0A0A09" />
-        </linearGradient>
-        <radialGradient id="ws-mouse-shine" cx="35%" cy="20%" r="50%">
-          <stop offset="0%" stopColor="#5F5E5A" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="#3A3A38" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="ws-kb-body" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#28282A" />
-          <stop offset="100%" stopColor="#0E0E0C" />
-        </linearGradient>
-        <radialGradient id="ws-rgb" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor="var(--violet-soft)" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="var(--violet-soft)" stopOpacity="0" />
-        </radialGradient>
       </defs>
 
       {/* ═══ PLANT (front-left, partially overlapping the laptop edge) ═══ */}
@@ -1083,118 +901,6 @@ export default function WorkspaceAnimation({ className, style }: Props) {
         <ellipse cx="535" cy="478" rx="34" ry="2.5" fill="#000" opacity="0.6" />
       </g>
 
-      {/* ═══ DESKPAD / DESK MAT (under keyboard + mouse) ═════════ */}
-      <g>
-        <rect x="65" y="490" width="540" height="220" rx="8" fill="#000" opacity="0.35" />
-        <rect x="60" y="485" width="535" height="218" rx="6" fill="#1B1B19" />
-        <rect x="62" y="486" width="531" height="1" rx="0.5" fill="#2C2C2A" opacity="0.55" />
-        <rect
-          x="64" y="489" width="527" height="210" rx="4"
-          fill="none"
-          stroke="#3A3A38" strokeWidth="0.6"
-          strokeDasharray="3 2"
-          opacity="0.55"
-        />
-        <g opacity="0.06" fill="#A8A69E">
-          {[80, 140, 200, 260, 320, 380, 440, 500, 560].flatMap(x =>
-            [510, 560, 610, 660].map(y => (
-              <circle key={`${x}-${y}`} cx={x} cy={y} r="0.4" />
-            ))
-          )}
-        </g>
-        <text x="582" y="697" fontSize="5" fontFamily="ui-monospace, monospace"
-              fill="#3A3A38" textAnchor="end" opacity="0.7">SA</text>
-      </g>
-
-      {/* ═══ KEYBOARD (realistic mechanical TKL) ════════════════ */}
-      <g>
-        <ellipse cx="300" cy={KB_Y + KB_H + 10} rx="200" ry="9" fill="#000" opacity="0.4" />
-        <rect x={KB_X - 3} y={KB_Y - 2} width={KB_W + 6} height={KB_H + 6} rx="9" fill="#0A0A09" />
-        <rect x={KB_X} y={KB_Y} width={KB_W} height={KB_H} rx="7" fill="url(#ws-kb-body)" />
-        <rect x={KB_X + 4} y={KB_Y + 1} width={KB_W - 8} height="1.2" rx="0.6" fill="#3A3A38" opacity="0.8" />
-        <rect x={KB_X + 6} y={KB_Y + 6} width={KB_W - 12} height={KB_H - 12} rx="5" fill="none"
-              stroke="#0E0E0C" strokeWidth="1" opacity="0.7" />
-        {KB_ROWS.map((row, ri) => {
-          const rowY = KB_Y + KB_PAD + ri * (KEY_H + ROW_GAP);
-          let cursor = KB_X + KB_PAD;
-          return (
-            <g key={ri}>
-              {row.map((k, ki) => {
-                const kx = cursor;
-                cursor += k.w * U;
-                if (k.g) return null;
-                return (
-                  <KeyCap
-                    key={ki}
-                    x={kx + 1}
-                    y={rowY}
-                    wU={k.w}
-                    h={KEY_H - 2}
-                    label={k.l}
-                    accent={k.accent}
-                    U={U}
-                  />
-                );
-              })}
-            </g>
-          );
-        })}
-        <path d={`M${KB_X + KB_W / 2} ${KB_Y - 1} Q300 ${KB_Y - 18} 300 ${KB_Y - 32}`}
-              fill="none" stroke="#1A1A18" strokeWidth="2.4" strokeLinecap="round" opacity="0.85" />
-        <ellipse cx="300" cy={KB_Y + KB_H + 4} rx="180" ry="6"
-                 fill="url(#ws-rgb)"
-                 style={{ animation: "ws-kb-glow 4s ease-in-out infinite" }} />
-      </g>
-
-      {/* ═══ GAMING MOUSE (right of keyboard) ═════════════════ */}
-      <g>
-        <ellipse cx="540" cy={695} rx="42" ry="6" fill="#000" opacity="0.5" />
-        <ellipse cx="540" cy="690" rx="40" ry="6"
-                 fill="url(#ws-rgb)"
-                 style={{ animation: "ws-rgb-pulse 3.5s ease-in-out infinite" }} />
-        <path
-          d="M515,600
-             Q515,572 542,572
-             Q572,572 575,605
-             L578,665
-             Q578,690 545,690
-             Q510,690 510,668
-             L508,635
-             Q508,615 515,600 Z"
-          fill="url(#ws-mouse)"
-        />
-        <path
-          d="M515,600
-             Q515,572 542,572
-             Q572,572 575,605
-             L578,665
-             Q578,690 545,690
-             Q510,690 510,668
-             L508,635
-             Q508,615 515,600 Z"
-          fill="url(#ws-mouse-shine)"
-        />
-        <line x1="544" y1="574" x2="544" y2="630" stroke="#0A0A09" strokeWidth="0.9" opacity="0.85" />
-        <rect x="540" y="595" width="9" height="16" rx="2" fill="#0A0A09" />
-        <rect x="541" y="597" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
-        <rect x="541" y="600.5" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
-        <rect x="541" y="604" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
-        <rect x="541" y="607.5" width="7" height="1.6" rx="0.5" fill="#3A3A38" />
-        <rect x="540" y="615" width="9" height="3.5" rx="1" fill="#0A0A09" />
-        <rect x="541" y="615.5" width="7" height="0.8" rx="0.4" fill="#3A3A38" />
-        <rect x="510" y="618" width="8" height="5" rx="1" fill="#0A0A09" opacity="0.85" />
-        <rect x="510" y="626" width="8" height="5" rx="1" fill="#0A0A09" opacity="0.85" />
-        <text x="514" y="622" fontSize="3" fill="#5F5E5A" textAnchor="middle">◂</text>
-        <text x="514" y="630" fontSize="3" fill="#5F5E5A" textAnchor="middle">▸</text>
-        <g style={{ animation: "ws-rgb-pulse 3s ease-in-out infinite" }}>
-          <circle cx="544" cy="660" r="6" fill="var(--violet-mid)" opacity="0.18" />
-          <path d="M540,656 L548,656 M540,660 L548,660 M540,664 L548,664"
-                stroke="var(--violet-soft)" strokeWidth="0.8" strokeLinecap="round" opacity="0.9" />
-        </g>
-        <path d="M575,615 Q577,640 575,665" stroke="#0A0A09" strokeWidth="0.6" opacity="0.7" fill="none" />
-        <path d="M542,572 Q535,560 540,540 Q548,520 545,500"
-              fill="none" stroke="#1A1A18" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
-      </g>
     </svg>
     </div>
   );

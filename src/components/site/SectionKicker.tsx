@@ -29,7 +29,7 @@ export default function SectionKicker({
       />
       <span
         className="font-mono text-[12px] tracking-[0.18em]"
-        style={{ color: "var(--amber-bright)" }}
+        style={{ color: "var(--text-muted)" }}
       >
         {meta}
       </span>
