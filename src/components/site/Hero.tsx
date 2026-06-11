@@ -33,9 +33,9 @@ export default function Hero() {
             sashreek<br />addanki
           </h1>
 
-          {/* Hairline divider */}
+          {/* Hairline divider — draws itself in after the name lands */}
           <div
-            className="h-px w-full mt-8 mb-6"
+            className="draw-x h-px w-full mt-8 mb-6"
             style={{
               background:
                 "linear-gradient(to right, color-mix(in srgb, var(--violet-mid) 80%, transparent), var(--gray-800) 60%, transparent)",
@@ -44,7 +44,7 @@ export default function Hero() {
 
           {/* Subtitle row */}
           <p
-            className="font-mono text-[15px] mb-4 flex items-center gap-3 flex-wrap justify-center lg:justify-start"
+            className="fade-up fade-up-2 font-mono text-[15px] mb-4 flex items-center gap-3 flex-wrap justify-center lg:justify-start"
             style={{ color: "var(--text-secondary)" }}
           >
             <span style={{ color: "var(--violet-pale)" }}>computing science</span>
@@ -61,7 +61,7 @@ export default function Hero() {
 
           {/* Tagline (Syne for some warmth against the mono name) */}
           <p
-            className="text-[19px] leading-[1.6] max-w-[540px] mb-8"
+            className="fade-up fade-up-3 text-[19px] leading-[1.6] max-w-[540px] mb-8"
             style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
           >
             I understand the{" "}
@@ -70,7 +70,7 @@ export default function Hero() {
           </p>
 
           {/* CTA buttons */}
-          <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
+          <div className="fade-up fade-up-4 flex flex-wrap gap-3 justify-center lg:justify-start">
             {[
               { href: "#about",  label: "about", accent: "violet" },
               { href: "#work",   label: "projects", accent: "violet" },
@@ -99,7 +99,7 @@ export default function Hero() {
         </div>
 
         {/* ── RIGHT: animated workspace ──────────────────────────────── */}
-        <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
+        <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
           <WorkspaceAnimation
             className="w-full h-auto block"
             style={{ aspectRatio: "600 / 800" }}

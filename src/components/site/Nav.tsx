@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function useScrollProgress() {
   const [p, setP] = useState(0);
@@ -53,17 +53,17 @@ const pageLinks = [
 
 export default function Nav() {
   const pathname = usePathname();
-
-  // /blog is a self-contained sub-site — it renders its own nav in
-  // blog/layout.tsx. Hide the portfolio nav there so the two don't stack.
-  if (pathname?.startsWith("/blog")) return null;
-
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("");
   const progress = useScrollProgress();
   // On the home page, hide the nav until past the hero. On other pages, always show.
   const scrolledPastHero = useScrolledPastHero(0.6);
   const visible = isHome ? scrolledPastHero : true;
+
+  // Sliding active-section indicator — one bar that translates between
+  // links instead of a per-link underline popping in and out.
+  const navRef = useRef<HTMLElement | null>(null);
+  const [bar, setBar] = useState({ left: 0, width: 0, on: false });
 
   useEffect(() => {
     if (!isHome) return;
@@ -82,6 +82,25 @@ export default function Nav() {
     });
     return () => observer.disconnect();
   }, [isHome]);
+
+  useEffect(() => {
+    if (!isHome) return;
+    const update = () => {
+      const el = navRef.current?.querySelector<HTMLAnchorElement>(
+        `a[data-section="${activeSection}"]`
+      );
+      if (el) setBar({ left: el.offsetLeft, width: el.offsetWidth, on: true });
+      else setBar((b) => ({ ...b, on: false }));
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [isHome, activeSection]);
+
+  // /blog is a self-contained sub-site — it renders its own nav in
+  // blog/layout.tsx. Hide the portfolio nav there so the two don't stack.
+  // (Kept below the hooks so the hook order never changes between renders.)
+  if (pathname?.startsWith("/blog")) return null;
 
   const logoHref = isHome ? "#hero" : "/";
 
@@ -115,7 +134,22 @@ export default function Nav() {
         SA
       </a>
 
-      <nav className="flex items-center gap-6">
+      <nav ref={navRef} className="relative flex items-center gap-6">
+        {isHome && (
+          <span
+            aria-hidden
+            className="absolute h-[2px] pointer-events-none"
+            style={{
+              bottom: "-21px",
+              left: bar.left,
+              width: bar.width,
+              background: "var(--violet-mid)",
+              opacity: bar.on ? 1 : 0,
+              transition:
+                "left 320ms cubic-bezier(0.16, 1, 0.3, 1), width 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease",
+            }}
+          />
+        )}
         {isHome
           ? homeLinks.map(({ href, label, id }) => {
               const active = activeSection === id;
@@ -123,16 +157,11 @@ export default function Nav() {
                 <a
                   key={href}
                   href={href}
+                  data-section={id}
                   className="relative font-mono text-[13px] transition-colors duration-200"
                   style={{ color: active ? "var(--text-primary)" : "var(--text-muted)" }}
                 >
                   {label}
-                  {active && (
-                    <span
-                      className="absolute -bottom-[21px] left-0 right-0 h-[2px]"
-                      style={{ background: "var(--violet-mid)" }}
-                    />
-                  )}
                 </a>
               );
             })

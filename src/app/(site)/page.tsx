@@ -117,7 +117,7 @@ export default async function HomePage() {
           {/* LEFT — essay */}
           <article>
             <h2
-              className="text-[36px] lg:text-[46px] font-medium leading-[1.16] mb-10 tracking-[-0.018em]"
+              className="reveal-child text-[36px] lg:text-[46px] font-medium leading-[1.16] mb-10 tracking-[-0.018em]"
               style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
             >
               Computing science @ UAlberta, building at the intersection of{" "}
@@ -146,8 +146,8 @@ export default async function HomePage() {
             </h2>
 
             <div
-              className="flex flex-col gap-6 text-[17px] leading-[1.8] max-w-[600px]"
-              style={{ color: "var(--text-secondary)" }}
+              className="reveal-child flex flex-col gap-6 text-[17px] leading-[1.8] max-w-[600px]"
+              style={{ color: "var(--text-secondary)", "--ri": 1 } as React.CSSProperties}
             >
               <p>
                 My work spans backend systems, low-level programming, and AI-driven
@@ -172,7 +172,10 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="mt-10 flex items-center gap-5 flex-wrap">
+            <div
+              className="reveal-child mt-10 flex items-center gap-5 flex-wrap"
+              style={{ "--ri": 3 } as React.CSSProperties}
+            >
               <Link
                 href="/about"
                 className="font-mono text-[14px] px-5 py-[12px] transition-all hover:-translate-y-[1px]"
@@ -203,10 +206,11 @@ export default async function HomePage() {
 
           {/* RIGHT — rendered README */}
           <aside
-            className="flex flex-col gap-10 pl-7"
+            className="reveal-child flex flex-col gap-10 pl-7"
             style={{
               borderLeft: "2px solid color-mix(in srgb, var(--violet-mid) 50%, var(--gray-800))",
-            }}
+              "--ri": 2,
+            } as React.CSSProperties}
           >
             {/* profile */}
             <section>
@@ -318,7 +322,7 @@ export default async function HomePage() {
       >
         <SectionKicker label="WORK" meta="selected.md" />
         <div className="max-w-[1320px] mx-auto">
-          <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
+          <div className="reveal-child flex items-end justify-between mb-12 flex-wrap gap-4">
             <div>
               <h2
                 className="text-[36px] lg:text-[42px] font-medium leading-[1.15] tracking-[-0.018em] mt-1"
@@ -347,7 +351,13 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
             {bestProjects.slice(0, 4).map((project, i) => (
-              <ProjectMediaCard key={project.id} project={project} index={i} />
+              <div
+                key={project.id}
+                className="reveal-child flex"
+                style={{ "--ri": i + 1 } as React.CSSProperties}
+              >
+                <ProjectMediaCard project={project} index={i} />
+              </div>
             ))}
           </div>
 
@@ -382,7 +392,7 @@ export default async function HomePage() {
         <SectionKicker label="CONTACT" meta="reach.md" />
         <div className="max-w-[960px] mx-auto flex flex-col items-center text-center">
           <h2
-            className="text-[42px] lg:text-[54px] leading-[1.08] font-medium tracking-[-0.02em] mb-14"
+            className="reveal-child text-[42px] lg:text-[54px] leading-[1.08] font-medium tracking-[-0.02em] mb-14"
             style={{
               color: "var(--text-primary)",
               fontFamily: "var(--font-body)",
@@ -403,14 +413,17 @@ export default async function HomePage() {
           </h2>
 
           <div className="w-full flex flex-col items-stretch">
-            <h3 className="font-mono text-[15px] flex items-baseline justify-center gap-2 mb-10">
+            <h3
+              className="reveal-child font-mono text-[15px] flex items-baseline justify-center gap-2 mb-10"
+              style={{ "--ri": 1 } as React.CSSProperties}
+            >
               <span style={{ color: "var(--violet-soft)" }}>##</span>
               <span style={{ color: "var(--text-primary)" }}>channels</span>
             </h3>
 
             <div
-              className="flex flex-col"
-              style={{ borderTop: "1px solid var(--gray-800)" }}
+              className="reveal-child flex flex-col"
+              style={{ borderTop: "1px solid var(--gray-800)", "--ri": 2 } as React.CSSProperties}
             >
               {[
                 {
@@ -445,7 +458,7 @@ export default async function HomePage() {
                   href={href}
                   target={ext ? "_blank" : undefined}
                   rel={ext ? "noreferrer noopener" : undefined}
-                  className="group grid gap-6 py-9 text-left transition-colors duration-200"
+                  className="contact-row group grid gap-6 py-9 text-left"
                   style={{
                     gridTemplateColumns: "60px 1fr 50px",
                     borderBottom: "1px solid var(--gray-800)",
@@ -495,7 +508,7 @@ export default async function HomePage() {
               <CopyHandle
                 value="sashreek"
                 copiedLabel="copied to clipboard"
-                className="group grid gap-6 py-9 w-full text-left"
+                className="contact-row group grid gap-6 py-9 w-full text-left"
                 style={{
                   gridTemplateColumns: "60px 1fr 50px",
                   background: "transparent",

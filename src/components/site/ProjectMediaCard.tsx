@@ -11,7 +11,7 @@ function MediaFrame({
 }) {
   return (
     <div
-      className="relative w-full overflow-hidden"
+      className="media-frame relative w-full overflow-hidden"
       style={{
         aspectRatio: "16 / 10",
         background:
@@ -74,7 +74,7 @@ function MediaFrame({
             </span>
           </div>
           <div
-            className="absolute inset-0 pointer-events-none opacity-[0.35]"
+            className="media-grid absolute inset-0 pointer-events-none opacity-[0.35]"
             style={{
               backgroundImage:
                 "linear-gradient(var(--gray-800) 1px, transparent 1px), linear-gradient(90deg, var(--gray-800) 1px, transparent 1px)",
@@ -98,12 +98,7 @@ export default function ProjectMediaCard({
   return (
     <Link
       href={projectHref(p)}
-      className="media-card group relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-[2px]"
-      style={{
-        border: "1px solid var(--gray-800)",
-        borderRadius: "8px",
-        background: "var(--bg-surface)",
-      }}
+      className="media-card group relative flex flex-col w-full overflow-hidden"
     >
       <MediaFrame project={p} index={index} />
 

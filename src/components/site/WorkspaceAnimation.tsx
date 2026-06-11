@@ -18,7 +18,7 @@
 // soft violet glow pulses behind the screen, mouse RGB and keyboard
 // underglow pulse gently.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = { className?: string; style?: React.CSSProperties };
 
@@ -291,7 +291,41 @@ export default function WorkspaceAnimation({ className, style }: Props) {
   const [phase, setPhase] = useState<Phase>("typing");
   const [flash, setFlash] = useState(0); // 0–1 opacity for delete-line red flash
 
+  // The vim loop re-renders constantly — only run it while the
+  // illustration is actually on screen, and not at all for users who
+  // prefer reduced motion (they get the finished buffer as a still).
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [onScreen, setOnScreen] = useState(true);
+  const [reduced, setReduced] = useState(false);
+
   useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const applyMq = () => setReduced(mq.matches);
+    applyMq();
+    mq.addEventListener("change", applyMq);
+
+    const io = new IntersectionObserver(
+      ([e]) => setOnScreen(e.isIntersecting),
+      { threshold: 0.05 }
+    );
+    if (wrapRef.current) io.observe(wrapRef.current);
+
+    return () => {
+      mq.removeEventListener("change", applyMq);
+      io.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (reduced) {
+      // Static final frame: full buffer, TODO line already deleted.
+      setTyped(TOTAL_CHARS);
+      setPhase("post");
+      setFlash(0);
+      return;
+    }
+    if (!onScreen) return;
+
     let raf = 0;
     let start = performance.now();
     const tick = (now: number) => {
@@ -347,7 +381,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [onScreen, reduced]);
 
   const insertMode = phase === "typing";
   const visualActive = phase === "visual" || phase === "delete";
@@ -384,6 +418,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
 
   return (
     <div
+      ref={wrapRef}
       className={className}
       style={{
         position: "relative",
