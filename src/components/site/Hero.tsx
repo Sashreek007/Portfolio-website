@@ -92,7 +92,7 @@ export default function Hero() {
         <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
           <WorkspaceAnimation
             className="w-full h-auto block"
-            style={{ aspectRatio: "600 / 520" }}
+            style={{ aspectRatio: "600 / 800" }}
           />
         </div>
       </div>
