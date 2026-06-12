@@ -16,7 +16,9 @@ export default function Hero() {
       className="relative min-h-[100vh] px-[5vw] pt-12 pb-12 overflow-hidden flex items-center"
       style={{ background: "var(--bg-base)" }}
     >
-      <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
+      {/* Top-aligned on desktop: the editor's top edge locks to the name's
+          cap line instead of both columns floating around a shared center. */}
+      <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center lg:items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
 
         {/* ── LEFT: name + subtitle + status ─────────────────────────── */}
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
@@ -89,7 +91,9 @@ export default function Hero() {
         </div>
 
         {/* ── RIGHT: animated workspace ──────────────────────────────── */}
-        <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
+        {/* lg:mt-2 nudges the editor's border down to the name's cap height
+            (the h1 box has ~8px of ascender space above the glyphs). */}
+        <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:mt-2 lg:justify-self-end">
           <SystemSchematic className="w-full" />
         </div>
       </div>
