@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useIsMac } from "@/components/Kbd";
+import Kbd, { useIsMac } from "@/components/Kbd";
 
 export type IndexPost = {
   id: string;
@@ -239,6 +239,26 @@ export default function BlogIndex({ posts }: { posts: IndexPost[] }) {
           </section>
         ))
       )}
+
+      {/* Vim-motion hint — keyboard users only, hidden on touch widths */}
+      <div
+        className="hidden md:flex items-center justify-center gap-4 mt-14 font-mono text-[11px]"
+        style={{ color: "var(--text-muted)" }}
+      >
+        <span className="flex items-center gap-[6px]">
+          <Kbd>j</Kbd>
+          <Kbd>k</Kbd> scroll
+        </span>
+        <span style={{ color: "var(--gray-800)" }}>·</span>
+        <span className="flex items-center gap-[6px]">
+          <Kbd>gg</Kbd>
+          <Kbd>G</Kbd> jump
+        </span>
+        <span style={{ color: "var(--gray-800)" }}>·</span>
+        <span className="flex items-center gap-[6px]">
+          <Kbd>/</Kbd> search
+        </span>
+      </div>
     </>
   );
 }
