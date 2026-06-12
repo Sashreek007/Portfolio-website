@@ -78,26 +78,6 @@ const SEED_BEST: Project[] = [
 const divider = <div className="gradient-divider" />;
 
 // ── About content — edit freely, the layout adapts ────────────────────────
-// Credo rows: any number of entries; numbering is automatic and `gloss`
-// is optional (omit it and the row renders without a subline).
-const CREDO_ROWS: { first: string; then: string; gloss?: string }[] = [
-  {
-    first: "Kurose & Ross",
-    then: "FastAPI",
-    gloss: "networks from first principles, then the framework on top.",
-  },
-  {
-    first: "Induction proofs",
-    then: "statistical packages",
-    gloss: "the math under the model, then the library that wraps it.",
-  },
-  {
-    first: "RISC-V",
-    then: "operating systems",
-    gloss: "the instruction set under the kernel, then the syscalls above it.",
-  },
-];
-
 // Spec panel facts: label + value, any number of rows.
 const PROFILE_FACTS: [string, React.ReactNode][] = [
   ["identity",   "Computing science · UAlberta"],
@@ -159,98 +139,84 @@ export default async function HomePage() {
       <Hero />
 
       {/* ── About (editorial split · README) ─────────────────────────────── */}
+      {/* Full-bleed lifted band — the section separates from the canvas by
+          surface, not by divider lines (Linear's section rhythm) */}
       <section
         id="about"
         className="section-hidden px-[6vw] py-24"
-        style={{ background: "var(--bg-base)" }}
+        style={{
+          background: "var(--bg-surface)",
+          borderTop: "1px solid var(--gray-800)",
+          borderBottom: "1px solid var(--gray-800)",
+        }}
       >
         <SectionKicker label="ABOUT" meta="readme.md" />
 
-        <div className="max-w-[1320px] mx-auto">
-          {/* Credo headline — the hero says who; this says how. */}
-          <h2
-            className="reveal-child text-[40px] lg:text-[56px] font-medium leading-[1.12] tracking-[-0.02em] max-w-[860px]"
-            style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-          >
-            I learn the{" "}
-            <span
-              style={{
-                color: "var(--violet-pale)",
-                background:
-                  "linear-gradient(to top, color-mix(in srgb, var(--violet-mid) 30%, transparent) 35%, transparent 35%)",
-                padding: "0 4px",
-              }}
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1320px] mx-auto">
+          {/* LEFT — essay (the copy is placeholder-agnostic: the lead
+              paragraph + drop cap are styled via .about-essay CSS, so any
+              future rewrite keeps the editorial treatment) */}
+          <article>
+            <h2
+              className="reveal-child text-[38px] lg:text-[50px] font-medium leading-[1.14] mb-10 tracking-[-0.018em]"
+              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
             >
-              mechanism
-            </span>{" "}
-            before the abstraction.
-          </h2>
-
-          {/* The proof — three editorial rows, same language as the
-              contact channels */}
-          <div
-            className="reveal-child mt-14 max-w-[980px]"
-            style={{ borderTop: "1px solid var(--gray-800)", "--ri": 1 } as React.CSSProperties}
-          >
-            {CREDO_ROWS.map(({ first, then, gloss }, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-[56px_1fr] gap-x-6 py-7 items-baseline"
-                style={{ borderBottom: "1px solid var(--gray-800)" }}
+              Computing science @ UAlberta, building at the intersection of{" "}
+              <span
+                style={{
+                  color: "var(--violet-pale)",
+                  background:
+                    "linear-gradient(to top, color-mix(in srgb, var(--violet-mid) 30%, transparent) 35%, transparent 35%)",
+                  padding: "0 4px",
+                }}
               >
-                <span
-                  className="font-mono text-[13px] tracking-[0.2em] font-medium pt-[6px]"
-                  style={{ color: "var(--amber-bright)" }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <div>
-                  <p
-                    className="text-[24px] lg:text-[30px] leading-[1.25] tracking-[-0.012em]"
-                    style={{ fontFamily: "var(--font-body)" }}
-                  >
-                    <span style={{ color: "var(--text-primary)" }}>{first}</span>{" "}
-                    <span style={{ color: "var(--text-muted)" }}>before</span>{" "}
-                    <span style={{ color: "var(--text-secondary)" }}>{then}</span>
-                  </p>
-                  {gloss && (
-                    <p
-                      className="font-mono text-[13px] mt-2"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {gloss}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                AI
+              </span>{" "}
+              and{" "}
+              <span
+                style={{
+                  color: "var(--amber-bright)",
+                  background:
+                    "linear-gradient(to top, color-mix(in srgb, var(--amber-mid) 22%, transparent) 35%, transparent 35%)",
+                  padding: "0 4px",
+                }}
+              >
+                systems
+              </span>
+              .
+            </h2>
 
-          {/* Below the credo — essay + CTA | spec panel */}
-          <div className="mt-16 grid gap-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-            <article
-              className="reveal-child"
-              style={{ "--ri": 2 } as React.CSSProperties}
+            <div
+              className="about-essay reveal-child flex flex-col gap-6 text-[17px] leading-[1.8] max-w-[600px]"
+              style={{ color: "var(--text-secondary)", "--ri": 1 } as React.CSSProperties}
             >
-              <div
-                className="flex flex-col gap-6 text-[17px] leading-[1.8] max-w-[600px]"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                <p>
-                  Using something I don&apos;t understand makes me uncomfortable.
-                  My work spans backend systems, low-level programming, and
-                  AI-driven features that move beyond research demos into usable
-                  software — I&apos;m most interested in the engineering required
-                  to bridge AI research ideas with real systems.
-                </p>
-                <p style={{ color: "var(--text-muted)" }}>
-                  Currently in my second year, co-op stream, graduating{" "}
-                  <span style={{ color: "var(--amber-bright)" }}>2028</span>. Each
-                  project is a deliberate rung — not a random one.
-                </p>
-              </div>
+              <p>
+                My work spans backend systems, low-level programming, and AI-driven
+                features that move beyond research demos into usable software. I&apos;m
+                especially interested in the engineering required to bridge AI research
+                ideas with real systems.
+              </p>
+              <p>
+                I learn bottom-up — the mechanism before the abstraction.{" "}
+                <span style={{ color: "var(--violet-pale)" }}>Kurose &amp; Ross</span>{" "}
+                before FastAPI.{" "}
+                <span style={{ color: "var(--violet-pale)" }}>Induction proofs</span>{" "}
+                before statistical packages.{" "}
+                <span style={{ color: "var(--violet-pale)" }}>RISC-V</span>{" "}
+                before operating systems. Using something I don&apos;t understand
+                makes me uncomfortable.
+              </p>
+              <p style={{ color: "var(--text-muted)" }}>
+                Currently in my second year, co-op stream, graduating{" "}
+                <span style={{ color: "var(--amber-bright)" }}>2028</span>. Each project
+                is a deliberate rung — not a random one.
+              </p>
+            </div>
 
-              <div className="mt-10 flex items-center gap-5 flex-wrap">
+            <div
+              className="reveal-child mt-10 flex items-center gap-5 flex-wrap"
+              style={{ "--ri": 3 } as React.CSSProperties}
+            >
                 <Link
                   href="/about"
                   className="pill-primary font-mono text-[14px] px-[22px] py-[11px]"
@@ -270,16 +236,18 @@ export default async function HomePage() {
               </div>
             </article>
 
-            {/* RIGHT — spec panel, lifted one surface step
-                (charcoal panel + hairline, no shadow) */}
-            <aside
-              className="reveal-child flex flex-col gap-8 p-7 lg:p-8 rounded-[12px]"
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--gray-800)",
-                "--ri": 3,
-              } as React.CSSProperties}
-            >
+          {/* RIGHT — spec panel, one surface step above the section band
+              (Linear ladder: band = surface, panel = elevated) */}
+          <aside
+            className="reveal-child flex flex-col gap-8 p-7 lg:p-8 rounded-[12px]"
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--gray-800)",
+              boxShadow:
+                "inset 0 1px 0 color-mix(in srgb, var(--text-primary) 6%, transparent)",
+              "--ri": 2,
+            } as React.CSSProperties}
+          >
             {/* profile */}
             <section>
               <h3 className="font-mono text-[16px] mb-4 flex items-baseline gap-2">
@@ -325,12 +293,9 @@ export default async function HomePage() {
                 ))}
               </ul>
             </section>
-            </aside>
-          </div>
+          </aside>
         </div>
       </section>
-
-      {divider}
 
       {/* ── Selected Work ─────────────────────────────────────────────────── */}
       <section

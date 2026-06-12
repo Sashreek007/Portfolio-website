@@ -408,6 +408,24 @@
 .media-card:hover .corner-2 { transform: translate(7px, -7px); }
 .media-card:hover .corner-3 { transform: translate(-7px, -7px); }
 
+/* ─── About essay — editorial lead treatment ─────────────────────────
+   Content-agnostic: whatever the first paragraph says, it renders as a
+   standfirst (larger, brighter) with a mono drop cap. Swapping copy
+   never touches these rules. */
+.about-essay > p:first-child {
+  font-size: 19px;
+  line-height: 1.75;
+  color: var(--text-primary);
+}
+.about-essay > p:first-child::first-letter {
+  float: left;
+  font-family: var(--font-mono);
+  font-size: 52px;
+  line-height: 0.8;
+  padding: 8px 14px 2px 0;
+  color: var(--violet-pale);
+}
+
 /* ─── Contact channel rows ───────────────────────────────────────────── */
 .contact-row {
   transition: background-color 250ms ease;
