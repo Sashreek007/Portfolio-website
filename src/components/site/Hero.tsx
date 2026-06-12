@@ -16,11 +16,11 @@ export default function Hero() {
       className="relative min-h-[100vh] px-[5vw] pt-24 pb-12 overflow-hidden flex items-center"
       style={{ background: "var(--bg-base)" }}
     >
-      {/* Desktop: both columns share BOTH edges — the name's cap line locks
-          to the editor's top border, and the CTA row sinks to the bottom of
-          the row so it lines up with the schematic's caption. The air in
-          between is deliberate. */}
-      <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center lg:items-stretch grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
+      {/* Desktop: columns top-align — the name's cap line locks to the
+          editor's top border and the left content flows naturally below.
+          (Bottom-locking the CTA row was tried and reverted: the gap it
+          opens between name and meta block grows with viewport size.) */}
+      <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center lg:items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
 
         {/* ── LEFT: name + subtitle + status ─────────────────────────── */}
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
@@ -28,7 +28,7 @@ export default function Hero() {
           <h1
             className="fade-up font-mono font-medium"
             style={{
-              fontSize: "clamp(56px, 10vw, 150px)",
+              fontSize: "clamp(56px, 10vw, 168px)",
               lineHeight: "0.95",
               letterSpacing: "-0.05em",
               color: "var(--text-primary)",
@@ -37,10 +37,9 @@ export default function Hero() {
             sashreek<br />addanki
           </h1>
 
-          {/* Meta block — divider, subtitle, tagline, CTAs. On desktop it
-              sinks to the bottom of the row (lg:mt-auto) so the CTA line
-              shares a bottom edge with the schematic's caption. */}
-          <div className="w-full flex flex-col items-center lg:items-start lg:mt-auto">
+          {/* Meta block — divider, subtitle, tagline, CTAs in natural flow
+              below the name. */}
+          <div className="w-full flex flex-col items-center lg:items-start">
             {/* Hairline divider — draws itself in after the name lands */}
             <div
               className="draw-x h-px w-full mt-8 mb-6"
