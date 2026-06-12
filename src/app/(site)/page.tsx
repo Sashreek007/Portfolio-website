@@ -138,28 +138,27 @@ export default async function HomePage() {
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <Hero />
 
-      {/* ── About (editorial split · README) ─────────────────────────────── */}
-      {/* Full-bleed lifted band — the section separates from the canvas by
-          surface, not by divider lines (Linear's section rhythm) */}
+      {/* ── About (editorial spread · poster headline / two-column copy /
+              datasheet band) ─────────────────────────────────────────── */}
       <section
         id="about"
-        className="section-hidden px-[6vw] py-24"
-        style={{
-          background: "var(--bg-surface)",
-          borderTop: "1px solid var(--gray-800)",
-          borderBottom: "1px solid var(--gray-800)",
-        }}
+        className="section-hidden relative overflow-hidden px-[6vw] py-24"
+        style={{ background: "var(--bg-base)" }}
       >
         <SectionKicker label="ABOUT" meta="readme.md" />
 
-        <div className="grid gap-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] max-w-[1320px] mx-auto">
-          {/* LEFT — essay (the copy is placeholder-agnostic: the lead
-              paragraph + drop cap are styled via .about-essay CSS, so any
-              future rewrite keeps the editorial treatment) */}
+        <div className="relative max-w-[1320px] mx-auto">
+          {/* Poster headline — spans the container instead of a column */}
           <article>
             <h2
-              className="reveal-child text-[38px] lg:text-[50px] font-medium leading-[1.14] mb-10 tracking-[-0.018em]"
-              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+              className="reveal-child font-medium max-w-[1100px]"
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-body)",
+                fontSize: "clamp(40px, 5.5vw, 76px)",
+                lineHeight: 1.08,
+                letterSpacing: "-0.022em",
+              }}
             >
               Computing science @ UAlberta, building at the intersection of{" "}
               <span
@@ -186,9 +185,15 @@ export default async function HomePage() {
               .
             </h2>
 
+            {/* Magazine body — copy flows across two columns at desktop;
+                works with any number of paragraphs */}
             <div
-              className="about-essay reveal-child flex flex-col gap-6 text-[17px] leading-[1.8] max-w-[600px]"
-              style={{ color: "var(--text-secondary)", "--ri": 1 } as React.CSSProperties}
+              className="about-essay reveal-child mt-14 text-[17px] leading-[1.8] lg:columns-2 [&>p:not(:last-child)]:mb-6 max-w-[1100px]"
+              style={{
+                color: "var(--text-secondary)",
+                columnGap: "64px",
+                "--ri": 1,
+              } as React.CSSProperties}
             >
               <p>
                 My work spans backend systems, low-level programming, and AI-driven
@@ -215,7 +220,7 @@ export default async function HomePage() {
 
             <div
               className="reveal-child mt-10 flex items-center gap-5 flex-wrap"
-              style={{ "--ri": 3 } as React.CSSProperties}
+              style={{ "--ri": 2 } as React.CSSProperties}
             >
                 <Link
                   href="/about"
@@ -236,64 +241,50 @@ export default async function HomePage() {
               </div>
             </article>
 
-          {/* RIGHT — spec panel, one surface step above the section band
-              (Linear ladder: band = surface, panel = elevated) */}
-          <aside
-            className="reveal-child flex flex-col gap-8 p-7 lg:p-8 rounded-[12px]"
-            style={{
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--gray-800)",
-              boxShadow:
-                "inset 0 1px 0 color-mix(in srgb, var(--text-primary) 6%, transparent)",
-              "--ri": 2,
-            } as React.CSSProperties}
+          {/* Datasheet band — full-width spec strip closing the section.
+              Cells adapt to any number of entries; all styling is
+              inline/utility so the CSS build cannot drop it. */}
+          <div
+            className="reveal-child mt-16 grid grid-cols-2 lg:grid-cols-4"
+            style={{ borderBottom: "1px solid var(--gray-800)", "--ri": 3 } as React.CSSProperties}
           >
-            {/* profile */}
-            <section>
-              <h3 className="font-mono text-[16px] mb-4 flex items-baseline gap-2">
-                <span style={{ color: "var(--violet-soft)" }}>##</span>
-                <span style={{ color: "var(--text-primary)" }}>profile</span>
-              </h3>
-              <dl className="flex flex-col gap-[10px] font-mono text-[14px]">
-                {PROFILE_FACTS.map(([k, v], i) => (
-                  <div key={i} className="grid grid-cols-[120px_1fr] items-baseline gap-2">
-                    <dt
-                      className="tracking-[0.1em] uppercase text-[12px]"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {k}
-                    </dt>
-                    <dd style={{ color: "var(--text-primary)" }}>{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-
-            {/* timeline */}
-            <section>
-              <h3 className="font-mono text-[16px] mb-4 flex items-baseline gap-2">
-                <span style={{ color: "var(--violet-soft)" }}>##</span>
-                <span style={{ color: "var(--text-primary)" }}>timeline</span>
-              </h3>
-              <ul className="flex flex-col gap-[10px] font-mono text-[14px]">
-                {TIMELINE_ENTRIES.map((e, i) => (
-                  <li key={i} className="grid grid-cols-[90px_1fr] items-baseline gap-2">
-                    <span style={{ color: "var(--text-muted)" }}>
-                      {e.year}
-                    </span>
-                    <span style={{ color: "var(--text-primary)" }}>
-                      {e.role}
-                      {e.current && (
-                        <span className="ml-2 font-medium" style={{ color: "var(--green-bright)" }}>
-                          [current]
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </aside>
+            {[
+              ...PROFILE_FACTS.map(([k, v]) => ({ label: k as string, value: v })),
+              ...TIMELINE_ENTRIES.map((e) => ({
+                label: e.year,
+                value: (
+                  <>
+                    {e.role}
+                    {e.current && (
+                      <span className="ml-2 font-medium" style={{ color: "var(--green-bright)" }}>
+                        [current]
+                      </span>
+                    )}
+                  </>
+                ),
+              })),
+            ].map((entry, i) => (
+              <div
+                key={i}
+                className="py-6 pr-5"
+                style={{
+                  borderTop: "1px solid var(--gray-800)",
+                  borderLeft: "1px solid var(--gray-800)",
+                  paddingLeft: "20px",
+                }}
+              >
+                <div
+                  className="font-mono text-[10.5px] tracking-[0.22em] uppercase mb-[8px]"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {entry.label}
+                </div>
+                <div className="font-mono text-[14px]" style={{ color: "var(--text-primary)" }}>
+                  {entry.value}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
