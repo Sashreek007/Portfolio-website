@@ -102,8 +102,9 @@ const CODE: Line[] = [
 // Line that gets visual-selected and deleted each loop (the TODO comment).
 const DELETE_LINE_IDX = 4;
 
-const CHAR_MS = 26;
-const POST_LINE_MS = 180;
+const CHAR_BASE_MS = 42;       // base keystroke interval (~human fast typist)
+const CHAR_JITTER_MS = 27;     // per-char variance so the rhythm isn't metronomic
+const POST_LINE_MS = 300;      // "thinking" beat between lines
 const NORMAL_HOLD_MS = 1400;   // pause after typing finishes
 const VISUAL_MS = 1100;        // V-LINE selection pulse
 const DELETE_FLASH_MS = 360;   // red flash on the targeted line
@@ -123,7 +124,36 @@ const TERM_OUTPUT: { text: string; mark?: "prompt" | "pass" | "sum" }[] = [
 
 const TOTAL_CHARS = CODE.reduce((n, ln) => n + ln.segs.reduce((m, s) => m + s.t.length, 0), 0);
 const LINE_CHARS = CODE.map(ln => ln.segs.reduce((m, s) => m + s.t.length, 0));
-const TOTAL_TYPE_MS = TOTAL_CHARS * CHAR_MS + (CODE.length - 1) * POST_LINE_MS;
+
+// Precomputed timestamp (ms from typing start) at which each character
+// lands. Jitter is a deterministic hash of the char index, so the rhythm
+// reads human but every loop is identical.
+const charJitter = (i: number) => (((i * 2654435761) >>> 0) % CHAR_JITTER_MS);
+const CHAR_TIMES: number[] = [];
+{
+  let t = 0;
+  let idx = 0;
+  for (let li = 0; li < CODE.length; li++) {
+    for (let c = 0; c < LINE_CHARS[li]; c++) {
+      t += CHAR_BASE_MS + charJitter(idx);
+      idx++;
+      CHAR_TIMES.push(t);
+    }
+    if (li < CODE.length - 1) t += POST_LINE_MS;
+  }
+}
+const TOTAL_TYPE_MS = (CHAR_TIMES[CHAR_TIMES.length - 1] ?? 0) + 200;
+
+// Chars visible at `elapsed` ms into the typing phase (binary search).
+function charsAt(elapsed: number): number {
+  let lo = 0, hi = CHAR_TIMES.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (CHAR_TIMES[mid] <= elapsed) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
 
 // Phase boundaries (cumulative ms from loop start).
 const T_TYPE    = TOTAL_TYPE_MS;
@@ -431,20 +461,7 @@ export default function WorkspaceAnimation({ className, style }: Props) {
         // typing phase
         setPhase("typing");
         setFlash(0);
-        let remaining = elapsed;
-        let chars = 0;
-        for (let i = 0; i < CODE.length; i++) {
-          const lineMs = LINE_CHARS[i] * CHAR_MS;
-          if (remaining <= lineMs) {
-            chars += Math.floor(remaining / CHAR_MS);
-            break;
-          }
-          remaining -= lineMs;
-          chars += LINE_CHARS[i];
-          if (remaining <= POST_LINE_MS) break;
-          remaining -= POST_LINE_MS;
-        }
-        const n = Math.min(chars, TOTAL_CHARS);
+        const n = Math.min(charsAt(elapsed), TOTAL_CHARS);
         setTyped(n);
         // Depress the keycap for the character that just landed; hold
         // `enter` through the between-line pause.
