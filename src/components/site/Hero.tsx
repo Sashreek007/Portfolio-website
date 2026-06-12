@@ -7,7 +7,7 @@
 //
 // On mobile (md and below) the animation drops below the text.
 
-import WorkspaceAnimation from "./WorkspaceAnimation";
+import SystemSchematic from "./SystemSchematic";
 
 export default function Hero() {
   return (
@@ -90,10 +90,7 @@ export default function Hero() {
 
         {/* ── RIGHT: animated workspace ──────────────────────────────── */}
         <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:justify-self-end">
-          <WorkspaceAnimation
-            className="w-full h-auto block"
-            style={{ aspectRatio: "600 / 800" }}
-          />
+          <SystemSchematic className="w-full" />
         </div>
       </div>
     </section>
