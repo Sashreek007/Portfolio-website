@@ -195,11 +195,13 @@ export default async function HomePage() {
             </div>
           </article>
 
-          {/* RIGHT — rendered README */}
+          {/* RIGHT — rendered README, lifted one surface step
+              (charcoal panel + hairline, no shadow) */}
           <aside
-            className="reveal-child flex flex-col gap-10 pl-7"
+            className="reveal-child flex flex-col gap-10 p-7 lg:p-8 rounded-[12px]"
             style={{
-              borderLeft: "2px solid color-mix(in srgb, var(--violet-mid) 50%, var(--gray-800))",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--gray-800)",
               "--ri": 2,
             } as React.CSSProperties}
           >
@@ -341,16 +343,27 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-            {bestProjects.slice(0, 4).map((project, i) => (
+          {/* Magazine hierarchy — one full-width feature, then a 3-up row */}
+          <div className="flex flex-col gap-7">
+            {bestProjects[0] && (
               <div
-                key={project.id}
                 className="reveal-child flex"
-                style={{ "--ri": i + 1 } as React.CSSProperties}
+                style={{ "--ri": 1 } as React.CSSProperties}
               >
-                <ProjectMediaCard project={project} index={i} />
+                <ProjectMediaCard project={bestProjects[0]} index={0} featured />
               </div>
-            ))}
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+              {bestProjects.slice(1, 4).map((project, i) => (
+                <div
+                  key={project.id}
+                  className="reveal-child flex"
+                  style={{ "--ri": i + 2 } as React.CSSProperties}
+                >
+                  <ProjectMediaCard project={project} index={i + 1} />
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex justify-center mt-14">

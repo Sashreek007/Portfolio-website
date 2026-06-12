@@ -5,18 +5,24 @@ import type { Project } from "@/components/site/ProjectCard";
 function MediaFrame({
   project: p,
   index,
+  featured = false,
 }: {
   project: Project;
   index: number;
+  featured?: boolean;
 }) {
   return (
     <div
-      className="media-frame relative w-full overflow-hidden"
+      className={`media-frame relative w-full overflow-hidden ${
+        featured
+          ? "aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[340px] border-b lg:border-b-0 lg:border-r border-[var(--gray-800)]"
+          : ""
+      }`}
       style={{
-        aspectRatio: "16 / 10",
+        aspectRatio: featured ? undefined : "16 / 10",
         background:
           "radial-gradient(900px circle at 25% 0%, color-mix(in srgb, var(--violet-dim) 16%, transparent), transparent 55%), var(--bg-surface)",
-        borderBottom: "1px solid var(--gray-800)",
+        borderBottom: featured ? undefined : "1px solid var(--gray-800)",
       }}
     >
       {p.video_url ? (
@@ -90,18 +96,30 @@ function MediaFrame({
 export default function ProjectMediaCard({
   project: p,
   index,
+  featured = false,
 }: {
   project: Project;
   index: number;
+  // Magazine front-page hierarchy: the featured card runs full width with
+  // the cover beside the text at desktop; the rest stay vertical.
+  featured?: boolean;
 }) {
   return (
     <Link
       href={projectHref(p)}
-      className="media-card group relative flex flex-col w-full overflow-hidden"
+      className={`media-card group relative w-full overflow-hidden ${
+        featured
+          ? "grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
+          : "flex flex-col"
+      }`}
     >
-      <MediaFrame project={p} index={index} />
+      <MediaFrame project={p} index={index} featured={featured} />
 
-      <div className="flex flex-col gap-4 p-6">
+      <div
+        className={`flex flex-col ${
+          featured ? "gap-5 p-6 lg:p-10 lg:justify-center" : "gap-4 p-6"
+        }`}
+      >
         {p.year && (
           <span
             className="font-mono text-[12px] tracking-[0.1em] uppercase font-medium"
@@ -113,7 +131,9 @@ export default function ProjectMediaCard({
 
         {/* Title */}
         <h3
-          className="text-[24px] font-medium leading-[1.2] tracking-[-0.015em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+          className={`font-medium leading-[1.15] tracking-[-0.015em] transition-colors duration-200 group-hover:text-[var(--violet-pale)] ${
+            featured ? "text-[28px] lg:text-[38px]" : "text-[24px]"
+          }`}
           style={{
             color: "var(--text-primary)",
             fontFamily: "var(--font-body)",
@@ -124,7 +144,7 @@ export default function ProjectMediaCard({
 
         {/* Description — secondary so the title stays the loudest element */}
         <p
-          className="text-[15px] leading-[1.6]"
+          className={featured ? "text-[16px] leading-[1.7] max-w-[480px]" : "text-[15px] leading-[1.6]"}
           style={{ color: "var(--text-secondary)" }}
         >
           {p.description}
