@@ -13,7 +13,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-[100vh] px-[5vw] pt-12 pb-12 overflow-hidden flex items-center"
+      className="relative min-h-[100vh] px-[5vw] pt-24 pb-12 overflow-hidden flex items-center"
       style={{ background: "var(--bg-base)" }}
     >
       {/* Top-aligned on desktop: the editor's top edge locks to the name's

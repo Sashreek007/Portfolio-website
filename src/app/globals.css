@@ -258,6 +258,16 @@
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--text-primary) 5%, transparent),
     0 8px 24px -16px rgba(0, 0, 0, 0.6);
+  transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+/* At the very top of the page the nav sits transparent over the hero;
+   the glass fades in on scroll. */
+.glass-nav.nav-top {
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* ─── Animations ────────────────────────────────────────────────────── */

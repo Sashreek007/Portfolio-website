@@ -23,15 +23,17 @@ function useScrollProgress() {
   return p;
 }
 
-function useScrolledPastHero(threshold = 0.6) {
-  const [past, setPast] = useState(false);
+// Glass treatment kicks in once the page scrolls — at the very top the
+// nav sits transparent over the hero.
+function useScrolled(threshold = 24) {
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const update = () => setPast(window.scrollY > window.innerHeight * threshold);
+    const update = () => setScrolled(window.scrollY > threshold);
     window.addEventListener("scroll", update, { passive: true });
     update();
     return () => window.removeEventListener("scroll", update);
   }, [threshold]);
-  return past;
+  return scrolled;
 }
 
 const homeLinks = [
@@ -56,9 +58,9 @@ export default function Nav() {
   const isHome = pathname === "/";
   const [activeSection, setActiveSection] = useState("");
   const progress = useScrollProgress();
-  // On the home page, hide the nav until past the hero. On other pages, always show.
-  const scrolledPastHero = useScrolledPastHero(0.6);
-  const visible = isHome ? scrolledPastHero : true;
+  // Always visible — the hero's CTAs were trimmed to two, so the nav is
+  // the only route to about/blog/contact from the top of the page.
+  const scrolled = useScrolled(24);
 
   // Sliding active-section indicator — one bar that translates between
   // links instead of a per-link underline popping in and out.
@@ -106,14 +108,11 @@ export default function Nav() {
 
   return (
     <header
-      className="glass-nav top-0 left-0 right-0 z-50 flex items-center justify-between px-[6vw] py-5 overflow-hidden"
+      className={`glass-nav ${scrolled ? "" : "nav-top"} top-0 left-0 right-0 z-50 flex items-center justify-between px-[6vw] py-5 overflow-hidden`}
       style={{
         // On home: fixed so it doesn't reserve space (hero fills full viewport).
         // On other pages: sticky so it occupies the top of the document normally.
         position: isHome ? "fixed" : "sticky",
-        transform: visible ? "translateY(0)" : "translateY(-100%)",
-        transition: "transform 350ms cubic-bezier(0.16, 1, 0.3, 1)",
-        pointerEvents: visible ? "auto" : "none",
       }}
     >
       {/* Scroll progress bar */}
