@@ -65,11 +65,10 @@ function MediaFrame({
             <span className="media-cover-num" aria-hidden>
               {String(index + 1).padStart(2, "0")}
             </span>
-            <span
-              className="font-mono text-[11px] tracking-[0.18em] uppercase pb-2"
-              style={{ color: "var(--text-muted)" }}
-            >
-              case file
+            {/* Document chain: hero = fig. 01, about spec = fig. 02,
+                so the four covers run fig. 03–06 */}
+            <span className="fig-caption pb-2">
+              fig. {String(index + 3).padStart(2, "0")}
             </span>
           </div>
           <div

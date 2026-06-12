@@ -344,6 +344,30 @@
   transform: translateY(0);
 }
 
+/* ─── Blueprint document language ────────────────────────────────────
+   The hero schematic established the site's signature: faint grid paper,
+   hairline frames, and "fig. NN" captions. These utilities extend that
+   drawing down the page so each section reads as a numbered figure of
+   one engineering document. */
+.blueprint-panel {
+  position: relative;
+  border: 1px solid var(--gray-800);
+  border-radius: 6px;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--gray-800) 38%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--gray-800) 38%, transparent) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+  background-color: color-mix(in srgb, var(--bg-surface) 55%, transparent);
+}
+.fig-caption {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+  text-transform: lowercase;
+}
+
 /* ─── Project media cards ────────────────────────────────────────────── */
 .media-card {
   border: 1px solid var(--gray-800);
