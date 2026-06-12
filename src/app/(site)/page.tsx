@@ -195,11 +195,13 @@ export default async function HomePage() {
             </div>
           </article>
 
-          {/* RIGHT — operator spec sheet, set on the same blueprint paper
-              as the hero schematic (fig. 02 in the document chain) */}
+          {/* RIGHT — rendered README */}
           <aside
-            className="reveal-child blueprint-panel flex flex-col gap-10 p-7 lg:p-8"
-            style={{ "--ri": 2 } as React.CSSProperties}
+            className="reveal-child flex flex-col gap-10 pl-7"
+            style={{
+              borderLeft: "2px solid color-mix(in srgb, var(--violet-mid) 50%, var(--gray-800))",
+              "--ri": 2,
+            } as React.CSSProperties}
           >
             {/* profile */}
             <section>
@@ -299,10 +301,6 @@ export default async function HomePage() {
                 ))}
               </ul>
             </section>
-
-            <div className="flex justify-end mt-auto pt-2">
-              <span className="fig-caption">fig. 02 — operator spec</span>
-            </div>
           </aside>
         </div>
       </section>
@@ -343,13 +341,11 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* Staggered editorial grid — the right column sits a beat lower,
-              so the four covers read as pinned sheets rather than a table */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
             {bestProjects.slice(0, 4).map((project, i) => (
               <div
                 key={project.id}
-                className={`reveal-child flex ${i % 2 === 1 ? "md:mt-14" : ""}`}
+                className="reveal-child flex"
                 style={{ "--ri": i + 1 } as React.CSSProperties}
               >
                 <ProjectMediaCard project={project} index={i} />
@@ -377,65 +373,27 @@ export default async function HomePage() {
         style={{ background: "var(--bg-base)" }}
       >
         <SectionKicker label="CONTACT" meta="reach.md" />
-        <div className="max-w-[1320px] mx-auto">
-          <div className="grid gap-14 lg:gap-20 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-            {/* LEFT — pitch + availability */}
-            <div>
-              <h2
-                className="reveal-child text-[42px] lg:text-[54px] leading-[1.08] font-medium tracking-[-0.02em]"
-                style={{
-                  color: "var(--text-primary)",
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                How to reach me, in{" "}
-                <span style={{ color: "var(--violet-pale)" }}>one page</span>.
-              </h2>
+        <div className="max-w-[960px] mx-auto flex flex-col">
+          <h2
+            className="reveal-child text-[42px] lg:text-[54px] leading-[1.08] font-medium tracking-[-0.02em] mb-14"
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-body)",
+            }}
+          >
+            How to reach me, in{" "}
+            <span style={{ color: "var(--violet-pale)" }}>one page</span>.
+          </h2>
 
-              <p
-                className="reveal-child mt-8 text-[17px] leading-[1.75] max-w-[440px]"
-                style={{ color: "var(--text-secondary)", "--ri": 1 } as React.CSSProperties}
-              >
-                No forms, no scheduling links. Four channels, ranked by how
-                fast I&apos;ll see them.
-              </p>
+          <div className="w-full flex flex-col items-stretch">
+            <h3
+              className="reveal-child font-mono text-[15px] flex items-baseline gap-2 mb-10"
+              style={{ "--ri": 1 } as React.CSSProperties}
+            >
+              <span style={{ color: "var(--violet-soft)" }}>##</span>
+              <span style={{ color: "var(--text-primary)" }}>channels</span>
+            </h3>
 
-              {/* Availability — a node from the schematic, pinned here */}
-              <div
-                className="reveal-child blueprint-panel inline-flex flex-col gap-[10px] mt-12 px-6 py-5"
-                style={{ "--ri": 2 } as React.CSSProperties}
-              >
-                <span className="flex items-center gap-3">
-                  <span
-                    className="w-[7px] h-[7px] rounded-full inline-block flex-shrink-0"
-                    style={{
-                      background: "var(--green-mid)",
-                      animation: "pulse-dot 2.5s ease-in-out infinite",
-                    }}
-                  />
-                  <span
-                    className="font-mono text-[12px] tracking-[0.18em] uppercase font-medium"
-                    style={{ color: "var(--green-bright)" }}
-                  >
-                    open to internships
-                  </span>
-                </span>
-                <span
-                  className="font-mono text-[12px] pl-[19px]"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  co-op stream · ualberta
-                </span>
-                <span
-                  className="font-mono text-[12px] pl-[19px]"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  edmonton, ab · mst
-                </span>
-              </div>
-            </div>
-
-            {/* RIGHT — channel rows */}
             <div
               className="reveal-child flex flex-col"
               style={{ borderTop: "1px solid var(--gray-800)", "--ri": 2 } as React.CSSProperties}
@@ -523,7 +481,7 @@ export default async function HomePage() {
               <CopyHandle
                 value="sashreek"
                 copiedLabel="copied to clipboard"
-                className="contact-row group grid gap-6 py-9 w-full text-left cursor-pointer"
+                className="contact-row group grid gap-6 py-9 w-full text-left"
                 style={{
                   gridTemplateColumns: "60px 1fr 50px",
                   background: "transparent",
@@ -571,15 +529,6 @@ export default async function HomePage() {
                 </span>
               </CopyHandle>
             </div>
-          </div>
-
-          {/* End of document */}
-          <div
-            className="flex items-center justify-between mt-20 pt-5"
-            style={{ borderTop: "1px solid var(--gray-800)" }}
-          >
-            <span className="fig-caption">eof</span>
-            <span className="fig-caption">fig. 07 — comms · end of document</span>
           </div>
         </div>
       </section>
