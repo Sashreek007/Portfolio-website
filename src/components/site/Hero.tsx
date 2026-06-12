@@ -16,9 +16,11 @@ export default function Hero() {
       className="relative min-h-[100vh] px-[5vw] pt-24 pb-12 overflow-hidden flex items-center"
       style={{ background: "var(--bg-base)" }}
     >
-      {/* Top-aligned on desktop: the editor's top edge locks to the name's
-          cap line instead of both columns floating around a shared center. */}
-      <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center lg:items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
+      {/* Desktop: both columns share BOTH edges — the name's cap line locks
+          to the editor's top border, and the CTA row sinks to the bottom of
+          the row so it lines up with the schematic's caption. The air in
+          between is deliberate. */}
+      <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center lg:items-stretch grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
 
         {/* ── LEFT: name + subtitle + status ─────────────────────────── */}
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
@@ -35,65 +37,71 @@ export default function Hero() {
             sashreek<br />addanki
           </h1>
 
-          {/* Hairline divider — draws itself in after the name lands */}
-          <div
-            className="draw-x h-px w-full mt-8 mb-6"
-            style={{
-              background:
-                "linear-gradient(to right, color-mix(in srgb, var(--violet-mid) 80%, transparent), var(--gray-800) 60%, transparent)",
-            }}
-          />
-
-          {/* Subtitle row */}
-          <p
-            className="fade-up fade-up-2 font-mono text-[15px] mb-4 flex items-center gap-3 flex-wrap justify-center lg:justify-start"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            <span style={{ color: "var(--violet-pale)" }}>computing science</span>
-            <span style={{ color: "var(--gray-600)" }}>@</span>
-            <span>ualberta</span>
-            <span
-              className="inline-block w-[5px] h-[5px] rounded-full"
-              style={{ background: "var(--gray-600)" }}
+          {/* Meta block — divider, subtitle, tagline, CTAs. On desktop it
+              sinks to the bottom of the row (lg:mt-auto) so the CTA line
+              shares a bottom edge with the schematic's caption. */}
+          <div className="w-full flex flex-col items-center lg:items-start lg:mt-auto">
+            {/* Hairline divider — draws itself in after the name lands */}
+            <div
+              className="draw-x h-px w-full mt-8 mb-6"
+              style={{
+                background:
+                  "linear-gradient(to right, color-mix(in srgb, var(--violet-mid) 80%, transparent), var(--gray-800) 60%, transparent)",
+              }}
             />
-            <span style={{ color: "var(--amber-bright)" }}>ai</span>
-            <span style={{ color: "var(--gray-600)" }}>+</span>
-            <span style={{ color: "var(--green-bright)" }}>systems</span>
-          </p>
 
-          {/* Tagline (Syne for some warmth against the mono name) */}
-          <p
-            className="fade-up fade-up-3 text-[19px] leading-[1.6] max-w-[540px] mb-8"
-            style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
-          >
-            I understand the{" "}
-            <span style={{ color: "var(--amber-bright)" }}>machine</span>
-            {" "}before I build on top of it.
-          </p>
+            {/* Subtitle row */}
+            <p
+              className="fade-up fade-up-2 font-mono text-[15px] mb-4 flex items-center gap-3 flex-wrap justify-center lg:justify-start"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <span style={{ color: "var(--violet-pale)" }}>computing science</span>
+              <span style={{ color: "var(--gray-600)" }}>@</span>
+              <span>ualberta</span>
+              <span
+                className="inline-block w-[5px] h-[5px] rounded-full"
+                style={{ background: "var(--gray-600)" }}
+              />
+              <span style={{ color: "var(--amber-bright)" }}>ai</span>
+              <span style={{ color: "var(--gray-600)" }}>+</span>
+              <span style={{ color: "var(--green-bright)" }}>systems</span>
+            </p>
 
-          {/* CTA buttons — one primary action, one secondary. Everything
-              else (about, blog, socials) already lives in the nav/contact. */}
-          <div className="fade-up fade-up-4 flex flex-wrap gap-3 justify-center lg:justify-start">
-            <a
-              href="#work"
-              className="pill-primary font-mono text-[14px] px-[22px] py-[11px]"
+            {/* Tagline (Syne for some warmth against the mono name) */}
+            <p
+              className="fade-up fade-up-3 text-[19px] leading-[1.6] max-w-[540px] mb-8"
+              style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
             >
-              view projects <span aria-hidden>→</span>
-            </a>
-            <a
-              href="/resume"
-              className="glass-pill font-mono text-[14px] px-[22px] py-[11px]"
-              style={{ color: "var(--text-primary)" }}
-            >
-              resume
-            </a>
+              I understand the{" "}
+              <span style={{ color: "var(--amber-bright)" }}>machine</span>
+              {" "}before I build on top of it.
+            </p>
+
+            {/* CTA buttons — one primary action, one secondary. Everything
+                else (about, blog, socials) already lives in the nav/contact. */}
+            <div className="fade-up fade-up-4 flex flex-wrap gap-3 justify-center lg:justify-start">
+              <a
+                href="#work"
+                className="pill-primary font-mono text-[14px] px-[22px] py-[11px]"
+              >
+                view projects <span aria-hidden>→</span>
+              </a>
+              <a
+                href="/resume"
+                className="glass-pill font-mono text-[14px] px-[22px] py-[11px]"
+                style={{ color: "var(--text-primary)" }}
+              >
+                resume
+              </a>
+            </div>
           </div>
         </div>
 
         {/* ── RIGHT: animated workspace ──────────────────────────────── */}
-        {/* lg:mt-2 nudges the editor's border down to the name's cap height
-            (the h1 box has ~8px of ascender space above the glyphs). */}
-        <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:mt-2 lg:justify-self-end">
+        {/* lg:mt-3 nudges the editor's border down to the name's cap height
+            (the h1 box carries ~12px of ascender space above the glyphs at
+            desktop sizes). */}
+        <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:mt-3 lg:justify-self-end">
           <SystemSchematic className="w-full" />
         </div>
       </div>
