@@ -1,4 +1,5 @@
 import BlogNav from "@/components/site/BlogNav";
+import VimKeys from "@/components/site/VimKeys";
 
 export default function BlogLayout({
   children,
@@ -8,6 +9,7 @@ export default function BlogLayout({
   return (
     <>
       <BlogNav />
+      <VimKeys />
       {children}
     </>
   );

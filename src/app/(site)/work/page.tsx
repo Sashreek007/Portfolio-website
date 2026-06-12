@@ -1,5 +1,6 @@
 import Link from "next/link";
 import WorkClient from "./WorkClient";
+import SectionKicker from "@/components/site/SectionKicker";
 import { getAllProjects } from "@/lib/projects.server";
 
 export const metadata = { title: "Work · Sashreek Addanki" };
@@ -18,35 +19,10 @@ export default async function WorkPage() {
       </Link>
 
       {/* Header — editorial kicker to match home + about */}
-      <div className="flex items-center gap-4 mb-14">
-        <span
-          className="inline-block w-[7px] h-[7px] rounded-full"
-          style={{
-            background: "var(--violet-soft)",
-            boxShadow:
-              "0 0 14px color-mix(in srgb, var(--violet-soft) 60%, transparent)",
-          }}
-        />
-        <span
-          className="font-mono text-[12.5px] tracking-[0.22em] uppercase font-medium"
-          style={{ color: "var(--violet-pale)" }}
-        >
-          WORK · PROJECTS
-        </span>
-        <span
-          className="h-px flex-1"
-          style={{
-            background:
-              "linear-gradient(to right, color-mix(in srgb, var(--violet-mid) 60%, transparent), var(--gray-800) 70%)",
-          }}
-        />
-        <span
-          className="font-mono text-[12px] tracking-[0.18em]"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {String(projects.length).padStart(2, "0")} entries
-        </span>
-      </div>
+      <SectionKicker
+        label="WORK · PROJECTS"
+        meta={`${String(projects.length).padStart(2, "0")} entries`}
+      />
 
       <h1
         className="text-[42px] lg:text-[58px] font-medium leading-[1.1] mb-5 tracking-[-0.02em] max-w-[840px]"

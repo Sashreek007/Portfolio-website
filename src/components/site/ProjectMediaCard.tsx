@@ -37,7 +37,7 @@ function MediaFrame({
         />
       ) : (
         <>
-          {/* corner crosshairs */}
+          {/* corner crosshairs — close in toward the target on hover */}
           {[
             { top: 10, left: 10 },
             { top: 10, right: 10 },
@@ -46,7 +46,7 @@ function MediaFrame({
           ].map((pos, i) => (
             <span
               key={i}
-              className="absolute w-3 h-3"
+              className={`corner corner-${i} absolute w-3 h-3`}
               style={{
                 ...pos,
                 borderTop:
