@@ -7,7 +7,7 @@
 //
 // On mobile (md and below) the animation drops below the text.
 
-import SystemSchematic from "./SystemSchematic";
+import HeroVisual from "./HeroVisual";
 
 export default function Hero() {
   return (
@@ -100,7 +100,7 @@ export default function Hero() {
             (the h1 box carries ~12px of ascender space above the glyphs at
             desktop sizes). */}
         <div className="fade-up fade-up-2 relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[560px] mx-auto lg:mx-0 lg:mt-3 lg:justify-self-end">
-          <SystemSchematic className="w-full" />
+          <HeroVisual className="w-full" />
         </div>
       </div>
     </section>
