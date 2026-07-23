@@ -654,7 +654,7 @@
 .bf-wrap-bl { bottom: -10px; left: 0; }
 .bf-branch {
   display: block;
-  width: clamp(260px, 32vw, 540px);
+  width: clamp(320px, 40vw, 660px);
   height: auto;
 }
 .bf-branch-flip { transform: rotate(180deg); }
@@ -663,27 +663,33 @@
   transform-origin: top right;
 }
 .bf-sway-bl {
-  animation: bf-sway-flip 11s ease-in-out infinite alternate;
+  animation: bf-sway 11s ease-in-out infinite alternate;
   transform-origin: bottom left;
 }
 @keyframes bf-sway {
   from { transform: rotate(-0.7deg); }
   to   { transform: rotate(0.9deg); }
 }
-@keyframes bf-sway-flip {
-  from { transform: rotate(180deg) rotate(-0.9deg); }
-  to   { transform: rotate(180deg) rotate(0.7deg); }
-}
 .bf-petal {
   position: absolute;
   top: -4vh;
   border-radius: 150% 0 150% 0;
-  background: color-mix(in srgb, var(--violet-soft) 62%, transparent);
+  background: radial-gradient(
+    circle at 32% 28%,
+    color-mix(in srgb, var(--violet-pale) 80%, white) 0%,
+    color-mix(in srgb, var(--violet-pale) 70%, transparent) 45%,
+    color-mix(in srgb, var(--violet-soft) 60%, transparent) 100%
+  );
   opacity: 0;
   animation: bf-fall var(--t) linear var(--d) infinite;
 }
 .bf-petal-pale {
-  background: color-mix(in srgb, var(--violet-pale) 55%, transparent);
+  background: radial-gradient(
+    circle at 32% 28%,
+    rgba(255, 255, 255, 0.8) 0%,
+    color-mix(in srgb, var(--violet-pale) 65%, transparent) 55%,
+    color-mix(in srgb, var(--violet-soft) 45%, transparent) 100%
+  );
 }
 @keyframes bf-fall {
   0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }

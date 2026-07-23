@@ -1,13 +1,16 @@
 "use client";
 
 // Blossom field — violet cherry-blossom branches anchored to two page
-// corners with falling petals: the painterly corner motif translated
-// into the site's palette (violet blooms, amber stamens, warm-gray
-// boughs). Branches draw in on load (Motion pathLength), blooms pop in
-// with springs, the whole bough sways gently, and petals drift down
-// the page. Spring scroll parallax gives the corners depth.
+// corners with falling petals. The branch skeleton is grown
+// procedurally (seeded recursion) and PAINTED into a canvas: every
+// petal is a radial-gradient stroke (near-white core → violet edge),
+// blossoms are layered back-to-front with soft bloom, bark is stroked
+// in warm layered browns — a painterly render, not flat vector shapes.
+// Painted once (DPR-aware) so it costs nothing per frame; Motion adds
+// entrance + spring scroll parallax, CSS adds sway + falling petals.
 // Hidden on /blog.
 
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import {
   motion,
@@ -17,168 +20,266 @@ import {
   useTransform,
 } from "motion/react";
 
-// ── Branch anatomy (hand-authored, anchored to the top-right of a
-//    520×400 viewBox; the bottom-left copy is the same art rotated). ──
-const BOUGH =
-  "M 520 48 C 440 60, 380 84, 330 120 C 300 142, 272 168, 252 190 L 259 197 C 282 172, 308 148, 338 128 C 386 96, 444 74, 520 66 Z";
-
-const TWIGS = [
-  "M 360 105 C 340 140, 330 170, 336 205",
-  "M 300 145 C 282 128, 270 108, 268 84",
-  "M 256 188 C 230 210, 210 240, 206 276",
-  "M 420 80 C 408 106, 402 126, 406 148",
-  "M 452 66 C 448 48, 440 34, 424 24",
-];
-
-// Blooms: position, scale, rotation, tone (0 = violet-soft, 1 = pale).
-const BLOOMS: { x: number; y: number; s: number; r: number; tone: 0 | 1 }[] = [
-  { x: 336, y: 205, s: 1.15, r: 15, tone: 0 },
-  { x: 268, y: 84, s: 0.9, r: -30, tone: 1 },
-  { x: 206, y: 276, s: 1.25, r: 40, tone: 0 },
-  { x: 406, y: 148, s: 0.85, r: 70, tone: 1 },
-  { x: 424, y: 24, s: 0.75, r: -12, tone: 0 },
-  { x: 300, y: 148, s: 1.0, r: 100, tone: 0 },
-  { x: 360, y: 108, s: 0.95, r: -55, tone: 1 },
-  { x: 472, y: 58, s: 0.8, r: 22, tone: 0 },
-  { x: 252, y: 192, s: 1.05, r: -80, tone: 1 },
-];
-
-const BUDS: [number, number][] = [
-  [340, 180],
-  [286, 110],
-  [222, 250],
-  [398, 132],
-  [440, 40],
-];
-
-function Bloom({
-  x,
-  y,
-  s,
-  r,
-  tone,
-  delay,
-  reduced,
-}: (typeof BLOOMS)[number] & { delay: number; reduced: boolean }) {
-  const petal =
-    tone === 0
-      ? "color-mix(in srgb, var(--violet-soft) 52%, transparent)"
-      : "color-mix(in srgb, var(--violet-pale) 42%, transparent)";
-  const edge =
-    tone === 0
-      ? "color-mix(in srgb, var(--violet-pale) 35%, transparent)"
-      : "color-mix(in srgb, var(--violet-soft) 45%, transparent)";
-  return (
-    <g transform={`translate(${x} ${y}) rotate(${r})`}>
-      <motion.g
-        initial={reduced ? false : { scale: 0, opacity: 0 }}
-        animate={{ scale: s, opacity: 1 }}
-        transition={{
-          delay,
-          type: "spring",
-          stiffness: 160,
-          damping: 14,
-          opacity: { delay, duration: 0.25 },
-        }}
-      >
-        {[0, 72, 144, 216, 288].map((a) => (
-          <ellipse
-            key={a}
-            cx="0"
-            cy="-6.6"
-            rx="4.3"
-            ry="6.6"
-            transform={`rotate(${a})`}
-            fill={petal}
-            stroke={edge}
-            strokeWidth="0.5"
-          />
-        ))}
-        <circle r="2.4" fill="color-mix(in srgb, var(--amber-bright) 85%, transparent)" />
-        {[30, 150, 270].map((a) => (
-          <circle
-            key={a}
-            cx={Math.cos((a * Math.PI) / 180) * 3.6}
-            cy={Math.sin((a * Math.PI) / 180) * 3.6}
-            r="0.8"
-            fill="color-mix(in srgb, var(--amber-bright) 60%, transparent)"
-          />
-        ))}
-      </motion.g>
-    </g>
-  );
+// ── seeded RNG (deterministic) ───────────────────────────────────────
+function mulberry32(seed: number) {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-function BlossomBranch({
-  className,
-  baseDelay,
-  reduced,
-}: {
-  className?: string;
-  baseDelay: number;
-  reduced: boolean;
-}) {
+type Seg = { x: number; y: number; mx: number; my: number; ex: number; ey: number; w: number; depth: number };
+type Flower = { x: number; y: number; s: number; r: number; tone: number; back: boolean };
+type Bud = { x: number; y: number; s: number };
+
+const VIEW_W = 520;
+const VIEW_H = 430;
+
+// ── procedural skeleton ──────────────────────────────────────────────
+function growBranch(seed: number) {
+  const rng = mulberry32(seed);
+  const segs: Seg[] = [];
+  const flowers: Flower[] = [];
+  const buds: Bud[] = [];
+
+  const clampAng = (a: number) =>
+    Math.min(Math.PI * 1.08, Math.max(Math.PI * 0.52, a));
+
+  const grow = (
+    x: number,
+    y: number,
+    ang: number,
+    len: number,
+    w: number,
+    depth: number
+  ) => {
+    const bend = (rng() - 0.5) * 0.5 + 0.05;
+    const a2 = clampAng(ang + bend);
+    const mx = x + Math.cos(ang + bend * 0.5) * len * 0.5;
+    const my = y + Math.sin(ang + bend * 0.5) * len * 0.5;
+    const ex = x + Math.cos(a2) * len;
+    const ey = y + Math.sin(a2) * len;
+    segs.push({ x, y, mx, my, ex, ey, w, depth });
+
+    if (depth >= 2 && rng() < 0.88) {
+      const clusters = 1 + Math.floor(rng() * 2);
+      for (let i = 0; i < clusters; i++) {
+        const t = 0.25 + rng() * 0.75;
+        const it = 1 - t;
+        const qx = it * it * x + 2 * it * t * mx + t * t * ex;
+        const qy = it * it * y + 2 * it * t * my + t * t * ey;
+        const size = 2 + Math.floor(rng() * 4);
+        for (let k = 0; k < size; k++) {
+          const ox = qx + (rng() - 0.5) * 20;
+          const oy = qy + (rng() - 0.3) * 20;
+          if (rng() < 0.15) {
+            buds.push({ x: ox, y: oy, s: 0.5 + rng() * 0.5 });
+          } else {
+            flowers.push({
+              x: ox,
+              y: oy,
+              s: 0.6 + rng() * 0.65,
+              r: rng() * Math.PI * 2,
+              tone: rng(),
+              back: rng() < 0.35,
+            });
+          }
+        }
+      }
+    }
+
+    if (depth < 4) {
+      const kids = depth === 0 ? 3 : rng() < 0.72 ? 2 : 1;
+      for (let i = 0; i < kids; i++) {
+        const spread = (rng() - 0.5) * 0.85 + (i - (kids - 1) / 2) * 0.44;
+        grow(
+          ex,
+          ey,
+          clampAng(a2 + spread),
+          len * (0.66 + rng() * 0.14),
+          Math.max(0.8, w * 0.55),
+          depth + 1
+        );
+      }
+    } else if (rng() < 0.65) {
+      flowers.push({
+        x: ex,
+        y: ey,
+        s: 0.7 + rng() * 0.55,
+        r: rng() * Math.PI * 2,
+        tone: rng(),
+        back: false,
+      });
+    }
+  };
+
+  grow(530, 22, Math.PI * 0.84, 150, 12, 0);
+  return { segs, flowers, buds };
+}
+
+const TREE = growBranch(20260723);
+
+// ── painterly canvas render ──────────────────────────────────────────
+function paintPetal(
+  ctx: CanvasRenderingContext2D,
+  tone: number,
+  jitter: () => number
+) {
+  // radial gradient: near-white core → pale violet → soft violet edge
+  const len = 5.4 + jitter() * 1.6;
+  const grad = ctx.createRadialGradient(0, -1.2, 0.4, 0, -len * 0.55, len);
+  const core = tone < 0.45 ? "rgba(240, 238, 252, 0.95)" : "rgba(226, 222, 250, 0.92)";
+  const mid = tone < 0.45 ? "rgba(206, 203, 246, 0.88)" : "rgba(190, 184, 240, 0.85)";
+  const edge =
+    tone < 0.2
+      ? "rgba(127, 119, 221, 0.55)"
+      : tone < 0.7
+        ? "rgba(148, 140, 230, 0.6)"
+        : "rgba(110, 100, 205, 0.55)";
+  grad.addColorStop(0, core);
+  grad.addColorStop(0.55, mid);
+  grad.addColorStop(1, edge);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  // petal: teardrop with the classic sakura notch at the tip
+  const hw = 2.6 + jitter() * 0.8;
+  ctx.moveTo(0, -0.4);
+  ctx.bezierCurveTo(-hw, -len * 0.35, -hw * 0.8, -len * 0.9, -hw * 0.28, -len);
+  ctx.lineTo(0, -len * 0.86); // notch
+  ctx.lineTo(hw * 0.28, -len);
+  ctx.bezierCurveTo(hw * 0.8, -len * 0.9, hw, -len * 0.35, 0, -0.4);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function paintFlower(
+  ctx: CanvasRenderingContext2D,
+  f: Flower,
+  jitter: () => number
+) {
+  ctx.save();
+  ctx.translate(f.x, f.y);
+  ctx.rotate(f.r);
+  ctx.scale(f.s, f.s);
+  for (let p = 0; p < 5; p++) {
+    ctx.save();
+    ctx.rotate((p * Math.PI * 2) / 5 + (jitter() - 0.5) * 0.22);
+    paintPetal(ctx, f.tone, jitter);
+    ctx.restore();
+  }
+  // deep center + amber stamens
+  ctx.fillStyle = "rgba(83, 74, 183, 0.6)";
+  ctx.beginPath();
+  ctx.arc(0, 0, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  for (let p = 0; p < 6; p++) {
+    const a = (p * Math.PI * 2) / 6 + jitter() * 0.5;
+    const rr = 1.7 + jitter() * 0.9;
+    ctx.fillStyle = "rgba(239, 159, 39, 0.85)";
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * rr, Math.sin(a) * rr, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function paintTree(ctx: CanvasRenderingContext2D, scale: number) {
+  const jrng = mulberry32(97);
+  const jitter = () => jrng();
+  ctx.save();
+  ctx.scale(scale, scale);
+
+  // background blossoms — soft, dark, slightly blurred (depth layer)
+  ctx.save();
+  ctx.globalAlpha = 0.5;
+  ctx.filter = "blur(1.2px)";
+  for (const f of TREE.flowers) {
+    if (f.back) paintFlower(ctx, { ...f, s: f.s * 0.85 }, jitter);
+  }
+  ctx.filter = "none";
+  ctx.restore();
+
+  // bark — layered warm strokes: dark base, lighter ridge
+  for (const s of TREE.segs) {
+    ctx.lineCap = "round";
+    ctx.strokeStyle = s.depth < 2 ? "rgba(46, 38, 30, 0.96)" : "rgba(58, 48, 38, 0.9)";
+    ctx.lineWidth = s.w;
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.quadraticCurveTo(s.mx, s.my, s.ex, s.ey);
+    ctx.stroke();
+    if (s.w > 2.5) {
+      ctx.strokeStyle = "rgba(112, 88, 60, 0.35)";
+      ctx.lineWidth = s.w * 0.36;
+      ctx.beginPath();
+      ctx.moveTo(s.x - s.w * 0.14, s.y - s.w * 0.2);
+      ctx.quadraticCurveTo(s.mx - s.w * 0.14, s.my - s.w * 0.2, s.ex, s.ey);
+      ctx.stroke();
+    }
+  }
+
+  // buds
+  for (const b of TREE.buds) {
+    const g = ctx.createRadialGradient(b.x - 0.5, b.y - 0.8, 0.2, b.x, b.y, 3 * b.s);
+    g.addColorStop(0, "rgba(206, 203, 246, 0.9)");
+    g.addColorStop(1, "rgba(83, 74, 183, 0.75)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, 2.6 * b.s, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // foreground blossoms — sharp, with a soft violet bloom behind them
+  ctx.save();
+  ctx.shadowColor = "rgba(127, 119, 221, 0.4)";
+  ctx.shadowBlur = 9;
+  for (const f of TREE.flowers) {
+    if (!f.back) paintFlower(ctx, f, jitter);
+  }
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function BlossomCanvas({ flip }: { flip?: boolean }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const paint = () => {
+      const cssW = canvas.clientWidth;
+      if (cssW === 0) return;
+      const cssH = (cssW * VIEW_H) / VIEW_W;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, cssW, cssH);
+      paintTree(ctx, cssW / VIEW_W);
+    };
+    paint();
+    const ro = new ResizeObserver(paint);
+    ro.observe(canvas);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <svg viewBox="0 0 520 400" className={className} aria-hidden>
-      {/* main bough — filled taper */}
-      <motion.path
-        d={BOUGH}
-        fill="color-mix(in srgb, var(--gray-600) 55%, transparent)"
-        initial={reduced ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.1, delay: baseDelay }}
-      />
-      {/* twigs — drawn strokes */}
-      {TWIGS.map((d, i) => (
-        <motion.path
-          key={i}
-          d={d}
-          fill="none"
-          stroke="color-mix(in srgb, var(--gray-600) 60%, transparent)"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          initial={reduced ? false : { pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{
-            pathLength: {
-              duration: 0.9,
-              delay: baseDelay + 0.35 + i * 0.16,
-              ease: [0.16, 1, 0.3, 1],
-            },
-            opacity: { duration: 0.25, delay: baseDelay + 0.35 + i * 0.16 },
-          }}
-        />
-      ))}
-      {/* buds */}
-      {BUDS.map(([x, y], i) => (
-        <motion.circle
-          key={i}
-          cx={x}
-          cy={y}
-          r="3"
-          fill="color-mix(in srgb, var(--violet-dim) 80%, transparent)"
-          stroke="color-mix(in srgb, var(--violet-soft) 40%, transparent)"
-          strokeWidth="0.6"
-          initial={reduced ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: baseDelay + 1.1 + i * 0.1 }}
-        />
-      ))}
-      {/* blooms */}
-      {BLOOMS.map((b, i) => (
-        <Bloom
-          key={i}
-          {...b}
-          delay={baseDelay + 0.9 + i * 0.14}
-          reduced={reduced}
-        />
-      ))}
-    </svg>
+    <canvas
+      ref={ref}
+      className={`bf-branch${flip ? " bf-branch-flip" : ""}`}
+      style={{ aspectRatio: `${VIEW_W} / ${VIEW_H}` }}
+    />
   );
 }
 
 // Deterministic petal fall — hardcoded so server and client agree.
-// l: left %, w/h px, t duration s, d delay s, x sway px, o peak opacity
 const PETALS: { l: number; w: number; h: number; t: number; d: number; x: number; o: number; pale?: boolean }[] = [
   { l: 8,  w: 7,  h: 9,  t: 18, d: 0,    x: 46,  o: 0.55 },
   { l: 16, w: 6,  h: 8,  t: 24, d: 5,    x: -60, o: 0.4 },
@@ -211,19 +312,27 @@ export default function BlossomField() {
 
   return (
     <div aria-hidden className="bf-field">
-      <motion.div className="bf-wrap bf-wrap-tr" style={{ y: yTr }}>
-        <BlossomBranch
-          className="bf-branch bf-sway-tr"
-          baseDelay={0.3}
-          reduced={reduced}
-        />
+      <motion.div
+        className="bf-wrap bf-wrap-tr"
+        style={{ y: yTr }}
+        initial={reduced ? false : { opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.4, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="bf-sway-tr">
+          <BlossomCanvas />
+        </div>
       </motion.div>
-      <motion.div className="bf-wrap bf-wrap-bl hidden md:block" style={{ y: yBl }}>
-        <BlossomBranch
-          className="bf-branch bf-branch-flip bf-sway-bl"
-          baseDelay={0.9}
-          reduced={reduced}
-        />
+      <motion.div
+        className="bf-wrap bf-wrap-bl hidden md:block"
+        style={{ y: yBl }}
+        initial={reduced ? false : { opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.4, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="bf-sway-bl">
+          <BlossomCanvas flip />
+        </div>
       </motion.div>
       {PETALS.map((p, i) => (
         <span
