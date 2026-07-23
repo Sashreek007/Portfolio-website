@@ -14,7 +14,6 @@ export default function Hero() {
     <section
       id="hero"
       className="relative min-h-[100vh] px-[5vw] pt-24 pb-12 overflow-hidden flex items-center"
-      style={{ background: "var(--bg-base)" }}
     >
       {/* Desktop: columns top-align — the name's cap line locks to the
           editor's top border and the left content flows naturally below.

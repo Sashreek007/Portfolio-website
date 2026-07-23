@@ -426,6 +426,172 @@
   color: var(--violet-pale);
 }
 
+/* ─── Ambient field ──────────────────────────────────────────────────
+   Slow-drifting radial glows pinned behind all content (z: -1). Keeps
+   long dark stretches from reading flat/blank. Stays inside the design
+   rule: radial glows only, single-digit opacity, no background
+   gradients. Violet + amber only — green is reserved for status. */
+.ambient-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+.ambient-a {
+  width: 58vw;
+  height: 58vw;
+  top: -20vw;
+  left: -14vw;
+  background: radial-gradient(circle, color-mix(in srgb, var(--violet-dim) 10%, transparent), transparent 62%);
+  animation: ambient-a 46s ease-in-out infinite alternate;
+}
+.ambient-b {
+  width: 50vw;
+  height: 50vw;
+  bottom: -18vw;
+  right: -12vw;
+  background: radial-gradient(circle, color-mix(in srgb, var(--amber-mid) 6%, transparent), transparent 62%);
+  animation: ambient-b 58s ease-in-out infinite alternate;
+}
+.ambient-c {
+  width: 42vw;
+  height: 42vw;
+  top: 38%;
+  left: 55%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--violet-mid) 7%, transparent), transparent 58%);
+  animation: ambient-c 70s ease-in-out infinite alternate;
+}
+@keyframes ambient-a { to { transform: translate3d(10vw, 8vh, 0) scale(1.15); } }
+@keyframes ambient-b { to { transform: translate3d(-9vw, -10vh, 0) scale(1.1); } }
+@keyframes ambient-c { to { transform: translate3d(-12vw, 7vh, 0) scale(0.9); } }
+
+/* ─── Stack ticker band ──────────────────────────────────────────────
+   Infinite marquee of technologies between hero and work. The track
+   holds two identical halves; translating -50% loops seamlessly.
+   Hover pauses it. */
+.ticker-band {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--gray-800);
+  border-bottom: 1px solid var(--gray-800);
+  background: color-mix(in srgb, var(--bg-surface) 45%, transparent);
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 44s linear infinite;
+}
+.ticker-band:hover .ticker-track { animation-play-state: paused; }
+@keyframes ticker-scroll { to { transform: translateX(-50%); } }
+/* Edge fades so items materialize instead of popping at the viewport. */
+.ticker-band::before,
+.ticker-band::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(48px, 10vw, 140px);
+  z-index: 1;
+  pointer-events: none;
+}
+.ticker-band::before { left: 0;  background: linear-gradient(to right, var(--bg-base), transparent); }
+.ticker-band::after  { right: 0; background: linear-gradient(to left,  var(--bg-base), transparent); }
+
+/* ─── Case-study strips (home work section) ──────────────────────────
+   Editorial chapters: hairline-separated full-width strips, media frame
+   beside the dossier text, oversized ghost numeral behind the body. */
+.case-strip {
+  position: relative;
+  display: block;
+  border-top: 1px solid var(--gray-800);
+  transition: background-color 300ms ease;
+}
+.case-strip:hover {
+  background-color: color-mix(in srgb, var(--violet-mid) 4%, transparent);
+}
+.case-media {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--gray-800);
+  border-radius: 10px;
+  background:
+    radial-gradient(900px circle at 25% 0%, color-mix(in srgb, var(--violet-dim) 16%, transparent), transparent 55%),
+    var(--bg-surface);
+  transition:
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 300ms ease,
+    box-shadow 400ms ease;
+}
+.case-strip:hover .case-media {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--violet-soft) 42%, transparent);
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.3),
+    0 8px 16px -4px rgba(0, 0, 0, 0.35),
+    0 24px 48px -20px rgba(0, 0, 0, 0.6),
+    0 0 32px color-mix(in srgb, var(--violet-soft) 10%, transparent);
+}
+.case-media > video,
+.case-media > img {
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.case-strip:hover .case-media > video,
+.case-strip:hover .case-media > img {
+  transform: scale(1.04);
+}
+.case-title {
+  cursor: crosshair;
+  transition: color 200ms ease;
+}
+.case-strip:hover .case-title { color: var(--violet-pale); }
+/* Ghost chapter numeral — sits behind the dossier column. */
+.case-ghost {
+  position: absolute;
+  top: -0.28em;
+  right: 0;
+  z-index: 0;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(110px, 14vw, 220px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: color-mix(in srgb, var(--violet-mid) 10%, transparent);
+  user-select: none;
+  pointer-events: none;
+  transition: color 400ms ease, transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.case-strip:hover .case-ghost {
+  color: color-mix(in srgb, var(--violet-mid) 18%, transparent);
+  transform: translateY(-6px);
+}
+.case-open {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms ease;
+}
+.case-strip:hover .case-open {
+  transform: translateX(4px);
+  color: var(--violet-pale);
+}
+
+/* ─── Project constellation cover ────────────────────────────────────
+   Generative system-schematic cover for projects without media: seeded
+   node graph, pulsing nodes, packets flowing along a few edges. */
+.cn-node { animation: cn-pulse 4s ease-in-out infinite; }
+@keyframes cn-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+.cn-flow {
+  stroke-dasharray: 5 9;
+  animation: cn-flow 5s linear infinite;
+}
+@keyframes cn-flow { to { stroke-dashoffset: -140; } }
+
 /* ─── Contact channel rows ───────────────────────────────────────────── */
 .contact-row {
   transition: background-color 250ms ease;

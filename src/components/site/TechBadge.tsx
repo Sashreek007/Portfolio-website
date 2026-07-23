@@ -9,7 +9,7 @@ import {
 } from "react-icons/si";
 import { IconType } from "react-icons";
 
-const TECH_META: Record<string, { icon: IconType; color: string }> = {
+export const TECH_META: Record<string, { icon: IconType; color: string }> = {
   Python:         { icon: SiPython,       color: "#3776AB" },
   Go:             { icon: SiGo,           color: "#00ADD8" },
   "C++":          { icon: SiCplusplus,    color: "#00599C" },

@@ -38,7 +38,7 @@ function useScrolled(threshold = 24) {
 
 const homeLinks = [
   { href: "#work",    label: "work",    id: "work" },
-  { href: "#about",   label: "about",   id: "about" },
+  { href: "/about",   label: "about",   id: "about" },
   { href: "/blog",    label: "blog ↗",  id: "blog" },
   { href: "#contact", label: "contact", id: "contact" },
 ];
@@ -69,7 +69,7 @@ export default function Nav() {
 
   useEffect(() => {
     if (!isHome) return;
-    const ids = ["hero", "work", "about", "contact"];
+    const ids = ["hero", "work", "contact"];
     const observer = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
