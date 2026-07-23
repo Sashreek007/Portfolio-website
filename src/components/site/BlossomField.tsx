@@ -245,7 +245,7 @@ function paintTree(ctx: CanvasRenderingContext2D, scale: number) {
   ctx.restore();
 }
 
-function BlossomCanvas({ flip }: { flip?: boolean }) {
+function BlossomCanvas({ mirror, flipV }: { mirror?: boolean; flipV?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -273,11 +273,29 @@ function BlossomCanvas({ flip }: { flip?: boolean }) {
   return (
     <canvas
       ref={ref}
-      className={`bf-branch${flip ? " bf-branch-flip" : ""}`}
+      className={`bf-branch${mirror ? " bf-branch-mirror" : ""}${flipV ? " bf-branch-flip-v" : ""}`}
       style={{ aspectRatio: `${VIEW_W} / ${VIEW_H}` }}
     />
   );
 }
+
+// One-shot burst petals: faster falls, front-loaded delays (0–6s).
+const BURST: { l: number; w: number; h: number; t: number; d: number; x: number; o: number; pale?: boolean }[] = [
+  { l: 4,  w: 8,  h: 10, t: 11, d: 0.2, x: 44,  o: 0.6 },
+  { l: 11, w: 6,  h: 8,  t: 13, d: 1.1, x: -52, o: 0.5, pale: true },
+  { l: 19, w: 7,  h: 9,  t: 10, d: 0.6, x: 36,  o: 0.55 },
+  { l: 27, w: 9,  h: 11, t: 12, d: 2.3, x: -40, o: 0.6 },
+  { l: 35, w: 6,  h: 8,  t: 14, d: 0.9, x: 48,  o: 0.5, pale: true },
+  { l: 44, w: 7,  h: 9,  t: 11, d: 3.2, x: -34, o: 0.55 },
+  { l: 52, w: 8,  h: 10, t: 13, d: 1.6, x: 42,  o: 0.6 },
+  { l: 60, w: 5,  h: 7,  t: 15, d: 4.1, x: -46, o: 0.45, pale: true },
+  { l: 68, w: 7,  h: 9,  t: 10, d: 2.8, x: 38,  o: 0.55 },
+  { l: 76, w: 6,  h: 8,  t: 12, d: 5.2, x: -50, o: 0.5 },
+  { l: 83, w: 8,  h: 10, t: 11, d: 3.7, x: 40,  o: 0.6, pale: true },
+  { l: 91, w: 6,  h: 8,  t: 14, d: 1.4, x: -36, o: 0.5 },
+  { l: 48, w: 5,  h: 7,  t: 13, d: 5.8, x: 30,  o: 0.45 },
+  { l: 22, w: 6,  h: 8,  t: 12, d: 4.6, x: -42, o: 0.5, pale: true },
+];
 
 // Deterministic petal fall — hardcoded so server and client agree.
 const PETALS: { l: number; w: number; h: number; t: number; d: number; x: number; o: number; pale?: boolean }[] = [
@@ -313,31 +331,50 @@ export default function BlossomField() {
   return (
     <div aria-hidden className="bf-field">
       <motion.div
-        className="bf-wrap bf-wrap-tr"
+        className="bf-wrap bf-wrap-tl"
         style={{ y: yTr }}
         initial={reduced ? false : { opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.4, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="bf-sway-tr">
-          <BlossomCanvas />
+        <div className="bf-sway-tl">
+          <BlossomCanvas mirror />
         </div>
       </motion.div>
       <motion.div
-        className="bf-wrap bf-wrap-bl hidden md:block"
+        className="bf-wrap bf-wrap-br hidden md:block"
         style={{ y: yBl }}
         initial={reduced ? false : { opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.4, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="bf-sway-bl">
-          <BlossomCanvas flip />
+        <div className="bf-sway-br">
+          <BlossomCanvas flipV />
         </div>
       </motion.div>
       {PETALS.map((p, i) => (
         <span
           key={i}
           className={`bf-petal${p.pale ? " bf-petal-pale" : ""}`}
+          style={
+            {
+              left: `${p.l}%`,
+              width: `${p.w}px`,
+              height: `${p.h}px`,
+              "--t": `${p.t}s`,
+              "--d": `${p.d}s`,
+              "--x": `${p.x}px`,
+              "--o": p.o,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+      {/* opening burst — a dense shower on page load that falls once and
+          settles into the sparse ambient drift above */}
+      {BURST.map((p, i) => (
+        <span
+          key={`b-${i}`}
+          className={`bf-petal bf-petal-burst${p.pale ? " bf-petal-pale" : ""}`}
           style={
             {
               left: `${p.l}%`,

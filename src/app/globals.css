@@ -650,21 +650,22 @@
   pointer-events: none;
 }
 .bf-wrap { position: absolute; }
-.bf-wrap-tr { top: -10px; right: 0; }
-.bf-wrap-bl { bottom: -10px; left: 0; }
+.bf-wrap-tl { top: -10px; left: 0; }
+.bf-wrap-br { bottom: -10px; right: 0; }
 .bf-branch {
   display: block;
   width: clamp(320px, 40vw, 660px);
   height: auto;
 }
-.bf-branch-flip { transform: rotate(180deg); }
-.bf-sway-tr {
+.bf-branch-mirror { transform: scaleX(-1); }
+.bf-branch-flip-v { transform: scaleY(-1); }
+.bf-sway-tl {
   animation: bf-sway 9s ease-in-out infinite alternate;
-  transform-origin: top right;
+  transform-origin: top left;
 }
-.bf-sway-bl {
+.bf-sway-br {
   animation: bf-sway 11s ease-in-out infinite alternate;
-  transform-origin: bottom left;
+  transform-origin: bottom right;
 }
 @keyframes bf-sway {
   from { transform: rotate(-0.7deg); }
@@ -682,6 +683,11 @@
   );
   opacity: 0;
   animation: bf-fall var(--t) linear var(--d) infinite;
+}
+/* opening shower: falls once, then it's gone */
+.bf-petal-burst {
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
 }
 .bf-petal-pale {
   background: radial-gradient(
