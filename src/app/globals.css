@@ -592,6 +592,52 @@
 }
 @keyframes cn-flow { to { stroke-dashoffset: -140; } }
 
+/* ─── Circuit field — corner branches + rising data motes ────────────
+   The site's edge motif: fixed layer behind all content. Branch draw-in
+   and parallax are driven by Motion in CircuitField.tsx; node pulses,
+   packet flows, and motes stay CSS. */
+.cf-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cf-wrap { position: absolute; }
+.cf-wrap-tr { top: -6px; right: 0; }
+.cf-wrap-bl { bottom: -6px; left: 0; }
+.cf-branch {
+  display: block;
+  width: clamp(240px, 30vw, 500px);
+  height: auto;
+}
+.cf-branch-flip { transform: rotate(180deg); }
+.cf-flow {
+  stroke-dasharray: 4 10;
+  animation: cn-flow 7s linear infinite;
+}
+.cf-node { animation: cn-pulse 4.5s ease-in-out infinite; }
+.cf-mote {
+  position: absolute;
+  bottom: -3vh;
+  border-radius: 50%;
+  background: var(--violet-soft);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--violet-soft) 60%, transparent);
+  opacity: 0;
+  animation: cf-rise var(--t) linear var(--d) infinite;
+}
+.cf-mote-accent {
+  background: var(--amber-bright);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--amber-bright) 55%, transparent);
+}
+@keyframes cf-rise {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  10%  { opacity: var(--o, 0.5); }
+  50%  { transform: translate3d(var(--x, 20px), -55vh, 0); }
+  90%  { opacity: var(--o, 0.5); }
+  100% { transform: translate3d(0, -110vh, 0); opacity: 0; }
+}
+
 /* ─── Contact channel rows ───────────────────────────────────────────── */
 .contact-row {
   transition: background-color 250ms ease;

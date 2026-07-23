@@ -13,5 +13,8 @@ node_modules
 # Personal docs — not for version control
 sashreek_personality.md
 sashreek_portfolio_theme.md
-.next/
+.next
 tsconfig.tsbuildinfo
+
+# iCloud sync exclusions (symlinked real dirs)
+*.nosync
