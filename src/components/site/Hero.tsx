@@ -8,6 +8,7 @@
 // On mobile (md and below) the animation drops below the text.
 
 import HeroVisual from "./HeroVisual";
+import { Magnetic } from "@/components/motion-primitives/magnetic";
 
 export default function Hero() {
   return (
@@ -78,19 +79,23 @@ export default function Hero() {
             {/* CTA buttons — one primary action, one secondary. Everything
                 else (about, blog, socials) already lives in the nav/contact. */}
             <div className="fade-up fade-up-4 flex flex-wrap gap-3 justify-center lg:justify-start">
-              <a
-                href="#work"
-                className="pill-primary font-mono text-[14px] px-[22px] py-[11px]"
-              >
-                view projects <span aria-hidden>→</span>
-              </a>
-              <a
-                href="/resume"
-                className="glass-pill font-mono text-[14px] px-[22px] py-[11px]"
-                style={{ color: "var(--text-primary)" }}
-              >
-                resume
-              </a>
+              <Magnetic intensity={0.35} range={110}>
+                <a
+                  href="#work"
+                  className="pill-primary font-mono text-[14px] px-[22px] py-[11px]"
+                >
+                  view projects <span aria-hidden>→</span>
+                </a>
+              </Magnetic>
+              <Magnetic intensity={0.35} range={110}>
+                <a
+                  href="/resume"
+                  className="glass-pill font-mono text-[14px] px-[22px] py-[11px]"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  resume
+                </a>
+              </Magnetic>
             </div>
           </div>
         </div>

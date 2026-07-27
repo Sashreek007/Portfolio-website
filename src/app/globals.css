@@ -478,9 +478,12 @@
 .ticker-band {
   position: relative;
   overflow: hidden;
-  border-top: 1px solid var(--gray-800);
-  border-bottom: 1px solid var(--gray-800);
+  border-top: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
   background: color-mix(in srgb, var(--bg-surface) 45%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-primary) 5%, transparent);
 }
 .ticker-track {
   display: flex;
@@ -638,73 +641,68 @@
   100% { transform: translate3d(0, -110vh, 0); opacity: 0; }
 }
 
-/* ─── Blossom field — violet cherry-blossom corners + falling petals ──
-   Successor to the circuit field: same corner anchors and parallax,
-   painterly instead of schematic. Branch draw-in and bloom springs are
-   Motion-driven in BlossomField.tsx; sway + petal fall stay CSS. */
-.bf-field {
+/* ─── Space field — starfield, gravity meteors, nebula corners ───────
+   Successor to the blossom field: same fixed z:-1 slot. Stars live on
+   a canvas; meteors are gradient streaks that fall with an
+   accelerating (gravity) curve; nebulae are haikei-style layered
+   blobs, heavily blurred. */
+.sf-field {
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
 }
-.bf-wrap { position: absolute; }
-.bf-wrap-tl { top: -10px; left: 0; }
-.bf-wrap-br { bottom: -10px; right: 0; }
-.bf-branch {
-  display: block;
-  width: clamp(320px, 40vw, 660px);
-  height: auto;
-}
-.bf-branch-mirror { transform: scaleX(-1); }
-.bf-branch-flip-v { transform: scaleY(-1); }
-.bf-sway-tl {
-  animation: bf-sway 9s ease-in-out infinite alternate;
-  transform-origin: top left;
-}
-.bf-sway-br {
-  animation: bf-sway 11s ease-in-out infinite alternate;
-  transform-origin: bottom right;
-}
-@keyframes bf-sway {
-  from { transform: rotate(-0.7deg); }
-  to   { transform: rotate(0.9deg); }
-}
-.bf-petal {
+.sf-stars {
   position: absolute;
-  top: -4vh;
-  border-radius: 150% 0 150% 0;
-  background: radial-gradient(
-    circle at 32% 28%,
-    color-mix(in srgb, var(--violet-pale) 80%, white) 0%,
-    color-mix(in srgb, var(--violet-pale) 70%, transparent) 45%,
-    color-mix(in srgb, var(--violet-soft) 60%, transparent) 100%
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sf-wrap { position: absolute; }
+.sf-wrap-tr { top: -70px; right: -70px; }
+.sf-wrap-bl { bottom: -70px; left: -70px; }
+.sf-nebula {
+  display: block;
+  width: clamp(340px, 44vw, 720px);
+  height: auto;
+  filter: blur(48px);
+}
+.sf-nebula-flip { transform: rotate(180deg); }
+.sf-meteor {
+  position: absolute;
+  top: -14vh;
+  width: 2px;
+  height: var(--len, 130px);
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--violet-pale) 88%, white)
   );
   opacity: 0;
-  animation: bf-fall var(--t) linear var(--d) infinite;
+  transform: rotate(17deg);
+  animation: sf-fall var(--mt, 3s) cubic-bezier(0.5, 0.05, 0.9, 0.4) var(--md, 0s) 1 forwards;
+  will-change: transform, opacity;
 }
-/* opening shower: falls once, then it's gone */
-.bf-petal-burst {
-  animation-iteration-count: 1;
-  animation-fill-mode: forwards;
+.sf-meteor::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--violet-pale) 80%, white);
+  opacity: 0.9;
 }
-.bf-petal-pale {
-  background: radial-gradient(
-    circle at 32% 28%,
-    rgba(255, 255, 255, 0.8) 0%,
-    color-mix(in srgb, var(--violet-pale) 65%, transparent) 55%,
-    color-mix(in srgb, var(--violet-soft) 45%, transparent) 100%
-  );
-}
-@keyframes bf-fall {
-  0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
-  8%   { opacity: var(--o, 0.5); }
-  25%  { transform: translate3d(calc(var(--x) * 0.6), 28vh, 0) rotate(95deg); }
-  50%  { transform: translate3d(var(--x), 55vh, 0) rotate(175deg); }
-  75%  { transform: translate3d(calc(var(--x) * 0.3), 82vh, 0) rotate(255deg); }
-  92%  { opacity: var(--o, 0.5); }
-  100% { transform: translate3d(calc(var(--x) * 0.8), 112vh, 0) rotate(335deg); opacity: 0; }
+@keyframes sf-fall {
+  0%   { transform: translate3d(0, 0, 0) rotate(17deg); opacity: 0; }
+  6%   { opacity: var(--o, 0.7); }
+  85%  { opacity: var(--o, 0.7); }
+  100% { transform: translate3d(-22vw, 118vh, 0) rotate(17deg); opacity: 0; }
 }
 
 /* ─── MDR terminal (Severance hero alternate) ────────────────────────
@@ -932,8 +930,11 @@
   letter-spacing: 0.12em;
   padding: 5px 12px;
   border-radius: 999px;
-  border: 1px solid var(--gray-800);
-  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+  background: color-mix(in srgb, var(--bg-surface) 45%, transparent);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-primary) 6%, transparent);
   color: var(--text-muted);
   cursor: pointer;
   transition: color 180ms, border-color 180ms, background 180ms;

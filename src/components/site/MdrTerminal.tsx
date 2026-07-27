@@ -19,6 +19,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { BorderTrail } from "@/components/motion-primitives/border-trail";
 
 type Digit = {
   col: number;
@@ -546,6 +547,11 @@ export default function MdrTerminal({ className }: { className?: string }) {
   return (
     <div className={className}>
       <div className="mdr-frame" role="img" aria-label="Macrodata refinement terminal refining the Cold Harbor file">
+        <BorderTrail
+          className="bg-[#9fdcf0] opacity-60 blur-[3px]"
+          size={54}
+          transition={{ repeat: Infinity, duration: 9, ease: "linear" }}
+        />
         <div className="mdr-header">
           <span className="mdr-file">Cold Harbor</span>
           <span className="mdr-head-right">

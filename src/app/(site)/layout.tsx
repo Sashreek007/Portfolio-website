@@ -2,7 +2,7 @@ import Nav from "@/components/site/Nav";
 import ScrollControls from "@/components/site/ScrollControls";
 import TrackPageView from "@/components/site/TrackPageView";
 import AmbientField from "@/components/site/AmbientField";
-import BlossomField from "@/components/site/BlossomField";
+import SpaceField from "@/components/site/SpaceField";
 import SmoothScroll from "@/components/site/SmoothScroll";
 
 export default function SiteLayout({
@@ -14,7 +14,7 @@ export default function SiteLayout({
     <>
       <SmoothScroll />
       <AmbientField />
-      <BlossomField />
+      <SpaceField />
       <Nav />
       <TrackPageView />
       <main className="flex-1">{children}</main>

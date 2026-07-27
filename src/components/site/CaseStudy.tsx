@@ -3,6 +3,7 @@ import { projectHref } from "@/lib/projects";
 import type { Project } from "@/components/site/ProjectCard";
 import { TechBadge } from "@/components/site/TechBadge";
 import ProjectConstellation from "@/components/site/ProjectConstellation";
+import { Spotlight } from "@/components/motion-primitives/spotlight";
 
 // Case-study strip — one editorial "chapter" per project. Layout only:
 // every string rendered here comes from the project record (or is a
@@ -77,7 +78,12 @@ export default function CaseStudy({
   const status = STATUS_META[p.status] ?? STATUS_META.shipped;
 
   return (
-    <article className="case-strip">
+    <article className="case-strip overflow-hidden">
+      {/* cursor-tracking glow across the whole strip */}
+      <Spotlight
+        className="from-violet-mid/25 via-violet-soft/10 to-transparent blur-2xl"
+        size={420}
+      />
       <div className="py-14 lg:py-16">
         {/* Kicker rail — chapter number, hairline, year, status */}
         <div className="flex items-center gap-4 font-mono text-[11px] tracking-[0.16em] uppercase mb-10">
