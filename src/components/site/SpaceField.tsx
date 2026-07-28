@@ -219,108 +219,148 @@ function renderGalaxy(dpr: number) {
 // Crescent-lit gas giant. Light arrives from the lower-right (where the
 // content lives), so the visible limb hanging out of the top-left
 // corner is the lit one and the night side stays off-screen.
-function renderPlanet(R: number, dpr: number) {
+// Split into three layers so the cloud bands can drift (the planet
+// "rotates") while the lighting stays physically fixed:
+//   base    — atmosphere glow + lit sphere gradient (static)
+//   bands   — tileable horizontal cloud-band strip, drifted per frame
+//   overlay — night-side shading + crescent limb (static, on top)
+function renderPlanetLayers(R: number, dpr: number) {
   const pad = Math.round(R * 0.85);
   const S = (R + pad) * 2;
-  const c = document.createElement("canvas");
-  c.width = c.height = Math.round(S * dpr);
-  const g = c.getContext("2d");
-  if (!g) return { canvas: c, size: S };
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const cx = S / 2;
-  const cy = S / 2;
   const lx = 0.66; // light direction (lower-right)
   const ly = 0.52;
 
-  // atmosphere glow
-  let grad = g.createRadialGradient(
-    cx + R * 0.2 * lx,
-    cy + R * 0.2 * ly,
-    R * 0.8,
-    cx,
-    cy,
-    R * 1.7
-  );
-  grad.addColorStop(0, "rgba(127,119,221,0.14)"); // violet-soft
-  grad.addColorStop(0.5, "rgba(83,74,183,0.05)");
-  grad.addColorStop(1, "rgba(83,74,183,0)");
-  g.fillStyle = grad;
-  g.beginPath();
-  g.arc(cx, cy, R * 1.7, 0, Math.PI * 2);
-  g.fill();
+  const make = (wCss: number, hCss: number) => {
+    const c = document.createElement("canvas");
+    c.width = Math.round(wCss * dpr);
+    c.height = Math.round(hCss * dpr);
+    const g = c.getContext("2d");
+    if (g) g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { c, g };
+  };
 
-  // sphere base — radial gradient offset toward the light
-  grad = g.createRadialGradient(
-    cx + R * 0.55 * lx,
-    cy + R * 0.55 * ly,
-    R * 0.06,
-    cx,
-    cy,
-    R * 1.35
-  );
-  grad.addColorStop(0, "#b3aae8");
-  grad.addColorStop(0.16, "#7d73cb");
-  grad.addColorStop(0.4, "#4a4280");
-  grad.addColorStop(0.66, "#211d3e");
-  grad.addColorStop(1, "#090812");
-  g.beginPath();
-  g.arc(cx, cy, R, 0, Math.PI * 2);
-  g.fillStyle = grad;
-  g.fill();
+  // ── base: atmosphere glow + lit sphere ─────────────────────────────
+  const base = make(S, S);
+  if (base.g) {
+    const g = base.g;
+    const cx = S / 2;
+    const cy = S / 2;
+    let grad = g.createRadialGradient(
+      cx + R * 0.2 * lx,
+      cy + R * 0.2 * ly,
+      R * 0.8,
+      cx,
+      cy,
+      R * 1.7
+    );
+    grad.addColorStop(0, "rgba(127,119,221,0.14)"); // violet-soft
+    grad.addColorStop(0.5, "rgba(83,74,183,0.05)");
+    grad.addColorStop(1, "rgba(83,74,183,0)");
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(cx, cy, R * 1.7, 0, Math.PI * 2);
+    g.fill();
 
-  // latitude bands, clipped to the sphere
-  g.globalCompositeOperation = "source-atop";
-  g.save();
-  g.translate(cx, cy);
-  g.rotate(-0.3);
-  const bands = [
-    { y: -0.55, h: 0.1, color: "rgba(20,16,44,0.20)" },
-    { y: -0.2, h: 0.15, color: "rgba(20,16,44,0.16)" },
-    { y: 0.12, h: 0.09, color: "rgba(186,117,23,0.09)" }, // faint warm band
-    { y: 0.42, h: 0.14, color: "rgba(20,16,44,0.20)" },
-    { y: 0.7, h: 0.1, color: "rgba(20,16,44,0.24)" },
-  ];
-  for (const b of bands) {
-    const yPx = b.y * R;
-    const hPx = b.h * R;
-    const bg = g.createLinearGradient(0, yPx - hPx, 0, yPx + hPx);
-    bg.addColorStop(0, "rgba(0,0,0,0)");
-    bg.addColorStop(0.5, b.color);
-    bg.addColorStop(1, "rgba(0,0,0,0)");
-    g.fillStyle = bg;
-    g.fillRect(-R * 1.2, yPx - hPx, R * 2.4, hPx * 2);
+    grad = g.createRadialGradient(
+      cx + R * 0.55 * lx,
+      cy + R * 0.55 * ly,
+      R * 0.06,
+      cx,
+      cy,
+      R * 1.35
+    );
+    grad.addColorStop(0, "#b3aae8");
+    grad.addColorStop(0.16, "#7d73cb");
+    grad.addColorStop(0.4, "#4a4280");
+    grad.addColorStop(0.66, "#211d3e");
+    grad.addColorStop(1, "#090812");
+    g.beginPath();
+    g.arc(cx, cy, R, 0, Math.PI * 2);
+    g.fillStyle = grad;
+    g.fill();
   }
-  g.restore();
 
-  // deepen the night side
-  grad = g.createRadialGradient(
-    cx - R * 0.6 * lx,
-    cy - R * 0.6 * ly,
-    R * 0.1,
-    cx - R * 0.3 * lx,
-    cy - R * 0.3 * ly,
-    R * 1.4
-  );
-  grad.addColorStop(0, "rgba(4,4,10,0.62)");
-  grad.addColorStop(0.6, "rgba(4,4,10,0.24)");
-  grad.addColorStop(1, "rgba(4,4,10,0)");
-  g.fillStyle = grad;
-  g.beginPath();
-  g.arc(cx, cy, R, 0, Math.PI * 2);
-  g.fill();
+  // ── bands: tileable strip, drifted along the band axis per frame ───
+  const tw = Math.round(R * 4); // tile width (one full drift cycle)
+  const th = Math.round(R * 3);
+  const bandsLayer = make(tw, th);
+  if (bandsLayer.g) {
+    const g = bandsLayer.g;
+    const midY = th / 2;
+    const bands = [
+      { y: -0.55, h: 0.1, color: "rgba(20,16,44,0.20)" },
+      { y: -0.2, h: 0.15, color: "rgba(20,16,44,0.16)" },
+      { y: 0.12, h: 0.09, color: "rgba(186,117,23,0.09)" }, // faint warm band
+      { y: 0.42, h: 0.14, color: "rgba(20,16,44,0.20)" },
+      { y: 0.7, h: 0.1, color: "rgba(20,16,44,0.24)" },
+    ];
+    for (const b of bands) {
+      const yPx = midY + b.y * R;
+      const hPx = b.h * R;
+      const bg = g.createLinearGradient(0, yPx - hPx, 0, yPx + hPx);
+      bg.addColorStop(0, "rgba(0,0,0,0)");
+      bg.addColorStop(0.5, b.color);
+      bg.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = bg;
+      g.fillRect(0, yPx - hPx, tw, hPx * 2);
+    }
+    // storm spots — features that make the drift readable. Drawn twice
+    // (x and x ± tw) so the tile wraps seamlessly.
+    const spots = [
+      { x: 0.3, y: 0.18, rx: 0.34, ry: 0.12, color: "206,203,246", a: 0.09 },
+      { x: 0.72, y: -0.35, rx: 0.26, ry: 0.1, color: "10,8,24", a: 0.2 },
+    ];
+    for (const sp of spots) {
+      for (const xo of [sp.x * tw, sp.x * tw - tw, sp.x * tw + tw]) {
+        const grad = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+        grad.addColorStop(0, `rgba(${sp.color},${sp.a})`);
+        grad.addColorStop(1, `rgba(${sp.color},0)`);
+        g.save();
+        g.translate(xo, midY + sp.y * R);
+        g.scale(sp.rx * R, sp.ry * R);
+        g.fillStyle = grad;
+        g.beginPath();
+        g.arc(0, 0, 1, 0, Math.PI * 2);
+        g.fill();
+        g.restore();
+      }
+    }
+  }
 
-  // crescent limb highlight along the lit edge
-  const la = Math.atan2(ly, lx);
-  g.strokeStyle = "rgba(216,213,250,0.68)";
-  g.lineWidth = 2.2;
-  g.shadowColor = "rgba(206,203,246,0.9)";
-  g.shadowBlur = 10;
-  g.beginPath();
-  g.arc(cx, cy, R - 0.8, la - 1.2, la + 1.2);
-  g.stroke();
-  g.shadowBlur = 0;
-  g.globalCompositeOperation = "source-over";
-  return { canvas: c, size: S };
+  // ── overlay: night-side shading + crescent limb ────────────────────
+  const overlay = make(S, S);
+  if (overlay.g) {
+    const g = overlay.g;
+    const cx = S / 2;
+    const cy = S / 2;
+    let grad = g.createRadialGradient(
+      cx - R * 0.6 * lx,
+      cy - R * 0.6 * ly,
+      R * 0.1,
+      cx - R * 0.3 * lx,
+      cy - R * 0.3 * ly,
+      R * 1.4
+    );
+    grad.addColorStop(0, "rgba(4,4,10,0.62)");
+    grad.addColorStop(0.6, "rgba(4,4,10,0.24)");
+    grad.addColorStop(1, "rgba(4,4,10,0)");
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(cx, cy, R, 0, Math.PI * 2);
+    g.fill();
+
+    const la = Math.atan2(ly, lx);
+    g.strokeStyle = "rgba(216,213,250,0.68)";
+    g.lineWidth = 2.2;
+    g.shadowColor = "rgba(206,203,246,0.9)";
+    g.shadowBlur = 10;
+    g.beginPath();
+    g.arc(cx, cy, R - 0.8, la - 1.2, la + 1.2);
+    g.stroke();
+    g.shadowBlur = 0;
+  }
+
+  return { base: base.c, bands: bandsLayer.c, overlay: overlay.c, size: S, R, tw, th };
 }
 
 // Opening meteor shower — one-shot, front-loaded delays.
@@ -394,7 +434,7 @@ export default function SpaceField() {
     let h = 0;
     let dust: HTMLCanvasElement | null = null;
     let galaxy: HTMLCanvasElement | null = null;
-    let planet: { canvas: HTMLCanvasElement; size: number } | null = null;
+    let planet: ReturnType<typeof renderPlanetLayers> | null = null;
 
     const layout = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -413,7 +453,10 @@ export default function SpaceField() {
       galaxy = renderGalaxy(dpr);
       planet =
         w >= 768
-          ? renderPlanet(Math.round(Math.min(Math.max(w * 0.13, 130), 220)), dpr)
+          ? renderPlanetLayers(
+              Math.round(Math.min(Math.max(w * 0.13, 130), 220)),
+              dpr
+            )
           : null;
     };
 
@@ -501,13 +544,30 @@ export default function SpaceField() {
         // anchored into the top-left corner, partially off-screen —
         // clean dark sky there, well away from both nebulae
         const bob = reduced ? 0 : Math.sin(t * 0.05 + 1) * 3;
-        ctx.drawImage(
-          planet.canvas,
-          w * 0.03 - planet.size / 2,
-          h * -0.04 - planet.size / 2 - scroll * 0.04 + bob,
-          planet.size,
-          planet.size
-        );
+        const pcx = w * 0.03;
+        const pcy = h * -0.04 - scroll * 0.04 + bob;
+        const S = planet.size;
+        ctx.drawImage(planet.base, pcx - S / 2, pcy - S / 2, S, S);
+        // cloud bands drift along the band axis — the "rotation".
+        // Lighting stays fixed; only the surface moves.
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pcx, pcy, planet.R - 0.5, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.translate(pcx, pcy);
+        ctx.rotate(-0.3);
+        const off = reduced ? 0 : (t * 2.4) % planet.tw;
+        for (let k = -1; k <= 1; k++) {
+          ctx.drawImage(
+            planet.bands,
+            k * planet.tw - off - planet.tw / 2,
+            -planet.th / 2,
+            planet.tw,
+            planet.th
+          );
+        }
+        ctx.restore();
+        ctx.drawImage(planet.overlay, pcx - S / 2, pcy - S / 2, S, S);
       }
     };
 
