@@ -12,7 +12,10 @@
 //     load, then occasional strays — all parallel to one radiant
 //   · haikei-style layered-blob nebulae anchored to the two corners,
 //     heavily blurred, violet/amber at single-digit opacity
-//   · tiered scroll parallax: near stars drift more than far ones
+//   · spatial scroll: wide tier-separated parallax (far crawls, near
+//     sweeps) + velocity motion-blur — fast scrolling smears near
+//     stars into streaks, reading as a fly-through rather than a
+//     sliding flat image
 // Canvas paints a static first frame, animates only while the tab is
 // visible, and everything respects reduced motion. Hidden on /blog.
 
@@ -117,8 +120,12 @@ const STAR_COLORS = [
   [239, 159, 39], // amber-bright
 ] as const;
 
-// scroll-parallax factors per depth tier (fraction of scroll distance)
-const TIER_PARALLAX = [0.018, 0.034, 0.055] as const;
+// scroll-parallax factors per depth tier (fraction of scroll distance).
+// Spread wide on purpose: depth reads through velocity CONTRAST — far
+// stars crawl, near stars sweep. The galactic band + dust use the
+// slowest factor (they are the farthest thing in the scene).
+const TIER_PARALLAX = [0.04, 0.11, 0.24] as const;
+const BAND_PARALLAX = 0.012;
 
 // ── prerendered layers (built once per resize, cheap to blit) ────────
 
@@ -466,6 +473,8 @@ export default function SpaceField() {
     const meteors: Meteor[] = [];
     let burstAt = -1; // first-draw timestamp: anchors the opening shower
     let nextStray = 0;
+    let lastScroll = 0;
+    let lastT = -1; // for scroll velocity (drives star motion blur)
 
     const layout = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -496,23 +505,41 @@ export default function SpaceField() {
       base: number,
       t: number,
       scroll: number,
+      vel: number,
+      factor: number,
       wrap: boolean
     ) => {
       const [cr, cg, cb] = STAR_COLORS[s.hue];
       const twinkle = reduced
         ? 0
         : Math.sin(t * s.speed + s.phase) * (0.12 + s.tier * 0.1);
-      const alpha = Math.max(0.06, base + twinkle);
-      let py = s.y * h - scroll * TIER_PARALLAX[s.tier];
+      let alpha = Math.max(0.06, base + twinkle);
+      const px = s.x * w;
+      let py = s.y * h - scroll * factor;
       if (wrap) py = ((py % h) + h) % h;
+      // motion blur: on fast scroll a star's on-screen velocity smears
+      // it into a short streak — near tiers smear most. This is what
+      // turns flat parallax into a spatial fly-through.
+      const stretch = Math.max(-26, Math.min(26, vel * factor * 0.045));
+      if (Math.abs(stretch) > 1.6) {
+        alpha *= 8 / (8 + Math.abs(stretch) * 0.6);
+        ctx.strokeStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha})`;
+        ctx.lineWidth = s.r * 1.6;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(px, py - stretch / 2);
+        ctx.lineTo(px, py + stretch / 2);
+        ctx.stroke();
+        return;
+      }
       ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha})`;
       ctx.beginPath();
-      ctx.arc(s.x * w, py, s.r, 0, Math.PI * 2);
+      ctx.arc(px, py, s.r, 0, Math.PI * 2);
       ctx.fill();
       if (s.tier === 2) {
         ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha * 0.18})`;
         ctx.beginPath();
-        ctx.arc(s.x * w, py, s.r * 3.2, 0, Math.PI * 2);
+        ctx.arc(px, py, s.r * 3.2, 0, Math.PI * 2);
         ctx.fill();
       }
     };
@@ -606,6 +633,12 @@ export default function SpaceField() {
       if (w !== window.innerWidth || h !== window.innerHeight) layout();
       if (!w || !h) return;
       const scroll = reduced ? 0 : scrollRef.current;
+      const vel =
+        lastT < 0 || reduced
+          ? 0
+          : (scroll - lastScroll) / Math.max(t - lastT, 1e-3);
+      lastScroll = scroll;
+      lastT = t;
       ctx.clearRect(0, 0, w, h);
       if (dust) ctx.drawImage(dust, 0, -scroll * 0.012, w, h);
       if (galaxy) {
@@ -617,9 +650,10 @@ export default function SpaceField() {
           GALAXY_SIZE
         );
       }
-      for (const s of STARS) drawStar(s, 0.25 + s.tier * 0.22, t, scroll, true);
+      for (const s of STARS)
+        drawStar(s, 0.25 + s.tier * 0.22, t, scroll, vel, TIER_PARALLAX[s.tier], true);
       for (const s of BAND_STARS)
-        drawStar(s, 0.12 + s.tier * 0.12, t, scroll, false);
+        drawStar(s, 0.12 + s.tier * 0.12, t, scroll, vel, BAND_PARALLAX, false);
       for (const sp of SPIKE_STARS) drawSpikeStar(sp, t, scroll);
       if (planet) {
         // anchored into the top-left corner, partially off-screen —
