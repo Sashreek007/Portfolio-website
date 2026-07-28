@@ -400,15 +400,18 @@ type Meteor = {
   flare: boolean;
 };
 
+// Meteors live in the upper sky band: top-edge spawns, burnout by
+// ~0.4 viewport heights, modest brightness. They must never carry a
+// blazing head across the hero text on shorter (tablet) viewports.
 function makeMeteor(start: number, l: number): Meteor {
   return {
     x0: l,
-    y0: -0.05 + Math.random() * 0.3,
-    path: 0.45 + Math.random() * 0.35,
+    y0: -0.04 + Math.random() * 0.08,
+    path: 0.2 + Math.random() * 0.18,
     dur: 1.3 + Math.random() * 0.7,
     start,
     trail: 110 + Math.random() * 100,
-    bright: 0.5 + Math.random() * 0.35,
+    bright: 0.4 + Math.random() * 0.25,
     flare: Math.random() < 0.4,
   };
 }
