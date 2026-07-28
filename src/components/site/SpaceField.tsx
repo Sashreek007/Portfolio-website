@@ -216,9 +216,9 @@ function renderGalaxy(dpr: number) {
   return c;
 }
 
-// Crescent-lit gas giant. Light arrives from the upper-right (where the
-// content lives), so the lit limb faces the page and the night side
-// fades into the nebula glow behind it.
+// Crescent-lit gas giant. Light arrives from the lower-right (where the
+// content lives), so the visible limb hanging out of the top-left
+// corner is the lit one and the night side stays off-screen.
 function renderPlanet(R: number, dpr: number) {
   const pad = Math.round(R * 0.85);
   const S = (R + pad) * 2;
@@ -229,8 +229,8 @@ function renderPlanet(R: number, dpr: number) {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   const cx = S / 2;
   const cy = S / 2;
-  const lx = 0.66; // light direction (upper-right)
-  const ly = -0.52;
+  const lx = 0.66; // light direction (lower-right)
+  const ly = 0.52;
 
   // atmosphere glow
   let grad = g.createRadialGradient(
@@ -492,13 +492,13 @@ export default function SpaceField() {
         drawStar(s, 0.12 + s.tier * 0.12, t, scroll, false);
       for (const sp of SPIKE_STARS) drawSpikeStar(sp, t, scroll);
       if (planet) {
-        // anchored into the bottom-left corner, partially off-screen —
-        // a planetary horizon rising out of the nebula glow
+        // anchored into the top-left corner, partially off-screen —
+        // clean dark sky there, well away from both nebulae
         const bob = reduced ? 0 : Math.sin(t * 0.05 + 1) * 3;
         ctx.drawImage(
           planet.canvas,
           w * 0.03 - planet.size / 2,
-          h * 1.04 - planet.size / 2 - scroll * 0.04 + bob,
+          h * -0.04 - planet.size / 2 - scroll * 0.04 + bob,
           planet.size,
           planet.size
         );
