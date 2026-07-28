@@ -23,12 +23,18 @@ export default function Hero() {
       <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center lg:items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
 
         {/* ── LEFT: name + subtitle + status ─────────────────────────── */}
-        <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+        {/* container-type lets the h1 size against THIS column, so the
+            name can never outgrow it and slide under the editor on
+            tablet widths (the 22cqw cap ≈ "sashreek" at 4.45em mono) */}
+        <div
+          className="flex flex-col items-center text-center lg:items-start lg:text-left"
+          style={{ containerType: "inline-size" }}
+        >
           {/* Massive name */}
           <h1
             className="fade-up font-mono font-medium"
             style={{
-              fontSize: "clamp(56px, 10vw, 168px)",
+              fontSize: "clamp(56px, min(10vw, 22cqw), 168px)",
               lineHeight: "0.95",
               letterSpacing: "-0.05em",
               color: "var(--text-primary)",
