@@ -7,15 +7,16 @@
 //   · three "hero" stars with 4-point diffraction spikes
 //   · a distant galaxy smudge and a crescent-lit gas giant anchored in
 //     the bottom-left nebula glow (desktop only)
-//   · meteors with a gravity fall (accelerating streaks): an opening
-//     shower on load, then occasional strays
+//   · canvas meteors: bright head, tapered self-drawing trail, mid-sky
+//     burnout with occasional terminal flare; an opening shower on
+//     load, then occasional strays — all parallel to one radiant
 //   · haikei-style layered-blob nebulae anchored to the two corners,
 //     heavily blurred, violet/amber at single-digit opacity
 //   · tiered scroll parallax: near stars drift more than far ones
 // Canvas paints a static first frame, animates only while the tab is
 // visible, and everything respects reduced motion. Hidden on /blog.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import {
   motion,
@@ -363,19 +364,47 @@ function renderPlanetLayers(R: number, dpr: number) {
   return { base: base.c, bands: bandsLayer.c, overlay: overlay.c, size: S, R, tw, th };
 }
 
-// Opening meteor shower — one-shot, front-loaded delays.
-const BURST_METEORS: { l: number; d: number; t: number; len: number; o: number }[] = [
-  { l: 78, d: 0.6, t: 2.6, len: 150, o: 0.85 },
-  { l: 30, d: 1.4, t: 3.2, len: 110, o: 0.6 },
-  { l: 55, d: 2.1, t: 2.2, len: 170, o: 0.9 },
-  { l: 90, d: 3.0, t: 3.6, len: 100, o: 0.5 },
-  { l: 14, d: 3.8, t: 2.8, len: 130, o: 0.7 },
-  { l: 66, d: 4.7, t: 3.4, len: 120, o: 0.6 },
-  { l: 42, d: 5.9, t: 2.5, len: 160, o: 0.8 },
-  { l: 84, d: 7.2, t: 3.8, len: 105, o: 0.5 },
+// Meteors — canvas-drawn: a bright head with a tapered trail that
+// draws itself out behind, burns out mid-sky, sometimes with a small
+// terminal flare. All meteors share one radiant direction (parallel),
+// like a real shower. Opening burst, then occasional strays.
+const METEOR_DIR = { x: -0.29, y: 0.956 };
+
+// spawn x (fraction of width) + front-loaded delays for the opener
+const BURST: { l: number; d: number }[] = [
+  { l: 0.78, d: 0.6 },
+  { l: 0.3, d: 1.4 },
+  { l: 0.55, d: 2.1 },
+  { l: 0.9, d: 3.0 },
+  { l: 0.14, d: 3.8 },
+  { l: 0.66, d: 4.7 },
+  { l: 0.42, d: 5.9 },
+  { l: 0.84, d: 7.2 },
 ];
 
-type Stray = { id: number; l: number; t: number; len: number; o: number };
+type Meteor = {
+  x0: number; // spawn point, fraction of viewport
+  y0: number;
+  path: number; // travel distance, fraction of viewport height
+  dur: number; // lifetime in seconds
+  start: number;
+  trail: number; // max trail length, px
+  bright: number;
+  flare: boolean;
+};
+
+function makeMeteor(start: number, l: number): Meteor {
+  return {
+    x0: l,
+    y0: -0.05 + Math.random() * 0.3,
+    path: 0.45 + Math.random() * 0.35,
+    dur: 1.3 + Math.random() * 0.7,
+    start,
+    trail: 110 + Math.random() * 100,
+    bright: 0.5 + Math.random() * 0.35,
+    flare: Math.random() < 0.4,
+  };
+}
 
 // Haikei-style layered blobs — three organic paths per nebula.
 function Nebula({ className }: { className?: string }) {
@@ -402,17 +431,16 @@ export default function SpaceField() {
   const reduced = useReducedMotion() ?? false;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scrollRef = useRef(0);
-  const [strays, setStrays] = useState<Stray[]>([]);
 
   const { scrollY } = useScroll();
   const smooth = useSpring(scrollY, { stiffness: 55, damping: 18, mass: 0.4 });
-  // nebula parallax eases into a cap (tanh) so the corner glows drift
-  // with the hero but never escape their corners on long pages
+  // nebula parallax eases into a tight cap (tanh) so the corner glows
+  // barely breathe — they must never read as detached from the corners
   const yTr = useTransform(smooth, (v) =>
-    reduced ? 0 : 90 * Math.tanh((v * 0.05) / 90)
+    reduced ? 0 : 36 * Math.tanh((v * 0.05) / 36)
   );
   const yBl = useTransform(smooth, (v) =>
-    reduced ? 0 : -110 * Math.tanh((v * 0.07) / 110)
+    reduced ? 0 : -44 * Math.tanh((v * 0.07) / 44)
   );
 
   // feed the smoothed scroll into the canvas parallax
@@ -435,6 +463,9 @@ export default function SpaceField() {
     let dust: HTMLCanvasElement | null = null;
     let galaxy: HTMLCanvasElement | null = null;
     let planet: ReturnType<typeof renderPlanetLayers> | null = null;
+    const meteors: Meteor[] = [];
+    let burstAt = -1; // first-draw timestamp: anchors the opening shower
+    let nextStray = 0;
 
     const layout = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -521,6 +552,56 @@ export default function SpaceField() {
       ctx.fill();
     };
 
+    const drawMeteor = (m: Meteor, t: number) => {
+      const u = (t - m.start) / m.dur;
+      if (u <= 0 || u >= 1) return;
+      const s = Math.pow(u, 1.15) * m.path * h; // slight gravity feel
+      const hx = m.x0 * w + METEOR_DIR.x * s;
+      const hy = m.y0 * h + METEOR_DIR.y * s;
+      let a = m.bright;
+      if (u < 0.08) a *= u / 0.08; // ignite
+      if (u > 0.7) a *= Math.max(0, (1 - u) / 0.3); // burn out
+      if (m.flare) {
+        const f = Math.exp(-Math.pow((u - 0.68) / 0.06, 2));
+        a = Math.min(1, a + f * 0.5); // brief terminal flare
+      }
+      if (a <= 0.01) return;
+      // tapered trail: three overlapping strokes, long/thin → short/bright
+      const trail = Math.min(m.trail, s * 0.8);
+      const layers: [number, number, number][] = [
+        [1.0, 1.1, 0.22],
+        [0.55, 2.0, 0.45],
+        [0.22, 3.0, 0.85],
+      ];
+      ctx.lineCap = "round";
+      for (const [frac, width, la] of layers) {
+        const tx = hx - METEOR_DIR.x * trail * frac;
+        const ty = hy - METEOR_DIR.y * trail * frac;
+        const grad = ctx.createLinearGradient(hx, hy, tx, ty);
+        grad.addColorStop(0, `rgba(244,242,255,${a * la})`);
+        grad.addColorStop(0.6, `rgba(206,203,246,${a * la * 0.45})`);
+        grad.addColorStop(1, "rgba(206,203,246,0)");
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(hx, hy);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+      }
+      const glow = ctx.createRadialGradient(hx, hy, 0, hx, hy, 8);
+      glow.addColorStop(0, `rgba(255,255,255,${a * 0.75})`);
+      glow.addColorStop(0.35, `rgba(206,203,246,${a * 0.35})`);
+      glow.addColorStop(1, "rgba(206,203,246,0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(hx, hy, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = `rgba(255,255,255,${Math.min(1, a * 1.1)})`;
+      ctx.beginPath();
+      ctx.arc(hx, hy, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
     const draw = (t: number) => {
       if (w !== window.innerWidth || h !== window.innerHeight) layout();
       if (!w || !h) return;
@@ -569,10 +650,30 @@ export default function SpaceField() {
         ctx.restore();
         ctx.drawImage(planet.overlay, pcx - S / 2, pcy - S / 2, S, S);
       }
+
+      // meteors (topmost — they're the nearest thing in the scene)
+      if (!reduced) {
+        if (burstAt < 0) {
+          burstAt = t;
+          for (const b of BURST) meteors.push(makeMeteor(burstAt + b.d, b.l));
+          nextStray = burstAt + 11;
+        }
+        if (t >= nextStray) {
+          meteors.push(makeMeteor(t + 0.01, 0.08 + Math.random() * 0.86));
+          nextStray = t + 8 + Math.random() * 8;
+        }
+        for (let i = meteors.length - 1; i >= 0; i--) {
+          if (t > meteors[i].start + meteors[i].dur) {
+            meteors.splice(i, 1);
+            continue;
+          }
+          drawMeteor(meteors[i], t);
+        }
+      }
     };
 
     layout();
-    draw(0);
+    draw(performance.now() / 1000);
     window.addEventListener("resize", layout);
 
     let raf = 0;
@@ -590,31 +691,6 @@ export default function SpaceField() {
     };
   }, [reduced]);
 
-  // occasional stray meteors after the opening shower
-  useEffect(() => {
-    if (reduced) return;
-    let id = 0;
-    let timer = 0;
-    const spawn = () => {
-      if (!document.hidden) {
-        id += 1;
-        setStrays((prev) => [
-          ...prev.slice(-4),
-          {
-            id,
-            l: 8 + Math.random() * 86,
-            t: 2.2 + Math.random() * 1.8,
-            len: 100 + Math.random() * 70,
-            o: 0.5 + Math.random() * 0.4,
-          },
-        ]);
-      }
-      timer = window.setTimeout(spawn, 8000 + Math.random() * 8000);
-    };
-    timer = window.setTimeout(spawn, 11000);
-    return () => window.clearTimeout(timer);
-  }, [reduced]);
-
   if (pathname?.startsWith("/blog")) return null;
 
   return (
@@ -627,43 +703,8 @@ export default function SpaceField() {
         <Nebula className="sf-nebula sf-nebula-flip" />
       </motion.div>
 
-      {/* starfield */}
+      {/* starfield + meteors (canvas-drawn) */}
       <canvas ref={canvasRef} className="sf-stars" />
-
-      {/* opening meteor shower — falls once with gravity, then it's gone */}
-      {!reduced &&
-        BURST_METEORS.map((m, i) => (
-          <span
-            key={`b-${i}`}
-            className="sf-meteor"
-            style={
-              {
-                left: `${m.l}%`,
-                "--mt": `${m.t}s`,
-                "--md": `${m.d}s`,
-                "--len": `${m.len}px`,
-                "--o": m.o,
-              } as React.CSSProperties
-            }
-          />
-        ))}
-
-      {/* stray meteors */}
-      {strays.map((m) => (
-        <span
-          key={m.id}
-          className="sf-meteor"
-          style={
-            {
-              left: `${m.l}%`,
-              "--mt": `${m.t}s`,
-              "--md": "0s",
-              "--len": `${m.len}px`,
-              "--o": m.o,
-            } as React.CSSProperties
-          }
-        />
-      ))}
     </div>
   );
 }

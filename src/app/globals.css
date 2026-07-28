@@ -669,41 +669,7 @@
   filter: blur(48px);
 }
 .sf-nebula-flip { transform: rotate(180deg); }
-.sf-meteor {
-  position: absolute;
-  top: -14vh;
-  width: 2px;
-  height: var(--len, 130px);
-  border-radius: 999px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    color-mix(in srgb, var(--violet-pale) 88%, white)
-  );
-  opacity: 0;
-  transform: rotate(17deg);
-  animation: sf-fall var(--mt, 3s) cubic-bezier(0.5, 0.05, 0.9, 0.4) var(--md, 0s) 1 forwards;
-  will-change: transform, opacity;
-}
-.sf-meteor::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--violet-pale) 80%, white);
-  opacity: 0.9;
-}
-@keyframes sf-fall {
-  0%   { transform: translate3d(0, 0, 0) rotate(17deg); opacity: 0; }
-  6%   { opacity: var(--o, 0.7); }
-  85%  { opacity: var(--o, 0.7); }
-  100% { transform: translate3d(-22vw, 118vh, 0) rotate(17deg); opacity: 0; }
-}
+/* meteors are canvas-drawn in SpaceField (bright head, tapered trail) */
 
 /* ─── MDR terminal (Severance hero alternate) ────────────────────────
    Diegetic Lumon CRT: its own blue screen palette lives INSIDE the
