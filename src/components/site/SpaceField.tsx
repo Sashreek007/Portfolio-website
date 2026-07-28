@@ -435,6 +435,10 @@ function Nebula({ className }: { className?: string }) {
 
 export default function SpaceField() {
   const pathname = usePathname();
+  // On /blog the field renders null, which unmounts the canvas. The
+  // draw effect must key on this so it rebinds to the fresh canvas
+  // element when the user navigates back.
+  const hidden = pathname?.startsWith("/blog") ?? false;
   const reduced = useReducedMotion() ?? false;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scrollRef = useRef(0);
@@ -461,6 +465,7 @@ export default function SpaceField() {
 
   // starfield canvas
   useEffect(() => {
+    if (hidden) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -723,9 +728,9 @@ export default function SpaceField() {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", layout);
     };
-  }, [reduced]);
+  }, [reduced, hidden]);
 
-  if (pathname?.startsWith("/blog")) return null;
+  if (hidden) return null;
 
   return (
     <div aria-hidden className="sf-field">
