@@ -366,8 +366,14 @@ export default function SpaceField() {
 
   const { scrollY } = useScroll();
   const smooth = useSpring(scrollY, { stiffness: 55, damping: 18, mass: 0.4 });
-  const yTr = useTransform(smooth, (v) => (reduced ? 0 : v * 0.05));
-  const yBl = useTransform(smooth, (v) => (reduced ? 0 : v * -0.07));
+  // nebula parallax eases into a cap (tanh) so the corner glows drift
+  // with the hero but never escape their corners on long pages
+  const yTr = useTransform(smooth, (v) =>
+    reduced ? 0 : 90 * Math.tanh((v * 0.05) / 90)
+  );
+  const yBl = useTransform(smooth, (v) =>
+    reduced ? 0 : -110 * Math.tanh((v * 0.07) / 110)
+  );
 
   // feed the smoothed scroll into the canvas parallax
   useEffect(() => {
