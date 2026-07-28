@@ -101,7 +101,15 @@ export default function CaseStudy({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 lg:gap-16 items-center">
+        {/* media-forward split: the frame carries the case (60/40).
+            The wide column must follow the media when sides alternate. */}
+        <div
+          className={`grid grid-cols-1 ${
+            reversed
+              ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]"
+              : "lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]"
+          } gap-10 lg:gap-12 items-center`}
+        >
           {/* Media */}
           <Link
             href={projectHref(p)}
