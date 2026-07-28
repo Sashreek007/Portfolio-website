@@ -16,9 +16,10 @@ export default function Hero() {
       id="hero"
       className="relative min-h-[100dvh] px-[5vw] pt-24 pb-12 overflow-hidden flex items-center"
     >
-      {/* Desktop: the right column (editor + schematic) is the tall one;
-          the text block centers against it so space balances above and
-          below the name instead of pooling under the CTAs. */}
+      {/* Desktop: columns top-align — the name's cap line locks to the
+          editor's top border and the left content flows naturally below.
+          (Bottom-locking the CTA row was tried and reverted: the gap it
+          opens between name and meta block grows with viewport size.) */}
       <div className="grid w-full max-w-[1440px] mx-auto gap-10 lg:gap-8 items-center lg:items-start grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
 
         {/* ── LEFT: name + subtitle + status ─────────────────────────── */}
@@ -26,7 +27,7 @@ export default function Hero() {
             name can never outgrow it and slide under the editor on
             tablet widths (the 22cqw cap ≈ "sashreek" at 4.45em mono) */}
         <div
-          className="flex flex-col items-center text-center lg:items-start lg:text-left lg:self-center"
+          className="flex flex-col items-center text-center lg:items-start lg:text-left"
           style={{ containerType: "inline-size" }}
         >
           {/* Massive name */}
