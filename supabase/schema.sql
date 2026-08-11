@@ -7,6 +7,11 @@ CREATE TABLE IF NOT EXISTS projects (
   demo_url    TEXT,
   image_url   TEXT,
   video_url   TEXT,
+  -- Ordered supporting figures: [{ url, alt, caption }]
+  gallery     JSONB NOT NULL DEFAULT '[]'::jsonb
+              CHECK (jsonb_typeof(gallery) = 'array'),
+  -- Short, factual result lines shown under the overview.
+  highlights  TEXT[] NOT NULL DEFAULT '{}',
   stack       TEXT[] DEFAULT '{}',
   status      TEXT DEFAULT 'shipped' CHECK (status IN ('active','shipped','building')),
   year        INTEGER,

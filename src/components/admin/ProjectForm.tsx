@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Project } from "@/components/site/ProjectCard";
+import type { GalleryItem, Project } from "@/components/site/ProjectCard";
 
 type FormData = {
   name: string;
@@ -15,6 +15,7 @@ type FormData = {
   year: string;
   is_best: boolean;
   is_current: boolean;
+  highlights: string;
 };
 
 type Props = {
@@ -32,6 +33,9 @@ export default function ProjectForm({ project, mode }: Props) {
   const [videoUrl, setVideoUrl] = useState(project?.video_url ?? "");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const [gallery, setGallery] = useState<GalleryItem[]>(project?.gallery ?? []);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
 
   const [form, setForm] = useState<FormData>({
     name: project?.name ?? "",
@@ -43,6 +47,7 @@ export default function ProjectForm({ project, mode }: Props) {
     year: project?.year?.toString() ?? new Date().getFullYear().toString(),
     is_best: project?.is_best ?? false,
     is_current: project?.is_current ?? false,
+    highlights: project?.highlights?.join("\n") ?? "",
   });
 
   const set = (key: keyof FormData) => (
@@ -80,6 +85,48 @@ export default function ProjectForm({ project, mode }: Props) {
     setUploading(false);
   };
 
+  // Gallery entries upload to the same bucket, then get their alt/caption
+  // filled in below. Array order is the order they render on the site.
+  const addGalleryFiles = async (files: File[]) => {
+    setUploadingGallery(true);
+    const supabase = createClient();
+
+    for (const file of files) {
+      const ext = file.name.split(".").pop();
+      const path = `gallery/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("project-media")
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) {
+        setError(uploadError.message);
+        continue;
+      }
+
+      const { data } = supabase.storage.from("project-media").getPublicUrl(path);
+      setGallery((prev) => [...prev, { url: data.publicUrl, alt: "", caption: "" }]);
+    }
+
+    setUploadingGallery(false);
+  };
+
+  const updateGalleryItem = (i: number, key: "alt" | "caption", value: string) =>
+    setGallery((prev) =>
+      prev.map((item, idx) => (idx === i ? { ...item, [key]: value } : item))
+    );
+
+  const moveGalleryItem = (i: number, delta: number) =>
+    setGallery((prev) => {
+      const next = [...prev];
+      const target = i + delta;
+      if (target < 0 || target >= next.length) return prev;
+      [next[i], next[target]] = [next[target], next[i]];
+      return next;
+    });
+
+  const removeGalleryItem = (i: number) =>
+    setGallery((prev) => prev.filter((_, idx) => idx !== i));
+
   const handleSave = async () => {
     setSaving(true);
     setError("");
@@ -91,6 +138,11 @@ export default function ProjectForm({ project, mode }: Props) {
       demo_url: form.demo_url.trim() || null,
       image_url: imageUrl || null,
       video_url: videoUrl || null,
+      gallery: gallery.filter((g) => g.url),
+      highlights: form.highlights
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
       stack: form.stack
         .split(",")
         .map((s) => s.trim())
@@ -167,6 +219,21 @@ export default function ProjectForm({ project, mode }: Props) {
           onChange={set("description")}
           rows={3}
           required
+          className="px-3 py-2 text-[14px] outline-none transition-colors duration-150 w-full resize-y"
+          style={{ ...inputStyle, fontFamily: "var(--font-body)", lineHeight: "1.6" }}
+          onFocus={(e) => ((e.target as HTMLTextAreaElement).style.borderColor = "var(--violet-mid)")}
+          onBlur={(e) => ((e.target as HTMLTextAreaElement).style.borderColor = "var(--gray-800)")}
+        />
+      </div>
+
+      {/* Highlights */}
+      <div className="flex flex-col gap-2">
+        <label style={labelStyle}>Highlights (one per line)</label>
+        <textarea
+          value={form.highlights}
+          onChange={set("highlights")}
+          rows={4}
+          placeholder={"One short factual line per row.\nKeep long detail out of the description."}
           className="px-3 py-2 text-[14px] outline-none transition-colors duration-150 w-full resize-y"
           style={{ ...inputStyle, fontFamily: "var(--font-body)", lineHeight: "1.6" }}
           onFocus={(e) => ((e.target as HTMLTextAreaElement).style.borderColor = "var(--violet-mid)")}
@@ -343,6 +410,122 @@ export default function ProjectForm({ project, mode }: Props) {
             if (file) uploadFile(file, "project-media", setVideoUrl, setUploadingVideo);
           }}
         />
+      </div>
+
+      {/* Gallery */}
+      <div className="flex flex-col gap-3">
+        <label style={labelStyle}>Gallery (ordered — renders on the detail page)</label>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => galleryRef.current?.click()}
+            disabled={uploadingGallery}
+            className="font-mono text-[12px] px-3 py-2 transition-colors duration-150 disabled:opacity-50"
+            style={{
+              color: "var(--text-muted)",
+              border: "1px solid var(--gray-800)",
+              borderRadius: "4px",
+              background: "var(--bg-surface)",
+              cursor: "pointer",
+            }}
+          >
+            {uploadingGallery ? "uploading..." : "add images"}
+          </button>
+          {gallery.length > 0 && (
+            <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+              {gallery.length} figure{gallery.length === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
+        <input
+          ref={galleryRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const files = Array.from(e.target.files ?? []);
+            if (files.length) addGalleryFiles(files);
+            e.target.value = "";
+          }}
+        />
+
+        {gallery.map((item, i) => (
+          <div
+            key={item.url}
+            className="flex gap-3 p-3"
+            style={{
+              border: "1px solid var(--gray-800)",
+              borderRadius: "6px",
+              background: "var(--bg-surface)",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={item.url}
+              alt=""
+              className="object-contain shrink-0"
+              style={{
+                width: "104px",
+                height: "68px",
+                border: "1px solid var(--gray-800)",
+                borderRadius: "4px",
+              }}
+            />
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
+              <input
+                value={item.caption}
+                onChange={(e) => updateGalleryItem(i, "caption", e.target.value)}
+                placeholder="Caption — the visible label"
+                className="px-2 py-[6px] text-[13px] outline-none w-full"
+                style={inputStyle}
+              />
+              <input
+                value={item.alt}
+                onChange={(e) => updateGalleryItem(i, "alt", e.target.value)}
+                placeholder="Alt text — describe the image for screen readers"
+                className="px-2 py-[6px] text-[13px] outline-none w-full"
+                style={inputStyle}
+              />
+              {!item.alt.trim() && (
+                <span className="font-mono text-[10.5px]" style={{ color: "var(--amber-bright)" }}>
+                  missing alt text
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-1 shrink-0">
+              {[
+                { label: "↑", action: () => moveGalleryItem(i, -1), disabled: i === 0 },
+                {
+                  label: "↓",
+                  action: () => moveGalleryItem(i, 1),
+                  disabled: i === gallery.length - 1,
+                },
+                { label: "✕", action: () => removeGalleryItem(i), disabled: false },
+              ].map(({ label, action, disabled }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={action}
+                  disabled={disabled}
+                  aria-label={
+                    label === "↑" ? "move up" : label === "↓" ? "move down" : "remove figure"
+                  }
+                  className="font-mono text-[12px] px-2 py-[3px] transition-colors duration-150 disabled:opacity-30"
+                  style={{
+                    color: label === "✕" ? "oklch(0.704 0.191 22.216)" : "var(--text-muted)",
+                    border: "1px solid var(--gray-800)",
+                    borderRadius: "4px",
+                    background: "transparent",
+                    cursor: disabled ? "default" : "pointer",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       {error && (

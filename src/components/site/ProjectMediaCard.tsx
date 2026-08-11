@@ -28,10 +28,12 @@ function MediaFrame({
       {p.video_url ? (
         <video
           src={p.video_url}
+          poster={p.image_url ?? undefined}
           autoPlay
           muted
           loop
           playsInline
+          preload="metadata"
           className="absolute inset-0 w-full h-full object-cover"
         />
       ) : p.image_url ? (
@@ -39,7 +41,9 @@ function MediaFrame({
         <img
           src={p.image_url}
           alt={p.name}
-          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       ) : (
         <>

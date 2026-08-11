@@ -4,6 +4,7 @@ import { getAllProjects } from "@/lib/projects.server";
 import { projectSlug } from "@/lib/projects";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Project } from "@/components/site/ProjectCard";
+import ProjectGallery from "@/components/site/ProjectGallery";
 
 export async function generateMetadata({
   params,
@@ -34,11 +35,13 @@ function DemoFrame({ project: p }: { project: Project }) {
       {p.video_url ? (
         <video
           src={p.video_url}
+          poster={p.image_url ?? undefined}
           autoPlay
           muted
           loop
           playsInline
           controls
+          preload="metadata"
           className="absolute inset-0 w-full h-full object-cover"
         />
       ) : p.image_url ? (
@@ -46,7 +49,8 @@ function DemoFrame({ project: p }: { project: Project }) {
         <img
           src={p.image_url}
           alt={p.name}
-          className="absolute inset-0 w-full h-full object-cover"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       ) : (
         <>
@@ -232,6 +236,35 @@ export default async function ProjectDetailPage({
             {p.description}
           </p>
         </section>
+
+        {p.highlights.length > 0 && (
+          <section className="mb-16">
+            <h2 className="font-mono text-[14px] mb-5 flex items-baseline gap-2">
+              <span style={{ color: "var(--violet-soft)" }}>##</span>
+              <span style={{ color: "var(--text-primary)" }}>what it does</span>
+            </h2>
+            <ul className="flex flex-col gap-4 max-w-[720px]">
+              {p.highlights.map((line, i) => (
+                <li key={line} className="flex items-baseline gap-4">
+                  <span
+                    className="font-mono text-[11px] tracking-[0.18em] shrink-0"
+                    style={{ color: "var(--amber-bright)" }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span
+                    className="text-[15px] leading-[1.75]"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {line}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <ProjectGallery items={p.gallery} />
 
         {p.stack.length > 0 && (
           <section className="mb-16">

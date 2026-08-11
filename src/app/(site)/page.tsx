@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { getBestProjects } from "@/lib/projects.server";
 import Hero from "@/components/site/Hero";
 import SectionKicker from "@/components/site/SectionKicker";
 import CopyHandle from "@/components/site/CopyHandle";
@@ -8,98 +8,12 @@ import TickerBand from "@/components/site/TickerBand";
 import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
 
-// ── Fallback projects (shown before Supabase is configured) ───────────────────
-const SEED_BEST: Project[] = [
-  {
-    id: "1",
-    name: "Career Co-Pilot",
-    description:
-      "AI-assisted job workflow platform that matches roles to your profile, generates tailored resumes, and supports browser-assisted applications while keeping the user in control.",
-    github_url: "https://github.com/Sashreek007/career-savers_CareerCo-Pilot",
-    demo_url: null,
-    image_url: null,
-    video_url: null,
-    stack: ["React", "TypeScript", "FastAPI", "Python", "Playwright", "Gemini API"],
-    status: "shipped",
-    year: 2025,
-    is_best: true,
-    is_current: false,
-    sort_order: 0,
-  },
-  {
-    id: "2",
-    name: "DoomScroller",
-    description:
-      "Chrome extension that converts doomscrolling into measurable distance, coins, and multiplayer battles with local-first tracking, Supabase sync, and personalized AI feedback.",
-    github_url: "https://github.com/Sashreek007/Doom-Scroller-by-Commit-and-Pray",
-    demo_url: null,
-    image_url: null,
-    video_url: null,
-    stack: ["TypeScript", "React", "Supabase", "PostgreSQL", "Chrome Extension"],
-    status: "shipped",
-    year: 2025,
-    is_best: true,
-    is_current: false,
-    sort_order: 1,
-  },
-  {
-    id: "4",
-    name: "FluxAtlas — Economic Trading Engine",
-    description:
-      "Full-stack auction simulation platform modeling international resource trading with Vickrey auction mechanisms across 50+ simulated countries.",
-    github_url: "https://github.com/Aarushb/NH25_flux_Atlas",
-    demo_url: null,
-    image_url: null,
-    video_url: null,
-    stack: ["FastAPI", "React", "PostgreSQL", "Python", "TypeScript"],
-    status: "shipped",
-    year: 2025,
-    is_best: true,
-    is_current: false,
-    sort_order: 2,
-  },
-  {
-    id: "5",
-    name: "Spam Detection Discord Bot",
-    description:
-      "Deployed scam detection bot that identifies and removes malicious messages in real time with low-latency inference.",
-    github_url: "https://github.com/UndergraduateArtificialIntelligenceClub/Spam-Detection-Discord-Bot",
-    demo_url: null,
-    image_url: null,
-    video_url: null,
-    stack: ["Python", "Discord.py", "Hugging Face"],
-    status: "active",
-    year: 2025,
-    is_best: true,
-    is_current: false,
-    sort_order: 3,
-  },
-];
-
 const divider = <div className="gradient-divider" />;
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 export default async function HomePage() {
-  let bestProjects: Project[] = SEED_BEST;
-
-  if (
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
-    try {
-      const supabase = await createServerClient();
-
-      const { data: projects } = await supabase
-        .from("projects")
-        .select("*")
-        .eq("is_best", true)
-        .order("sort_order")
-        .limit(4);
-      if (projects?.length) bestProjects = projects as Project[];
-    } catch {
-      // silence — fallback data used
-    }
-  }
+  // Falls back to the shared seed list when Supabase is unreachable.
+  const bestProjects: Project[] = await getBestProjects(4);
 
   // Ticker + header meta derived from the data on the page.
   const tickerItems = Array.from(new Set(bestProjects.flatMap((p) => p.stack)));

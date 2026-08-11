@@ -7,6 +7,15 @@
       "runtimeArgs": ["node_modules/.bin/next", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "next-dev-seed",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_ANON_KEY= exec node node_modules/.bin/next dev --port 3111"
+      ],
+      "port": 3111
     }
   ]
 }

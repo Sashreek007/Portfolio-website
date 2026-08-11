@@ -3,6 +3,14 @@
 import { useRef } from "react";
 import { TechBadge } from "./TechBadge";
 
+// One supporting figure on a project's detail page. `alt` is the accessible
+// description, `caption` the visible label — they are not interchangeable.
+export type GalleryItem = {
+  url: string;
+  alt: string;
+  caption: string;
+};
+
 export type Project = {
   id: string;
   name: string;
@@ -11,6 +19,10 @@ export type Project = {
   demo_url: string | null;
   image_url: string | null;
   video_url: string | null;
+  // Ordered; array order is display order. Empty for most projects.
+  gallery: GalleryItem[];
+  // Short factual lines; kept out of `description` so cards stay card-sized.
+  highlights: string[];
   stack: string[];
   status: "active" | "shipped" | "building";
   year: number | null;
@@ -143,10 +155,25 @@ export default function ProjectCard({ project, index }: Props) {
           }}
         >
           {project.video_url ? (
-            <video src={project.video_url} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+            <video
+              src={project.video_url}
+              poster={project.image_url ?? undefined}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-cover"
+            />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={project.image_url!} alt={project.name} className="w-full h-full object-cover" />
+            <img
+              src={project.image_url!}
+              alt={project.name}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-contain"
+            />
           )}
         </div>
       )}
