@@ -158,10 +158,9 @@ export default async function ProjectDetailPage({
   const linkedPost = await findLinkedPost(p);
 
   return (
-    <div
-      className="min-h-screen w-full px-[6vw] py-16"
-      style={{ background: "var(--bg-base)" }}
-    >
+    // No background here: the layout's SpaceField sits at z-index -1, so an
+    // opaque wrapper would paint the starfield out on this route alone.
+    <div className="min-h-screen w-full px-[6vw] py-16">
       <div className="max-w-[960px] mx-auto">
         <nav
           className="flex items-center gap-[6px] font-mono text-[12px] mb-10"
