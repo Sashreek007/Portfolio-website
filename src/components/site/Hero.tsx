@@ -30,14 +30,20 @@ export default function Hero() {
           className="flex flex-col items-center text-center lg:items-start lg:text-left"
           style={{ containerType: "inline-size" }}
         >
-          {/* Greeting — lands first, then the name. Amber because this sits
-              over the nebula's brightest corner, where --text-secondary
-              disappeared; amber is already the kicker colour site-wide. */}
+          {/* Greeting — reads straight into the name below it ("Hi all, I'm
+              sashreek addanki"), so the gap under it is tight. Amber because
+              this sits over the nebula's brightest corner, where
+              --text-secondary disappeared; amber is the kicker colour
+              site-wide. The name stays the h1 — this is not part of it. */}
           <p
-            className="fade-up font-mono text-[16px] mb-4 tracking-[0.06em]"
-            style={{ color: "var(--amber-bright)" }}
+            className="fade-up font-mono mb-2 tracking-[0.01em]"
+            style={{
+              color: "var(--amber-bright)",
+              fontSize: "clamp(20px, 2vw, 30px)",
+              lineHeight: 1.2,
+            }}
           >
-            Hi all,
+            Hi all, I&rsquo;m
           </p>
 
           {/* Massive name */}
