@@ -9,6 +9,41 @@
 
 import SystemSchematic from "./SystemSchematic";
 import { Magnetic } from "@/components/motion-primitives/magnetic";
+import { SiGithub, SiLeetcode, SiMonkeytype } from "react-icons/si";
+// Simple Icons dropped LinkedIn, so its glyph comes from Font Awesome.
+// "LinkedinIn" is the bare wordmark, matching the other three; "Linkedin"
+// bakes in a rounded-square background that would fight the circle.
+import { FaLinkedinIn } from "react-icons/fa6";
+
+// `brand` is each service's own colour, revealed on hover via --brand.
+// GitHub's mark is officially near-black, which is invisible here, so it
+// takes the standard on-dark treatment of white.
+const SOCIALS = [
+  {
+    label: "GitHub",
+    href: "https://github.com/Sashreek007",
+    Icon: SiGithub,
+    brand: "#FFFFFF",
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/sashreek-addanki-121471257/",
+    Icon: FaLinkedinIn,
+    brand: "#0A66C2",
+  },
+  {
+    label: "LeetCode",
+    href: "https://leetcode.com/u/Sashreek_18/",
+    Icon: SiLeetcode,
+    brand: "#FFA116",
+  },
+  {
+    label: "monkeytype",
+    href: "https://monkeytype.com/profile/Shrek6791",
+    Icon: SiMonkeytype,
+    brand: "#E2B714",
+  },
+];
 
 export default function Hero() {
   return (
@@ -110,9 +145,10 @@ export default function Hero() {
               or chasing a faster monkeytype score.
             </p>
 
-            {/* CTA buttons — one primary action, one secondary. Everything
-                else (about, blog, socials) already lives in the nav/contact. */}
-            <div className="fade-up fade-up-4 flex flex-wrap gap-3 justify-center lg:justify-start">
+            {/* CTA row — one primary action, then the profiles as icon-only
+                circles. Icon buttons carry no text, so each needs an
+                aria-label; title gives sighted users the same name on hover. */}
+            <div className="fade-up fade-up-4 flex flex-wrap items-center gap-x-4 gap-y-3 justify-center lg:justify-start">
               <Magnetic intensity={0.35} range={110}>
                 <a
                   href="#work"
@@ -121,15 +157,23 @@ export default function Hero() {
                   view projects <span aria-hidden>→</span>
                 </a>
               </Magnetic>
-              <Magnetic intensity={0.35} range={110}>
-                <a
-                  href="/resume"
-                  className="glass-pill font-mono text-[14px] px-[22px] py-[11px]"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  resume
-                </a>
-              </Magnetic>
+
+              <div className="flex items-center gap-[10px]">
+                {SOCIALS.map(({ label, href, Icon, brand }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label={label}
+                    title={label}
+                    className="social-circle"
+                    style={{ "--brand": brand } as React.CSSProperties}
+                  >
+                    <Icon size={17} aria-hidden />
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </div>

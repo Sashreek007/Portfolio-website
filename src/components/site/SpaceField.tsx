@@ -665,10 +665,18 @@ export default function SpaceField() {
       for (const sp of SPIKE_STARS) drawSpikeStar(sp, t, scroll);
       if (planet) {
         // anchored into the top-left corner, partially off-screen —
-        // clean dark sky there, well away from both nebulae
+        // clean dark sky there, well away from both nebulae.
+        //
+        // Offset by its OWN radius, not by viewport height: the radius
+        // tracks width, so tying the centre to h let the limb creep down
+        // over the hero greeting on shorter/narrower windows. At -0.65R the
+        // limb always bottoms out ~0.35R from the top, which clears the
+        // greeting on short laptop viewports (1512x700 was the tight case)
+        // and keeps the same crescent at every size. The soft atmosphere
+        // still spills further down, which is the intent.
         const bob = reduced ? 0 : Math.sin(t * 0.05 + 1) * 3;
         const pcx = w * 0.03;
-        const pcy = h * -0.04 - scroll * 0.04 + bob;
+        const pcy = -planet.R * 0.65 - scroll * 0.04 + bob;
         const S = planet.size;
         ctx.drawImage(planet.base, pcx - S / 2, pcy - S / 2, S, S);
         // cloud bands drift along the band axis — the "rotation".
