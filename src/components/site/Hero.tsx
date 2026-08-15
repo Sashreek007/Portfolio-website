@@ -30,10 +30,12 @@ export default function Hero() {
           className="flex flex-col items-center text-center lg:items-start lg:text-left"
           style={{ containerType: "inline-size" }}
         >
-          {/* Greeting — lands first, then the name */}
+          {/* Greeting — lands first, then the name. Amber because this sits
+              over the nebula's brightest corner, where --text-secondary
+              disappeared; amber is already the kicker colour site-wide. */}
           <p
-            className="fade-up font-mono text-[15px] mb-4 tracking-[0.02em]"
-            style={{ color: "var(--text-secondary)" }}
+            className="fade-up font-mono text-[16px] mb-4 tracking-[0.06em]"
+            style={{ color: "var(--amber-bright)" }}
           >
             Hi all,
           </p>
@@ -42,7 +44,7 @@ export default function Hero() {
           <h1
             className="fade-up fade-up-1 font-mono font-medium"
             style={{
-              fontSize: "clamp(56px, min(10vw, 22cqw), 168px)",
+              fontSize: "clamp(48px, min(8.5vw, 19cqw), 140px)",
               lineHeight: "0.95",
               letterSpacing: "-0.05em",
               color: "var(--text-primary)",
