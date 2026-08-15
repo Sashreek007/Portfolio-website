@@ -19,8 +19,7 @@ const arr = (a) =>
   a.length === 0 ? "'{}'" : `ARRAY[${a.map(q).join(",")}]::text[]`;
 const json = (o) => `${q(JSON.stringify(o))}::jsonb`;
 
-const NEW = SEED_PROJECTS.filter((p) => p.sort_order <= 1);
-const EXISTING = SEED_PROJECTS.filter((p) => p.sort_order > 1);
+const ALL = SEED_PROJECTS;
 
 let out = `-- Adds the two flagship projects and re-orders the grid.
 -- Idempotent: safe to run more than once. Matched on name, so the existing
@@ -41,18 +40,10 @@ ALTER TABLE projects
 ALTER TABLE projects
   ADD COLUMN IF NOT EXISTS highlights TEXT[] NOT NULL DEFAULT '{}';
 
--- 2. Push the existing projects down so 0 and 1 are free -------------------
+-- 2. Every project, in repo order ------------------------------------------
 `;
 
-for (const p of EXISTING) {
-  out += `UPDATE projects SET sort_order = ${p.sort_order} WHERE name = ${q(p.name)};\n`;
-}
-
-out += `
--- 3. The two flagship projects --------------------------------------------
-`;
-
-for (const p of NEW) {
+for (const p of ALL) {
   // `name` has no unique index, so guard the insert explicitly — ON CONFLICT
   // would not fire and a second run would duplicate the row.
   out += `
@@ -87,7 +78,6 @@ COMMIT;
 -- FROM projects ORDER BY sort_order;
 `;
 
-fs.writeFileSync(path.join(REPO, "supabase/apply_flagship_projects.sql"), out);
+fs.writeFileSync(path.join(REPO, "supabase/sync_projects.sql"), out);
 console.log(`wrote ${out.length} bytes`);
-console.log(`new: ${NEW.map((p) => p.name).join(", ")}`);
-console.log(`reordered: ${EXISTING.length} existing rows`);
+console.log(`projects: ${ALL.length}`);

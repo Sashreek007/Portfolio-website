@@ -3,6 +3,7 @@ import { projectHref } from "@/lib/projects";
 import type { Project } from "@/components/site/ProjectCard";
 import { TechBadge } from "@/components/site/TechBadge";
 import ProjectConstellation from "@/components/site/ProjectConstellation";
+import ProjectMediaRotator from "@/components/site/ProjectMediaRotator";
 import { Spotlight } from "@/components/motion-primitives/spotlight";
 
 // Case-study strip — one editorial "chapter" per project. Layout only:
@@ -18,26 +19,8 @@ const STATUS_META: Record<Project["status"], { label: string; color: string; dot
 function CaseMedia({ project: p, index }: { project: Project; index: number }) {
   return (
     <div className="case-media w-full" style={{ aspectRatio: "16 / 10" }}>
-      {p.video_url ? (
-        <video
-          src={p.video_url}
-          poster={p.image_url ?? undefined}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      ) : p.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={p.image_url}
-          alt={p.name}
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 w-full h-full object-contain"
-        />
+      {p.video_url || p.image_url ? (
+        <ProjectMediaRotator project={p} />
       ) : (
         <>
           <div

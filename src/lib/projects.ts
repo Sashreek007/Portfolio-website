@@ -114,6 +114,67 @@ export const SEED_PROJECTS: Project[] = [
     sort_order: 1,
   },
   {
+    id: "11",
+    name: "Durable Execution Engine (Latch)",
+    description:
+      "A durable execution engine for AI agent workflows. A worker claims one step at a time under a lease, a model decides what happens next, and every decision is recorded as a durable fact the moment it is made — so a machine that dies mid-step recovers by reading facts forward instead of re-running work. Tool calls that spend money or can't be undone are gated behind a human approval. Currently in development.",
+    github_url: null,
+    demo_url: null,
+    image_url: "/projects/latch/workflow-trace.webp",
+    video_url: null,
+    gallery: [
+      {
+        url: "/projects/latch/workflows.webp",
+        caption: "UI prototype — workflow operations",
+        alt: "Dark dashboard prototype titled 'Workflow operations'. Four counters across the top track active, ready, needs-review and recovered workflows. A live workflow table lists each run with its status, phase, step, spend and age, and a right-hand rail shows the selected workflow's definition, worker, lease token and event count, its latest checkpoint, and a panel showing the four invariants as verified. All values are sample data.",
+      },
+      {
+        url: "/projects/latch/workflow-trace.webp",
+        caption: "UI prototype — workflow trace",
+        alt: "Dark dashboard prototype showing the trace of a single workflow as a chronological event timeline: a lease being claimed, a model decision recorded with its provider, token count and cost, an intent recorded with an idempotency key, a worker handover to a second worker, and a deduplicated outcome noting no second provider call. A right-hand rail breaks out the budget envelope, the lease with its heartbeat and fencing token, the model decision, and the effect guarantee. All values are sample data.",
+      },
+      {
+        url: "/projects/latch/approvals.webp",
+        caption: "UI prototype — approval queue",
+        alt: "Dark dashboard prototype titled 'Approval queue', listing risk-gated actions awaiting a decision with their due times, customer and risk level. The detail pane shows ticket facts, a narrow audit timeline, and side-by-side proposer and critic panels in which one model recommends approving a refund and a second escalates it for manual review, each with its rationale and evidence. A footer notes the workflow is suspended holding rows only. All values are sample data.",
+      },
+      {
+        url: "/projects/latch/invariants.webp",
+        caption: "UI prototype — invariant sweep",
+        alt: "Dark dashboard prototype titled 'Correctness verification'. Four cards show the invariants — no duplicate effects, no lost workflows, single owner, budget ceiling — each marked verified. Panels below report a seeded invariant sweep, the mechanism backing each invariant, recently failing fixtures that were fixed, and a crash-coverage list marking which points in the step loop have been exercised. All values are sample data.",
+      },
+      {
+        url: "/projects/latch/cost-reliability.webp",
+        caption: "UI prototype — cost and reliability",
+        alt: "Dark dashboard prototype titled 'Cost & reliability'. Top cards track model spend, average spend per workflow, routing savings and budget breaches, with sparklines. Panels below break spend down by workflow phase and provider, compare routing strategies against their estimated spend, list recent recovery evidence, and show a budget envelope in which reserved plus spent stays within the ceiling. All values are sample data.",
+      },
+    ],
+    highlights: [
+      "Queue, events and state commit in one Postgres transaction, so there is no dual-write window where work is queued but the state never lands.",
+      "Workers hold a lease with a fencing token, so a zombie that wakes up after its lease expired cannot write over the worker that replaced it.",
+      "Idempotency keys name the logical effect rather than the attempt, so a retry after a crash settles the same effect instead of firing it a second time.",
+      "Correctness is meant to be proven rather than asserted: the four invariants are pure functions run over the whole event log across seeded crash schedules.",
+      "Cloud-native from the first week — ECS Fargate, RDS Postgres, SQS and Bedrock, defined in CDK and deployed by GitHub Actions over OIDC.",
+    ],
+    stack: [
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL 17",
+      "AWS ECS Fargate",
+      "Amazon SQS",
+      "Amazon Bedrock",
+      "OpenAI",
+      "AWS CDK",
+      "Docker",
+      "GitHub Actions",
+    ],
+    status: "building",
+    year: 2026,
+    is_best: true,
+    is_current: true,
+    sort_order: 2,
+  },
+  {
     id: "1",
     name: "Career Co-Pilot",
     description:
@@ -129,7 +190,7 @@ export const SEED_PROJECTS: Project[] = [
     year: 2025,
     is_best: true,
     is_current: false,
-    sort_order: 2,
+    sort_order: 3,
   },
   {
     id: "2",
@@ -145,9 +206,12 @@ export const SEED_PROJECTS: Project[] = [
     stack: ["TypeScript", "React", "TailwindCSS", "Supabase", "PostgreSQL", "Chrome Extension"],
     status: "shipped",
     year: 2025,
+    // Stays "best work" so it keeps its place on /work; ordered past the
+    // homepage's four-item cut so it drops off the reel. is_best drives both
+    // surfaces, so clearing it here would hide the project from /work too.
     is_best: true,
     is_current: false,
-    sort_order: 3,
+    sort_order: 4,
   },
   {
     id: "4",
@@ -165,7 +229,7 @@ export const SEED_PROJECTS: Project[] = [
     year: 2025,
     is_best: true,
     is_current: false,
-    sort_order: 4,
+    sort_order: 5,
   },
   {
     id: "5",
@@ -184,7 +248,7 @@ export const SEED_PROJECTS: Project[] = [
     year: 2025,
     is_best: true,
     is_current: false,
-    sort_order: 5,
+    sort_order: 6,
   },
   {
     id: "6",
@@ -202,7 +266,7 @@ export const SEED_PROJECTS: Project[] = [
     year: 2024,
     is_best: true,
     is_current: false,
-    sort_order: 6,
+    sort_order: 7,
   },
   {
     id: "7",
@@ -220,7 +284,7 @@ export const SEED_PROJECTS: Project[] = [
     year: 2024,
     is_best: false,
     is_current: false,
-    sort_order: 7,
+    sort_order: 8,
   },
   {
     id: "8",
@@ -238,7 +302,7 @@ export const SEED_PROJECTS: Project[] = [
     year: 2025,
     is_best: false,
     is_current: true,
-    sort_order: 8,
+    sort_order: 9,
   },
 ];
 

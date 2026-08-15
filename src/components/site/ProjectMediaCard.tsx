@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { projectHref } from "@/lib/projects";
 import type { Project } from "@/components/site/ProjectCard";
+import ProjectMediaRotator from "@/components/site/ProjectMediaRotator";
 
 function MediaFrame({
   project: p,
@@ -25,26 +26,8 @@ function MediaFrame({
         borderBottom: featured ? undefined : "1px solid var(--gray-800)",
       }}
     >
-      {p.video_url ? (
-        <video
-          src={p.video_url}
-          poster={p.image_url ?? undefined}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      ) : p.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={p.image_url}
-          alt={p.name}
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 w-full h-full object-contain"
-        />
+      {p.video_url || p.image_url ? (
+        <ProjectMediaRotator project={p} />
       ) : (
         <>
           {/* corner crosshairs — close in toward the target on hover */}

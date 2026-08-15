@@ -2044,3 +2044,18 @@
     transition-delay: 0ms !important;
   }
 }
+
+/* ── Project gallery carousel ─────────────────────────────────────────── */
+.project-gallery:focus-visible {
+  border-color: color-mix(in srgb, var(--violet-soft) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--violet-mid) 22%, transparent);
+}
+.gallery-arrow:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--violet-soft) 45%, transparent);
+}
+.gallery-arrow:focus-visible,
+.gallery-dot:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--violet-soft) 60%, transparent);
+  outline-offset: 2px;
+}

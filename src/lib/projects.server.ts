@@ -59,5 +59,10 @@ export async function getBestProjects(limit = 4): Promise<Project[]> {
       // fall through to seed
     }
   }
-  return SEED_PROJECTS.filter((p) => p.is_best).slice(0, limit);
+  // Sort rather than trusting array order: the reel is a top-N slice, so a
+  // seed entry sitting out of sort_order would quietly change who is featured.
+  return SEED_PROJECTS.filter((p) => p.is_best)
+    .slice()
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .slice(0, limit);
 }
