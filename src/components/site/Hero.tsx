@@ -30,9 +30,17 @@ export default function Hero() {
           className="flex flex-col items-center text-center lg:items-start lg:text-left"
           style={{ containerType: "inline-size" }}
         >
+          {/* Greeting — lands first, then the name */}
+          <p
+            className="fade-up font-mono text-[15px] mb-4 tracking-[0.02em]"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Hi all,
+          </p>
+
           {/* Massive name */}
           <h1
-            className="fade-up font-mono font-medium"
+            className="fade-up fade-up-1 font-mono font-medium"
             style={{
               fontSize: "clamp(56px, min(10vw, 22cqw), 168px)",
               lineHeight: "0.95",
@@ -60,6 +68,11 @@ export default function Hero() {
               className="fade-up fade-up-2 font-mono text-[15px] mb-4 flex items-center gap-3 flex-wrap justify-center lg:justify-start"
               style={{ color: "var(--text-secondary)" }}
             >
+              <span>3rd year</span>
+              <span
+                className="inline-block w-[5px] h-[5px] rounded-full"
+                style={{ background: "var(--gray-600)" }}
+              />
               <span style={{ color: "var(--violet-pale)" }}>computing science</span>
               <span style={{ color: "var(--gray-600)" }}>@</span>
               <span>ualberta</span>
@@ -72,14 +85,21 @@ export default function Hero() {
               <span style={{ color: "var(--green-bright)" }}>systems</span>
             </p>
 
-            {/* Tagline (Syne for some warmth against the mono name) */}
+            {/* Intro (Syne for some warmth against the mono name). The mono
+                row above carries the credential, so this stays on what the
+                work actually is rather than restating it. */}
             <p
               className="fade-up fade-up-3 text-[19px] leading-[1.6] max-w-[540px] mb-8"
               style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
             >
-              I understand the{" "}
-              <span style={{ color: "var(--amber-bright)" }}>machine</span>
-              {" "}before I build on top of it.
+              I love designing scalable{" "}
+              <span style={{ color: "var(--green-bright)" }}>
+                backend and distributed systems
+              </span>
+              , and integrating{" "}
+              <span style={{ color: "var(--amber-bright)" }}>AI</span>
+              {" "}into them. In my free time I&rsquo;m usually grinding LeetCode
+              or chasing a faster monkeytype score.
             </p>
 
             {/* CTA buttons — one primary action, one secondary. Everything
