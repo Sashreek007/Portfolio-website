@@ -1959,3 +1959,109 @@
     opacity: 0.3;
   }
 }
+
+/* ─── Experience: roles as branch diagrams ────────────────────────────
+   A spine drops from each role's mark and every bullet taps off it with an
+   elbow, echoing the hero schematic rather than boxing roles into cards. */
+.xp-role {
+  padding: 26px 0 30px;
+  border-top: 1px solid var(--gray-800);
+}
+.xp-role:last-child {
+  border-bottom: 1px solid var(--gray-800);
+}
+.xp-head {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+.xp-mark {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  background-color: color-mix(in srgb, var(--bg-surface) 70%, transparent);
+  background-size: 68%;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: var(--violet-pale);
+  transition: border-color 200ms ease;
+}
+.xp-role:hover .xp-mark {
+  border-color: color-mix(in srgb, var(--violet-soft) 45%, transparent);
+}
+.xp-when {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* the spine + elbows */
+.xp-branches {
+  margin: 18px 0 0 22px;
+  padding-left: 26px;
+  border-left: 1px solid var(--gray-800);
+  list-style: none;
+}
+.xp-branch {
+  position: relative;
+  padding: 0 0 14px 0;
+  max-width: 760px;
+}
+.xp-branch:last-child {
+  padding-bottom: 0;
+}
+.xp-branch::before {
+  content: "";
+  position: absolute;
+  left: -26px;
+  top: 11px;
+  width: 18px;
+  height: 1px;
+  background: var(--gray-800);
+}
+/* the node where the branch meets the copy */
+.xp-branch::after {
+  content: "";
+  position: absolute;
+  left: -11px;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--violet-mid);
+  transition: background 200ms ease, box-shadow 200ms ease;
+}
+.xp-role:hover .xp-branch::after {
+  background: var(--violet-soft);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--violet-soft) 55%, transparent);
+}
+
+@media (max-width: 640px) {
+  .xp-head {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .xp-when {
+    grid-column: 2;
+    text-align: left;
+    margin-top: 10px;
+    white-space: normal;
+  }
+  .xp-when span {
+    justify-content: flex-start !important;
+  }
+  .xp-branches {
+    margin-left: 12px;
+    padding-left: 20px;
+  }
+  .xp-branch::before {
+    left: -20px;
+    width: 12px;
+  }
+  .xp-branch::after {
+    left: -8px;
+  }
+}

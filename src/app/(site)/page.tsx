@@ -4,6 +4,7 @@ import SectionKicker from "@/components/site/SectionKicker";
 import CopyHandle from "@/components/site/CopyHandle";
 import { type Project } from "@/components/site/ProjectCard";
 import CaseStudy from "@/components/site/CaseStudy";
+import ExperienceSection from "@/components/site/ExperienceSection";
 import BlackHole from "@/components/site/BlackHole";
 import TickerBand from "@/components/site/TickerBand";
 import RevealSections from "@/components/site/RevealSections";
@@ -35,6 +36,14 @@ export default async function HomePage() {
 
       {/* ── Stack ticker — living band between hero and the case files ──── */}
       <TickerBand items={tickerItems} />
+
+      {/* ── Experience — roles as branch diagrams, ahead of the work ─────── */}
+      <section id="experience" className="section-hidden px-[6vw] pt-24 pb-20">
+        <SectionKicker label="EXPERIENCE" meta="roles.md" />
+        <ExperienceSection />
+      </section>
+
+      {divider}
 
       {/* ── Selected Work — editorial case-study chapters ─────────────────── */}
       <section id="work" className="section-hidden px-[6vw] pt-24 pb-28">
