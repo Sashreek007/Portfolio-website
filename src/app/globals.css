@@ -1884,3 +1884,40 @@
 @media (prefers-reduced-motion: reduce) {
   .social-circle:hover { transform: none; }
 }
+
+/* ─── Card media frame controls ───────────────────────────────────────
+   The cards use a stretched link (absolute, z-10) so the whole frame is
+   clickable; these sit above it and take pointer events back for
+   themselves only. */
+.media-nav {
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.media-card:hover .media-nav,
+.feature:hover .media-nav,
+.case-strip:hover .media-nav,
+.media-nav:focus-within {
+  opacity: 1;
+}
+.media-nav-btn {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-surface) 70%, transparent);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: color 150ms, border-color 150ms, background 150ms;
+}
+.media-nav-btn:hover {
+  color: var(--violet-pale);
+  border-color: color-mix(in srgb, var(--violet-soft) 55%, transparent);
+}
+.media-nav-btn:focus-visible,
+.media-nav-dot:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--violet-soft) 65%, transparent);
+  outline-offset: 2px;
+}

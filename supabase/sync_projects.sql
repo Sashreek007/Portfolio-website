@@ -80,7 +80,27 @@ UPDATE projects SET
 WHERE name = 'Durable Execution Engine (Latch)';
 
 INSERT INTO projects (name, description, sort_order)
-SELECT 'Career Co-Pilot', 'AI-assisted job workflow platform that matches roles to your profile, generates tailored resumes, and supports browser-assisted applications while keeping the user in control.', 3
+SELECT 'ClubMate AI', 'Open-source automation platform for club operations, focused on intelligent task scheduling and document workflows.', 3
+WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'ClubMate AI');
+
+UPDATE projects SET
+  description = 'Open-source automation platform for club operations, focused on intelligent task scheduling and document workflows.',
+  github_url  = 'https://github.com/UndergraduateArtificialIntelligenceClub/Clubmate-AI',
+  demo_url    = NULL,
+  image_url   = '/projects/clubmate/ragbotv2.jpg',
+  video_url   = '/projects/clubmate/ragbotv2.mp4',
+  gallery     = '[{"url":"/projects/clubmate/ragbotv2.mp4","poster":"/projects/clubmate/ragbotv2.jpg","caption":"Knowledge base and question answering","alt":"Screen recording of a Discord server beside the ClubMate admin dashboard. The bot posts its command list, split into member commands and exec commands, while the dashboard''s Knowledge Base panel shows the indexed document chunks and offers to sync a Google Doc or upload a file."},{"url":"/projects/clubmate/meetings.mp4","poster":"/projects/clubmate/meetings.jpg","caption":"Scheduling and rescheduling meetings","alt":"Screen recording in Discord: a slash command schedules a session, the bot replies with a Google Calendar link and invites an attendee, then a reschedule command finds two matching meetings and asks which event id to move."},{"url":"/projects/clubmate/meeting-transcription.mp4","poster":"/projects/clubmate/meeting-transcription.jpg","caption":"Recording, transcribing and summarising a meeting","alt":"Screen recording in Discord: the bot joins a voice lounge and starts recording, then on stop reports that it is transcribing and summarising, and posts a meeting summary with key discussion points, decisions made, action items, next steps and a full speaker-labelled transcript."},{"url":"/projects/clubmate/sheets.mp4","poster":"/projects/clubmate/sheets.jpg","caption":"Reading and summarising a spreadsheet","alt":"Screen recording in Discord: a read-sheet command returns a summary of a Google Sheet, listing row and column counts, completion and progress insights, due-date highlights, anomalies such as rows missing review dates, and a set of representative rows."},{"url":"/projects/clubmate/creating-forms.mp4","poster":"/projects/clubmate/creating-forms.jpg","caption":"Generating a Google Form","alt":"Screen recording showing a Google Form the bot generated — a sports survey with a name field, a multiple-choice question and a short-answer question — beside the ClubMate dashboard overview reporting the bot online, the Google account connected, and the indexed knowledge base."},{"url":"/projects/clubmate/roombooking.mp4","poster":"/projects/clubmate/roombooking.jpg","caption":"Library room availability","alt":"Screen recording in Discord: the bot answers a room-availability request with a dated list of study rooms and their free time slots, a total slot count, and a link out to the library''s booking page."},{"url":"/projects/clubmate/events.mp4","poster":"/projects/clubmate/events.jpg","caption":"Upcoming events","alt":"Screen recording in Discord: an events command lists what is coming up, with the bot''s full command reference visible above it and a scheduled project showcase entry with its time range below."}]'::jsonb,
+  highlights  = '{}',
+  stack       = ARRAY['Python','LangChain','LangGraph','MCP','Discord.py','Gemini','Google Workspace API']::text[],
+  status      = 'building',
+  year        = 2025,
+  is_best     = true,
+  is_current  = true,
+  sort_order  = 3
+WHERE name = 'ClubMate AI';
+
+INSERT INTO projects (name, description, sort_order)
+SELECT 'Career Co-Pilot', 'AI-assisted job workflow platform that matches roles to your profile, generates tailored resumes, and supports browser-assisted applications while keeping the user in control.', 4
 WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'Career Co-Pilot');
 
 UPDATE projects SET
@@ -96,11 +116,11 @@ UPDATE projects SET
   year        = 2025,
   is_best     = true,
   is_current  = false,
-  sort_order  = 3
+  sort_order  = 4
 WHERE name = 'Career Co-Pilot';
 
 INSERT INTO projects (name, description, sort_order)
-SELECT 'DoomScroller', 'Chrome extension that converts doomscrolling into measurable distance, coins, and multiplayer battles with local-first tracking, Supabase sync, and personalized AI feedback.', 4
+SELECT 'DoomScroller', 'Chrome extension that converts doomscrolling into measurable distance, coins, and multiplayer battles with local-first tracking, Supabase sync, and personalized AI feedback.', 5
 WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'DoomScroller');
 
 UPDATE projects SET
@@ -116,11 +136,11 @@ UPDATE projects SET
   year        = 2025,
   is_best     = true,
   is_current  = false,
-  sort_order  = 4
+  sort_order  = 5
 WHERE name = 'DoomScroller';
 
 INSERT INTO projects (name, description, sort_order)
-SELECT 'FluxAtlas — Economic Trading Engine', 'Full-stack auction simulation platform modeling international resource trading with Vickrey auction mechanisms across 50+ simulated countries.', 5
+SELECT 'FluxAtlas — Economic Trading Engine', 'Full-stack auction simulation platform modeling international resource trading with Vickrey auction mechanisms across 50+ simulated countries.', 6
 WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'FluxAtlas — Economic Trading Engine');
 
 UPDATE projects SET
@@ -136,11 +156,11 @@ UPDATE projects SET
   year        = 2025,
   is_best     = true,
   is_current  = false,
-  sort_order  = 5
+  sort_order  = 6
 WHERE name = 'FluxAtlas — Economic Trading Engine';
 
 INSERT INTO projects (name, description, sort_order)
-SELECT 'Spam Detection Discord Bot', 'Deployed scam detection bot that identifies and removes malicious messages in real time with low-latency inference.', 6
+SELECT 'Spam Detection Discord Bot', 'Deployed scam detection bot that identifies and removes malicious messages in real time with low-latency inference.', 7
 WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'Spam Detection Discord Bot');
 
 UPDATE projects SET
@@ -156,11 +176,11 @@ UPDATE projects SET
   year        = 2025,
   is_best     = true,
   is_current  = false,
-  sort_order  = 6
+  sort_order  = 7
 WHERE name = 'Spam Detection Discord Bot';
 
 INSERT INTO projects (name, description, sort_order)
-SELECT 'Balloon Popper — Gesture-Controlled Game', 'Gesture-controlled arcade game with webcam-based hand tracking at 60 FPS and dynamic difficulty scaling.', 7
+SELECT 'Balloon Popper — Gesture-Controlled Game', 'Gesture-controlled arcade game with webcam-based hand tracking at 60 FPS and dynamic difficulty scaling.', 8
 WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'Balloon Popper — Gesture-Controlled Game');
 
 UPDATE projects SET
@@ -176,11 +196,11 @@ UPDATE projects SET
   year        = 2024,
   is_best     = true,
   is_current  = false,
-  sort_order  = 7
+  sort_order  = 8
 WHERE name = 'Balloon Popper — Gesture-Controlled Game';
 
 INSERT INTO projects (name, description, sort_order)
-SELECT 'LinkedIn Profile Summarizer', 'Automated profile analysis pipeline combining web scraping and LLM processing to generate structured summaries.', 8
+SELECT 'LinkedIn Profile Summarizer', 'Automated profile analysis pipeline combining web scraping and LLM processing to generate structured summaries.', 9
 WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'LinkedIn Profile Summarizer');
 
 UPDATE projects SET
@@ -196,28 +216,8 @@ UPDATE projects SET
   year        = 2024,
   is_best     = false,
   is_current  = false,
-  sort_order  = 8
-WHERE name = 'LinkedIn Profile Summarizer';
-
-INSERT INTO projects (name, description, sort_order)
-SELECT 'ClubMate AI', 'Open-source automation platform for club operations, focused on intelligent task scheduling and document workflows.', 9
-WHERE NOT EXISTS (SELECT 1 FROM projects WHERE name = 'ClubMate AI');
-
-UPDATE projects SET
-  description = 'Open-source automation platform for club operations, focused on intelligent task scheduling and document workflows.',
-  github_url  = 'https://github.com/UndergraduateArtificialIntelligenceClub/Clubmate-AI',
-  demo_url    = NULL,
-  image_url   = '/projects/clubmate/ragbotv2.jpg',
-  video_url   = '/projects/clubmate/ragbotv2.mp4',
-  gallery     = '[{"url":"/projects/clubmate/ragbotv2.mp4","poster":"/projects/clubmate/ragbotv2.jpg","caption":"Knowledge base and question answering","alt":"Screen recording of a Discord server beside the ClubMate admin dashboard. The bot posts its command list, split into member commands and exec commands, while the dashboard''s Knowledge Base panel shows the indexed document chunks and offers to sync a Google Doc or upload a file."},{"url":"/projects/clubmate/meetings.mp4","poster":"/projects/clubmate/meetings.jpg","caption":"Scheduling and rescheduling meetings","alt":"Screen recording in Discord: a slash command schedules a session, the bot replies with a Google Calendar link and invites an attendee, then a reschedule command finds two matching meetings and asks which event id to move."},{"url":"/projects/clubmate/meeting-transcription.mp4","poster":"/projects/clubmate/meeting-transcription.jpg","caption":"Recording, transcribing and summarising a meeting","alt":"Screen recording in Discord: the bot joins a voice lounge and starts recording, then on stop reports that it is transcribing and summarising, and posts a meeting summary with key discussion points, decisions made, action items, next steps and a full speaker-labelled transcript."},{"url":"/projects/clubmate/sheets.mp4","poster":"/projects/clubmate/sheets.jpg","caption":"Reading and summarising a spreadsheet","alt":"Screen recording in Discord: a read-sheet command returns a summary of a Google Sheet, listing row and column counts, completion and progress insights, due-date highlights, anomalies such as rows missing review dates, and a set of representative rows."},{"url":"/projects/clubmate/creating-forms.mp4","poster":"/projects/clubmate/creating-forms.jpg","caption":"Generating a Google Form","alt":"Screen recording showing a Google Form the bot generated — a sports survey with a name field, a multiple-choice question and a short-answer question — beside the ClubMate dashboard overview reporting the bot online, the Google account connected, and the indexed knowledge base."},{"url":"/projects/clubmate/roombooking.mp4","poster":"/projects/clubmate/roombooking.jpg","caption":"Library room availability","alt":"Screen recording in Discord: the bot answers a room-availability request with a dated list of study rooms and their free time slots, a total slot count, and a link out to the library''s booking page."},{"url":"/projects/clubmate/events.mp4","poster":"/projects/clubmate/events.jpg","caption":"Upcoming events","alt":"Screen recording in Discord: an events command lists what is coming up, with the bot''s full command reference visible above it and a scheduled project showcase entry with its time range below."}]'::jsonb,
-  highlights  = '{}',
-  stack       = ARRAY['Python','LangChain','LangGraph','MCP','Discord.py','Gemini','Google Workspace API']::text[],
-  status      = 'building',
-  year        = 2025,
-  is_best     = false,
-  is_current  = true,
   sort_order  = 9
-WHERE name = 'ClubMate AI';
+WHERE name = 'LinkedIn Profile Summarizer';
 
 COMMIT;
 

@@ -75,9 +75,10 @@ export default function FeatureStrip({
 }) {
   const reversed = index % 2 === 1;
   return (
-    <Link
-      href={projectHref(p)}
-      className="feature group grid gap-10 lg:gap-14 items-center"
+    // Stretched link, not a wrapper: the media frame carries its own
+    // controls, and a button nested in an anchor is invalid and unreachable.
+    <div
+      className="feature group relative grid gap-10 lg:gap-14 items-center"
       style={{
         gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 0.9fr)",
         direction: reversed ? "rtl" : "ltr",
@@ -147,6 +148,12 @@ export default function FeatureStrip({
           <span>→</span>
         </span>
       </div>
-    </Link>
+
+      <Link
+        href={projectHref(p)}
+        aria-label={p.name}
+        className="absolute inset-0 z-10"
+      />
+    </div>
   );
 }

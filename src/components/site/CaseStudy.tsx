@@ -98,13 +98,17 @@ export default function CaseStudy({
           } gap-10 lg:gap-12 items-center`}
         >
           {/* Media */}
-          <Link
-            href={projectHref(p)}
-            aria-label={p.name}
-            className={reversed ? "lg:order-2" : undefined}
-          >
+          {/* Stretched link rather than a wrapper: the media carries its own
+              frame controls, and a button inside an anchor is invalid and
+              unreachable. The overlay keeps the whole frame clickable. */}
+          <div className={`relative ${reversed ? "lg:order-2" : ""}`}>
             <CaseMedia project={p} index={index} />
-          </Link>
+            <Link
+              href={projectHref(p)}
+              aria-label={p.name}
+              className="absolute inset-0 z-10"
+            />
+          </div>
 
           {/* Dossier */}
           <div className={`relative ${reversed ? "lg:order-1" : ""}`}>
