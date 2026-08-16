@@ -114,10 +114,17 @@ export default async function HomePage() {
           .section-visible resolving `transform: none`, otherwise the section's
           stacking context traps mix-blend-mode and the video's black shows as
           a rectangle. */}
-      <section id="contact" className="section-hidden relative px-[6vw] pt-24 pb-24">
+      {/* overflow-hidden clips the disc's bleed instead of letting it push the
+          page wider — it does not create a stacking context, so the blend
+          still escapes. */}
+      <section id="contact" className="section-hidden relative overflow-hidden px-[6vw] pt-24 pb-24">
         <SectionKicker label="CONTACT" meta="reach.md" />
 
-        <BlackHole className="bh-veil pointer-events-none absolute z-0 left-1/2 -translate-x-1/2 top-[150px] w-full max-w-[1280px] h-[560px] sm:h-[760px] lg:h-[900px]" />
+        {/* Right-anchored and bleeding off the edge: the channel rows keep the
+            left column to themselves, so the disc never has to be dimmed into
+            a smudge to stay out of their way. Opacity drops on small screens,
+            where the single column runs under it. */}
+        <BlackHole className="bh-veil pointer-events-none absolute z-0 top-1/2 -translate-y-1/2 -right-[45%] sm:-right-[30%] lg:-right-[20%] w-[620px] sm:w-[1000px] lg:w-[1420px] h-[349px] sm:h-[563px] lg:h-[800px]" />
 
         <div className="relative z-10 max-w-[960px] mx-auto flex flex-col">
           <h2

@@ -21,14 +21,14 @@ export default function BlackHole({ className }: { className?: string }) {
       className={className}
       style={{
         mixBlendMode: "screen",
-        // Soft edges so the band merges into the section instead of ending
-        // on a hard line, and held well under full strength: this sits
-        // behind body copy, and at full brightness the disc swallows it.
+        // The disc is anchored right, off the text column, so only its left
+        // flank runs under any copy — fade that side out and the rest can
+        // stay at full strength. Opacity is set by the caller's classes so
+        // it can drop on small screens where the columns collapse.
         maskImage:
-          "radial-gradient(115% 78% at 50% 50%, #000 42%, rgba(0,0,0,0.55) 68%, transparent 100%)",
+          "linear-gradient(to right, transparent 0%, transparent 32%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 66%, #000 78%)",
         WebkitMaskImage:
-          "radial-gradient(115% 78% at 50% 50%, #000 42%, rgba(0,0,0,0.55) 68%, transparent 100%)",
-        opacity: 0.3,
+          "linear-gradient(to right, transparent 0%, transparent 32%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 66%, #000 78%)",
       }}
     >
       {reduced ? (

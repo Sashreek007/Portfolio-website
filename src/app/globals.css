@@ -337,13 +337,27 @@
 
 /* The black hole waits for the section's transform to finish resolving to
    `none` before fading in — mid-transition the blend is still trapped, and
-   showing it early flashes a black box. */
+   showing it early flashes a black box.
+   Strength lives here rather than in utility classes: `.section-visible
+   .bh-veil` out-specifies a single-class `opacity-*`, so those were being
+   silently ignored. Full strength only once the layout is wide enough to
+   keep the disc clear of the text column. */
 .bh-veil {
   opacity: 0;
   transition: opacity 800ms ease 500ms;
 }
 .section-visible .bh-veil {
-  opacity: 1;
+  opacity: 0.32;
+}
+@media (min-width: 640px) {
+  .section-visible .bh-veil {
+    opacity: 0.5;
+  }
+}
+@media (min-width: 1024px) {
+  .section-visible .bh-veil {
+    opacity: 1;
+  }
 }
 
 /* Child stagger — elements marked .reveal-child cascade in once their
