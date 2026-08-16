@@ -5,11 +5,18 @@ import { TechBadge } from "./TechBadge";
 
 // One supporting figure on a project's detail page. `alt` is the accessible
 // description, `caption` the visible label — they are not interchangeable.
+// A `url` ending in .mp4/.webm renders as a muted looping clip instead of an
+// image; `poster` is its still frame and is ignored for image entries.
 export type GalleryItem = {
   url: string;
   alt: string;
   caption: string;
+  poster?: string;
 };
+
+export function isVideoUrl(url: string) {
+  return /\.(mp4|webm)$/i.test(url);
+}
 
 export type Project = {
   id: string;

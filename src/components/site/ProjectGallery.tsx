@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { GalleryItem } from "@/components/site/ProjectCard";
+import { isVideoUrl, type GalleryItem } from "@/components/site/ProjectCard";
 
 // Ordered figure carousel for a project's detail page. Layout only: every
 // string rendered here comes from the project record, so a project with an
@@ -85,15 +85,31 @@ export default function ProjectGallery({ items }: { items: GalleryItem[] }) {
               }}
               aria-hidden={i !== index}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.url}
-                alt={item.alt}
-                loading={i === 0 ? "eager" : "lazy"}
-                decoding="async"
-                draggable={false}
-                className="block w-full h-auto"
-              />
+              {isVideoUrl(item.url) ? (
+                // Only the visible slide is allowed to load or play — a
+                // gallery of clips would otherwise pull every file at once.
+                <video
+                  src={i === index ? item.url : undefined}
+                  poster={item.poster}
+                  aria-label={item.alt}
+                  autoPlay={i === index}
+                  muted
+                  loop
+                  playsInline
+                  preload="none"
+                  className="block w-full h-auto"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.url}
+                  alt={item.alt}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  draggable={false}
+                  className="block w-full h-auto"
+                />
+              )}
             </figure>
           ))}
         </div>

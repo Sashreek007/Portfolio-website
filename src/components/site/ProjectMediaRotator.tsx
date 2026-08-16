@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Project } from "@/components/site/ProjectCard";
+import { isVideoUrl, type Project } from "@/components/site/ProjectCard";
 
 // Card media for a project. A video plays as-is; otherwise the hero image and
 // any gallery figures cycle so a card shows more than one frame of the work.
@@ -11,9 +11,15 @@ import type { Project } from "@/components/site/ProjectCard";
 
 const INTERVAL_MS = 3600;
 
+// Stills only. A gallery may hold clips, and a card that cycled those would
+// pull every file on the grid — the hero video_url is the card's motion.
 export function projectMediaImages(p: Project): string[] {
   return Array.from(
-    new Set([p.image_url, ...p.gallery.map((g) => g.url)].filter(Boolean) as string[])
+    new Set(
+      [p.image_url, ...p.gallery.map((g) => g.url)].filter(
+        (u): u is string => !!u && !isVideoUrl(u)
+      )
+    )
   );
 }
 
