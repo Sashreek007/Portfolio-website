@@ -4,6 +4,7 @@ import SectionKicker from "@/components/site/SectionKicker";
 import CopyHandle from "@/components/site/CopyHandle";
 import { type Project } from "@/components/site/ProjectCard";
 import CaseStudy from "@/components/site/CaseStudy";
+import BlackHole from "@/components/site/BlackHole";
 import TickerBand from "@/components/site/TickerBand";
 import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
@@ -107,9 +108,18 @@ export default async function HomePage() {
       {divider}
 
       {/* ── Contact (/4 dossier layout, centered) ────────────────────────── */}
-      <section id="contact" className="section-hidden px-[6vw] py-24">
+      {/* The black hole gets its own band between the kicker and the heading
+          rather than sitting under the text — the disc is bright enough that
+          anything on top of it stops being readable. It relies on
+          .section-visible resolving `transform: none`, otherwise the section's
+          stacking context traps mix-blend-mode and the video's black shows as
+          a rectangle. */}
+      <section id="contact" className="section-hidden relative px-[6vw] pt-24 pb-24">
         <SectionKicker label="CONTACT" meta="reach.md" />
-        <div className="max-w-[960px] mx-auto flex flex-col">
+
+        <BlackHole className="bh-veil pointer-events-none absolute z-0 left-1/2 -translate-x-1/2 top-[150px] w-full max-w-[1280px] h-[560px] sm:h-[760px] lg:h-[900px]" />
+
+        <div className="relative z-10 max-w-[960px] mx-auto flex flex-col">
           <h2
             className="reveal-child text-[42px] lg:text-[54px] leading-[1.08] font-medium tracking-[-0.02em] mb-14"
             style={{

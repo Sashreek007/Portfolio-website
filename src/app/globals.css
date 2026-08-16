@@ -326,7 +326,24 @@
 }
 .section-visible {
   opacity: 1;
-  transform: translateY(0);
+  /* `none`, not translateY(0). Any non-identity transform creates a
+     stacking context, and that traps mix-blend-mode inside the section —
+     the contact black hole screens its black away against the page, so the
+     blend has to escape or it renders as a hard rectangle. Identity and
+     none look the same and interpolate the same, so the reveal still
+     animates. */
+  transform: none;
+}
+
+/* The black hole waits for the section's transform to finish resolving to
+   `none` before fading in — mid-transition the blend is still trapped, and
+   showing it early flashes a black box. */
+.bh-veil {
+  opacity: 0;
+  transition: opacity 800ms ease 500ms;
+}
+.section-visible .bh-veil {
+  opacity: 1;
 }
 
 /* Child stagger — elements marked .reveal-child cascade in once their
