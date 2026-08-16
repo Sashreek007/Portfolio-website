@@ -38,23 +38,33 @@ export default function CopyHandle({
       type="button"
       onClick={onClick}
       className={className}
-      style={{ textAlign: "left", cursor: "pointer", ...style }}
+      style={{
+        textAlign: "left",
+        cursor: "pointer",
+        position: "relative",
+        ...style,
+      }}
       aria-label={`copy ${value}`}
       data-copied={copied || undefined}
     >
       {children}
-      {/* Tiny copy affordance shown on hover / focus. Wrapped in a
-          data-attr so variants can override positioning if needed. */}
+      {/* Tiny copy affordance shown on hover / focus. Absolutely placed:
+          in a grid row this is an extra child, and in flow it would open a
+          second implicit row that stays there whether or not anything was
+          copied — worth ~70px of permanent dead space. */}
       <span
         className="copy-flash"
         style={{
-          marginLeft: "8px",
+          position: "absolute",
+          right: 0,
+          bottom: 4,
           opacity: copied ? 1 : 0,
           transition: "opacity 180ms",
           color: "var(--green-bright)",
           fontSize: "10.5px",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
+          pointerEvents: "none",
         }}
       >
         {copiedLabel}

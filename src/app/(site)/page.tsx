@@ -117,7 +117,7 @@ export default async function HomePage() {
       {/* overflow-hidden clips the disc's bleed instead of letting it push the
           page wider — it does not create a stacking context, so the blend
           still escapes. */}
-      <section id="contact" className="section-hidden relative overflow-hidden px-[6vw] pt-24 pb-24">
+      <section id="contact" className="section-hidden relative overflow-hidden px-[6vw] pt-16 pb-16">
         <SectionKicker label="CONTACT" meta="reach.md" />
 
         {/* Right-anchored and bleeding off the edge: the channel rows keep the
@@ -128,7 +128,7 @@ export default async function HomePage() {
 
         <div className="relative z-10 max-w-[960px] mx-auto flex flex-col">
           <h2
-            className="reveal-child text-[42px] lg:text-[54px] leading-[1.08] font-medium tracking-[-0.02em] mb-14"
+            className="reveal-child text-[36px] lg:text-[46px] leading-[1.08] font-medium tracking-[-0.02em] mb-8"
             style={{
               color: "var(--text-primary)",
               fontFamily: "var(--font-body)",
@@ -140,7 +140,7 @@ export default async function HomePage() {
 
           <div className="w-full flex flex-col items-stretch">
             <h3
-              className="reveal-child font-mono text-[15px] flex items-baseline gap-2 mb-10"
+              className="reveal-child font-mono text-[15px] flex items-baseline gap-2 mb-6"
               style={{ "--ri": 1 } as React.CSSProperties}
             >
               <span style={{ color: "var(--violet-soft)" }}>##</span>
@@ -184,7 +184,7 @@ export default async function HomePage() {
                   href={href}
                   target={ext ? "_blank" : undefined}
                   rel={ext ? "noreferrer noopener" : undefined}
-                  className="contact-row group grid gap-6 py-9 text-left"
+                  className="contact-row group grid gap-6 py-5 text-left"
                   style={{
                     gridTemplateColumns: "60px 1fr 50px",
                     borderBottom: "1px solid var(--gray-800)",
@@ -205,7 +205,7 @@ export default async function HomePage() {
                         {label}
                       </span>
                       <span
-                        className="text-[26px] lg:text-[32px] leading-[1.1] tracking-[-0.012em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                        className="text-[22px] lg:text-[27px] leading-[1.15] tracking-[-0.012em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
                         style={{
                           color: "var(--text-primary)",
                           fontFamily: "var(--font-body)",
@@ -215,7 +215,7 @@ export default async function HomePage() {
                       </span>
                     </div>
                     <p
-                      className="text-[16px] leading-[1.65] max-w-[620px]"
+                      className="text-[15px] leading-[1.55] max-w-[760px]"
                       style={{ color: "var(--text-secondary)" }}
                     >
                       {blurb}
@@ -234,7 +234,7 @@ export default async function HomePage() {
               <CopyHandle
                 value="sashreek"
                 copiedLabel="copied to clipboard"
-                className="contact-row group grid gap-6 py-9 w-full text-left"
+                className="contact-row group grid gap-6 py-5 w-full text-left"
                 style={{
                   gridTemplateColumns: "60px 1fr 50px",
                   background: "transparent",
@@ -257,7 +257,7 @@ export default async function HomePage() {
                       discord
                     </span>
                     <span
-                      className="text-[26px] lg:text-[32px] leading-[1.1] tracking-[-0.012em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
+                      className="text-[22px] lg:text-[27px] leading-[1.15] tracking-[-0.012em] transition-colors duration-200 group-hover:text-[var(--violet-pale)]"
                       style={{
                         color: "var(--text-primary)",
                         fontFamily: "var(--font-body)",
@@ -267,7 +267,7 @@ export default async function HomePage() {
                     </span>
                   </div>
                   <p
-                    className="text-[16px] leading-[1.65] max-w-[620px]"
+                    className="text-[15px] leading-[1.55] max-w-[760px]"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     Quick DMs. Click the handle to copy — Discord has no
