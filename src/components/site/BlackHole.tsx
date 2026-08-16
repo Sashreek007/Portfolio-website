@@ -125,7 +125,7 @@ export default function BlackHole({ className }: { className?: string }) {
         />
       ) : (
         <motion.div
-          className="w-full h-full"
+          className="relative w-full h-full"
           style={{ x, y, scale, filter, willChange: "transform, filter" }}
         >
           <video
@@ -139,6 +139,12 @@ export default function BlackHole({ className }: { className?: string }) {
             preload="metadata"
             className="block w-full h-full object-contain"
           />
+          {/* The source loop is very nearly a still — frames 5s apart differ
+              by 0.2% — so the orbit is added here: a wedge of extra light
+              sweeping the photon ring, masked to the ring's annulus so it
+              never lights the empty corners. Rotating a gradient costs one
+              composited transform and leaves the disc itself in place. */}
+          <span className="bh-orbit" aria-hidden />
         </motion.div>
       )}
     </div>
