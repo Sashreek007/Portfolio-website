@@ -36,7 +36,9 @@ export const EXPERIENCE: Role[] = [
     location: "Edmonton, AB",
     period: "Sept 2025 — Dec 2025",
     current: false,
-    logo: null,
+    // Shield only: the wordmark under it is unreadable at 46px and just
+    // repeats the org name printed beside the mark.
+    logo: "/logos/ualberta.png",
     monogram: "UA",
     bullets: [
       "Ran weekly help sessions and 1:1 code reviews for 200+ students, and authored practice exam problems on Python data structures, recursion, OOP and Big-O analysis.",
