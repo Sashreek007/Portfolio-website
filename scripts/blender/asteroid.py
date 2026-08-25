@@ -38,13 +38,13 @@ AMBER_BRIGHT = "EF9F27"
 VIOLET_PALE = "CECBF6"
 VIOLET_SOFT = "7F77DD"
 VIOLET_DIM = "3C3489"
-CLOAK_FABRIC = "2A2550"
+CLOAK_FABRIC = "1B1733"
 # NOTE: these are albedo, not the colour you want to SEE. sRGB #1E1D1C is
 # ~1.4% reflectance in linear space — near-black, and no amount of light
 # rescues it. Real rock sits around 0.05-0.15. The rendered result still
 # reads dark because the lighting is directional; opacity on the web side
 # does the final dimming.
-RIDER_H = 0.92   # figure height, in asteroid-radius units
+RIDER_H = 1.45   # figure height, in asteroid-radius units (rock is ~1.0)
 
 ROCK_DARK = "34322F"
 ROCK_LIGHT = "6E6B66"
@@ -315,7 +315,7 @@ def cloak_material():
     set_input(bsdf, "Roughness", 0.68)
     # Sheen is what makes cloth read as cloth rather than painted plastic — it
     # lifts the grazing angles where folds turn away from camera.
-    set_input(bsdf, ["Sheen Weight", "Sheen"], 0.7)
+    set_input(bsdf, ["Sheen Weight", "Sheen"], 0.35)
     set_input(bsdf, "Sheen Tint", hex_rgba(VIOLET_PALE))
 
     # Fine weave bump. At ambient scale this is invisible; in the close-up it
@@ -719,6 +719,51 @@ def build_hair(H, body, ctr, radius):
     return hair
 
 
+def build_boots(H, body):
+    """Boots, cut from a copy of the body's own lower legs.
+
+    Modelling footwear separately means guessing where the posed feet ended up.
+    Duplicating the leg geometry and pushing it out along its normals means the
+    boot fits by construction, whatever the pose did.
+    """
+    mat = bpy.data.materials.new("Boot")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    set_input(bsdf, "Base Color", hex_rgba("1A1620"))
+    set_input(bsdf, "Roughness", 0.52)
+    set_input(bsdf, ["Specular IOR Level", "Specular"], 0.4)
+
+    bpy.ops.object.select_all(action="DESELECT")
+    body.select_set(True)
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.duplicate()
+    boots = bpy.context.active_object
+    boots.name = "Boots"
+
+    cutoff = 0.185 * H          # mid-calf
+    bm = bmesh.new()
+    bm.from_mesh(boots.data)
+    doomed = [v for v in bm.verts if (boots.matrix_world @ v.co).z > cutoff]
+    bmesh.ops.delete(bm, geom=doomed, context="VERTS")
+    bm.to_mesh(boots.data)
+    bm.free()
+
+    # A textureless Displace offsets every vertex along its own normal, which
+    # is exactly "same shape, slightly larger".
+    d = boots.modifiers.new("Swell", "DISPLACE")
+    d.mid_level = 0.0
+    d.strength = H * 0.008
+    bpy.context.view_layer.objects.active = boots
+    bpy.ops.object.modifier_apply(modifier="Swell")
+    sd = boots.modifiers.new("Solidify", "SOLIDIFY")
+    sd.thickness = H * 0.004
+
+    boots.data.materials.clear()
+    boots.data.materials.append(mat)
+    bpy.ops.object.shade_smooth()
+    return boots
+
+
 def build_brows(H, body, eye_locs):
     """Eyebrows, placed off the solved eye positions.
 
@@ -897,14 +942,21 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     body, eyes = import_human(H)
     rig_and_pose(body, eyes, H)
 
+    # The pose lifts the feet off local z=0, so the exact sole height has to be
+    # measured from the BODY (not the joined object — the cape hem hangs lower
+    # and would push the figure up off the rock).
+    bpy.context.view_layer.update()
+    foot_z = min((body.matrix_world @ v.co).z for v in body.data.vertices)
+
     brows = build_brows(H, body, [e.location.copy() for e in eyes])
     hair = build_hair(H, body, *head_sphere(body, H))
+    boots = build_boots(H, body)
     cape = build_cape(cloak_mat, H)
     tunic = build_tunic(cloak_mat, H)
     hood = build_hood(cloak_mat, H)
 
     bpy.ops.object.select_all(action="DESELECT")
-    for ob in [body, cape, tunic, hood, hair] + brows:
+    for ob in [body, cape, tunic, hood, hair, boots] + brows:
         ob.select_set(True)
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
@@ -917,7 +969,8 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
         e.parent = rider
         e.matrix_parent_inverse = rider.matrix_world.inverted()
 
-    print(f"[asteroid] rider verts = {len(rider.data.vertices)}")
+    rider["foot_z"] = foot_z
+    print(f"[asteroid] rider verts = {len(rider.data.vertices)}  soles at z={foot_z:.4f}")
     return rider
 
 
@@ -941,7 +994,10 @@ def place_rider(rider, asteroid, rng, spin_deg=-38.0):
     rider.rotation_quaternion = (
         Quaternion(d, math.radians(spin_deg)) @ d.to_track_quat("Z", "Y")
     )
-    rider.location = loc - d * (0.04 * RIDER_H)   # settle the boots into the rock
+    # Plant the soles on the surface: a local point at z=foot_z maps to
+    # location + d*foot_z once local Z is aligned to d.
+    foot_z = rider.get("foot_z", 0.0)
+    rider.location = loc - d * foot_z - d * (0.010 * RIDER_H)   # bite in slightly
     return rider
 
 
@@ -1092,17 +1148,34 @@ def setup_compositor():
         glare = ng.nodes.new("CompositorNodeGlare")
         gout = ng.nodes.new("NodeGroupOutput")
 
-        for sock, val in (("Type", "BLOOM"), ("Quality", "HIGH"),
-                          ("Threshold", 0.72), ("Strength", 0.28),
-                          ("Size", 0.55), ("Smoothness", 0.4)):
+        # The Type socket is a menu whose values are not enumerable from the
+        # API here, so try the bloom-ish ones in order and report what stuck.
+        # The default is a streak/ghost glare, which fired diffraction spikes
+        # across the render.
+        for cand in ("Bloom", "Fog Glow", "BLOOM", "FOG_GLOW"):
+            try:
+                glare.inputs["Type"].default_value = cand
+                break
+            except (TypeError, ValueError):
+                continue
+        for sock, val in (("Quality", "HIGH"), ("Threshold", 0.80),
+                          ("Strength", 0.16), ("Size", 0.45),
+                          ("Smoothness", 0.4)):
             if sock in glare.inputs:
                 try:
                     glare.inputs[sock].default_value = val
                 except (TypeError, ValueError):
                     pass
 
+        # Glare returns opaque RGB, so routing it straight to the output threw
+        # the alpha away and the asset came back on solid black — useless for
+        # compositing onto the page. Put the render's own alpha back.
+        setalpha = ng.nodes.new("CompositorNodeSetAlpha")
         ng.links.new(rl.outputs["Image"], glare.inputs["Image"])
-        ng.links.new(glare.outputs["Image"], gout.inputs[0])
+        ng.links.new(glare.outputs["Image"], setalpha.inputs["Image"])
+        ng.links.new(rl.outputs["Alpha"], setalpha.inputs["Alpha"])
+        ng.links.new(setalpha.outputs["Image"], gout.inputs[0])
+        print(f"[asteroid] glare type = {glare.inputs['Type'].default_value}")
         sc.compositing_node_group = ng
         sc.use_nodes = True
         print("[asteroid] compositor: bloom enabled")
