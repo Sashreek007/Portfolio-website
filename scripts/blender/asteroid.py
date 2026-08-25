@@ -507,8 +507,19 @@ HAIR = "140F0C"          # near-black, with a warm cast in the highlights
 # Optional face photo, front-projected onto the head for likeness. Drop a file
 # here and it is picked up automatically; absent, the figure keeps the base
 # mesh's own face and the render still works.
-# Produced by scripts/blender/prep-face.py, which stands the photo upright,
-# divides out its baked-in lighting and crops it crown-to-chin.
+# Photo projection, OFF by default.
+#
+# It works — the projection lands square on the face and the eye sockets are
+# masked out of it correctly. It still looks worse than not doing it. A single
+# phone photo carries its own shading, its own noise and its own proportions,
+# and painting that onto a skull it does not match produces artefacts rather
+# than a likeness: the mouth fights the geometry underneath it and the whole
+# face reads as printed-on. The sculpted face with his complexion matched to
+# the reference is simply better.
+#
+# Kept because it is correct and someone may want it with a better source —
+# flat even light, front-on, no shadow. Set FACE_PROJECT = True to enable.
+FACE_PROJECT = False
 FACE_PHOTO = os.path.join(os.getcwd(), "assets", "vendor", "face-reference.png")
 FACE_W = 0.098          # projected width, in figure heights
 # Where the eyes sit inside the cropped photo. CROP in prep-face.py runs
@@ -610,9 +621,8 @@ def skin_material():
     bsdf = nt.nodes["Principled BSDF"]
     set_input(bsdf, "Base Color", hex_rgba(SKIN))
     set_input(bsdf, "Metallic", 0.0)
-    set_input(bsdf, "Roughness", 0.62)
-    set_input(bsdf, ["Specular IOR Level", "Specular"], 0.22)
-    set_input(bsdf, ["Subsurface Weight", "Subsurface"], 0.055)
+    set_input(bsdf, "Roughness", 0.48)
+    set_input(bsdf, ["Subsurface Weight", "Subsurface"], 0.155)
     set_input(bsdf, "Subsurface Radius", (0.012, 0.0042, 0.0028))
     set_input(bsdf, "Subsurface Scale", 0.010)
 
@@ -1261,6 +1271,9 @@ def apply_face_projection(body, H, ctr, eye_ctr, eye_worlds):
     Honest limit: this changes the face's colour and its features-as-painted,
     not its shape. The skull underneath is still the CC0 base mesh.
     """
+    if not FACE_PROJECT:
+        print("[asteroid] face projection off — sculpted face")
+        return None
     if not os.path.exists(FACE_PHOTO):
         print(f"[asteroid] no face photo at {FACE_PHOTO} — using the base face")
         return None
