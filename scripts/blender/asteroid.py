@@ -383,7 +383,7 @@ def build_cape(mat, H):
     """
     RAD, VSEG = 34, 30
     TH0, TH1 = -0.18 * math.pi, 1.18 * math.pi   # open at the front
-    z_top, length = 0.80 * H, 1.30 * H
+    z_top, length = 0.815 * H, 1.24 * H
 
     centre, cy, cz = [], 0.0, z_top
     for i in range(VSEG + 1):
@@ -391,16 +391,16 @@ def build_cape(mat, H):
         centre.append((t, cy, cz))
         # exponent below 1 bends it back EARLY; at t**1.15 the cape mostly hung
         # straight down and read as a long dress.
-        ang = (math.pi * 0.60) * (t ** 0.55)
+        ang = (math.pi * 0.62) * (t ** 0.82)
         step = length / VSEG
-        cy -= math.sin(ang) * step
+        cy += math.sin(ang) * step   # trails behind (+Y); the body faces -Y
         cz -= math.cos(ang) * step
 
     rings = []
     for t, ccy, ccz in centre:
-        ang = (math.pi * 0.60) * (t ** 0.55)
-        py, pz = -math.cos(ang), math.sin(ang)
-        base_r = H * (0.165 + 0.190 * t ** 1.35)
+        ang = (math.pi * 0.62) * (t ** 0.82)
+        py, pz = math.cos(ang), math.sin(ang)
+        base_r = H * (0.104 + 0.225 * t ** 1.25)
         ring = []
         for j in range(RAD):
             th = TH0 + (TH1 - TH0) * j / (RAD - 1)
@@ -417,7 +417,7 @@ def build_cape(mat, H):
     return _mesh_from_rings("Cape", rings, mat, closed=False, thickness=H * 0.008)
 
 
-def build_tunic(mat, H, lean_fn):
+def build_tunic(mat, H):
     """Short closed robe over the torso and hips, ending mid-thigh.
 
     This is the part that answers "where are the clothes" — the cape reads from
@@ -428,154 +428,494 @@ def build_tunic(mat, H, lean_fn):
     rings = []
     for i in range(VSEG + 1):
         t = i / VSEG
-        z = 0.79 - (0.79 - 0.30) * t                    # shoulders → mid-thigh
-        # chest → nipped waist → flare over the hips
-        r = 0.118 - 0.026 * math.sin(math.pi * min(t / 0.45, 1.0)) + 0.052 * t ** 1.8
+        z = 0.81 - (0.81 - 0.34) * t          # real shoulders (0.81H) → mid-thigh
+        # chest → nipped waist → flare over the hips. Sized to clear the body
+        # underneath rather than to my old primitive proportions.
+        r = 0.128 - 0.026 * math.sin(math.pi * min(t / 0.45, 1.0)) + 0.030 * t ** 2.1
         ring = []
         for j in range(RAD):
             th = 2 * math.pi * j / RAD
             fold = math.sin(th * 11 + t * 1.6) * 0.008 * (0.35 + t)
             rr = r + fold
-            x, y = math.cos(th) * rr, math.sin(th) * rr * 0.70
-            ring.append(lean_fn(x, y, z))
+            x, y = math.cos(th) * rr, math.sin(th) * rr * 0.72
+            ring.append((x * H, y * H, z * H))
         rings.append(ring)
     return _mesh_from_rings("Tunic", rings, mat, closed=True, cap_last=True,
                             thickness=H * 0.007)
 
 
-def build_hood(mat, H, L):
-    """Cowl over the head. At ambient scale a hood tells you more about who
-    this is than any amount of facial geometry could."""
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=16,
-                                         radius=H * 0.105, location=L(0, 0.03, 0.945))
-    hood = bpy.context.active_object
-    hood.name = "Hood"
-    hood.scale = (1.08, 1.42, 1.20)
-    hood.data.materials.append(mat)
-    bpy.ops.object.shade_smooth()
-    return hood
+def build_hood(mat, H):
+    """Open cowl around the back and sides of the head.
+
+    The first version was a closed sphere scaled over the skull, which simply
+    deleted the face — the whole point of using a sculpted head. This is a
+    partial arc with the opening centred on -Y, which is the direction the base
+    mesh faces, so the face stays visible and the hood frames it.
+    """
+    RAD, VSEG = 34, 20
+    TH0, TH1 = -0.24 * math.pi, 1.24 * math.pi     # opening faces -Y
+
+    rings = []
+    for i in range(VSEG + 1):
+        t = i / VSEG
+        z = 1.005 - (1.005 - 0.775) * t             # crown → shoulders
+        # tight at the crown, out to head width, then flaring onto the shoulders
+        r = (0.024
+             + 0.064 * math.sin(math.pi * 0.5 * min(t / 0.45, 1.0))
+             + 0.090 * max(0.0, (t - 0.45) / 0.55) ** 1.5)
+        ring = []
+        for j in range(RAD):
+            th = TH0 + (TH1 - TH0) * j / (RAD - 1)
+            fold = math.sin(th * 6 + t * 2.0) * 0.006 * (0.3 + t)
+            rr = r + fold
+            # a hood sits back off the brow rather than centred on the skull
+            ring.append((math.cos(th) * rr * H,
+                         (math.sin(th) * rr + 0.030) * H,
+                         z * H))
+        rings.append(ring)
+
+    return _mesh_from_rings("Hood", rings, mat, closed=False, thickness=H * 0.007)
 
 
-def _limb(name, start, end, r0, r1, mat):
-    """One tapered cone between two points — the building block for arms and
-    legs. Segments share endpoints so the voxel remesh can union them."""
-    start, end = Vector(start), Vector(end)
-    vec = end - start
-    bpy.ops.mesh.primitive_cone_add(
-        vertices=16, radius1=r0, radius2=r1, depth=vec.length,
-        location=(start + end) / 2.0,
-    )
-    ob = bpy.context.active_object
-    ob.name = name
-    ob.rotation_mode = "QUATERNION"
-    ob.rotation_quaternion = vec.to_track_quat("Z", "Y")
-    ob.data.materials.append(mat)
-    bpy.ops.object.shade_smooth()
+# ── real human figure ────────────────────────────────────────────────
+# Blender Studio's Human Base Meshes bundle (CC0). Primitives fused with a
+# voxel remesh got the silhouette right but never stopped reading as a toy —
+# no anatomy, no hands, a featureless ball for a head.
+#
+# Fetch it with scripts/blender/fetch-human-base.sh (gitignored, ~48MB).
+HUMAN_BLEND = os.path.join(os.getcwd(), "assets", "vendor",
+                           "human_base_meshes_bundle.blend")
+HUMAN_OBJECT = "GEO-body_male_realistic"
+HUMAN_EYES = ("GEO-body_male_realistic.eye.L", "GEO-body_male_realistic.eye.R")
+HUMAN_REST_H = 1.684        # measured height of the rest mesh, in metres
+SKIN = "8A6247"          # warm mid-brown, from the supplied reference
+HAIR = "140F0C"          # near-black, with a warm cast in the highlights
+
+# Joint positions measured off the rest mesh: arms hang at the sides with the
+# hands at z≈0.76, shoulders at z≈1.36. Rest-mesh metres, scaled at build time.
+BONES = [
+    # name,         head,                 tail,                  parent,        connect
+    ("hips",        (0, 0, 0.90),         (0, 0, 1.02),          None,          False),
+    ("spine",       (0, 0, 1.02),         (0, 0, 1.18),          "hips",        True),
+    ("chest",       (0, 0, 1.18),         (0, 0, 1.36),          "spine",       True),
+    ("neck",        (0, 0, 1.38),         (0, 0, 1.50),          "chest",       False),
+    ("head",        (0, 0, 1.50),         (0, 0, 1.70),          "neck",        True),
+    ("shoulder.L",  (0.02, 0, 1.36),      (0.16, 0, 1.36),       "chest",       False),
+    ("upper_arm.L", (0.16, 0, 1.36),      (0.30, -0.02, 1.10),   "shoulder.L",  True),
+    ("forearm.L",   (0.30, -0.02, 1.10),  (0.40, -0.05, 0.88),   "upper_arm.L", True),
+    ("hand.L",      (0.40, -0.05, 0.88),  (0.44, -0.09, 0.78),   "forearm.L",   True),
+    ("shoulder.R",  (-0.02, 0, 1.36),     (-0.16, 0, 1.36),      "chest",       False),
+    ("upper_arm.R", (-0.16, 0, 1.36),     (-0.30, -0.02, 1.10),  "shoulder.R",  True),
+    ("forearm.R",   (-0.30, -0.02, 1.10), (-0.40, -0.05, 0.88),  "upper_arm.R", True),
+    ("hand.R",      (-0.40, -0.05, 0.88), (-0.44, -0.09, 0.78),  "forearm.R",   True),
+    ("thigh.L",     (0.10, 0, 0.90),      (0.11, 0, 0.50),       "hips",        False),
+    ("shin.L",      (0.11, 0, 0.50),      (0.12, 0, 0.09),       "thigh.L",     True),
+    ("foot.L",      (0.12, 0, 0.09),      (0.13, -0.15, 0.01),   "shin.L",      True),
+    ("thigh.R",     (-0.10, 0, 0.90),     (-0.11, 0, 0.50),      "hips",        False),
+    ("shin.R",      (-0.11, 0, 0.50),     (-0.12, 0, 0.09),      "thigh.R",     True),
+    ("foot.R",      (-0.12, 0, 0.09),     (-0.13, -0.15, 0.01),  "shin.R",      True),
+]
+
+# Standing tall, braced into the wind of travel. The cape supplies the motion,
+# so the body does not need a violent pose to read as flying. Degrees, XYZ.
+POSE = {
+    "spine":       (-7, 0, 0),
+    "chest":       (-5, 0, 0),
+    "neck":        (5, 0, 0),
+    "head":        (7, 0, -8),
+    "shoulder.L":  (0, 0, -9),
+    "shoulder.R":  (0, 0, 9),
+    "upper_arm.L": (-16, 0, -34),
+    "forearm.L":   (-26, 0, 0),
+    "upper_arm.R": (-10, 0, 28),
+    "forearm.R":   (-18, 0, 0),
+    "thigh.L":     (-17, 0, 0),
+    "shin.L":      (24, 0, 0),
+    "thigh.R":     (13, 0, 0),
+    "shin.R":      (9, 0, 0),
+}
+
+
+def skin_material():
+    """Skin with subsurface scattering and pore-scale bump.
+
+    Subsurface is the whole game on skin: without it flesh renders like painted
+    plastic, because light stops travelling through it. The radius is weighted
+    to red — that is why ears and nostrils glow warm when backlit.
+    """
+    mat = bpy.data.materials.new("Skin")
+    mat.use_nodes = True
+    nt = mat.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    set_input(bsdf, "Base Color", hex_rgba(SKIN))
+    set_input(bsdf, "Metallic", 0.0)
+    set_input(bsdf, "Roughness", 0.48)
+    set_input(bsdf, ["Subsurface Weight", "Subsurface"], 0.16)
+    set_input(bsdf, "Subsurface Radius", (0.012, 0.0042, 0.0028))
+    set_input(bsdf, "Subsurface Scale", 0.010)
+
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    pores = nt.nodes.new("ShaderNodeTexNoise")
+    pores.inputs["Scale"].default_value = 320.0
+    pores.inputs["Detail"].default_value = 6.0
+    micro = nt.nodes.new("ShaderNodeBump")
+    micro.inputs["Strength"].default_value = 0.09
+    nt.links.new(coord.outputs["Object"], pores.inputs["Vector"])
+    nt.links.new(pores.outputs["Fac"], micro.inputs["Height"])
+    nt.links.new(micro.outputs["Normal"], bsdf.inputs["Normal"])
+    return mat
+
+
+def eye_material():
+    """Sclera, iris and pupil from the eyeball's own object coordinates.
+
+    The bundle ships each eye as a plain 546-vert sphere with no iris geometry
+    and no UVs, so the eye is drawn in shader space: radial distance from the
+    forward axis, through a ramp. A uniform dark ball reads as a doll.
+    """
+    mat = bpy.data.materials.new("Eye")
+    mat.use_nodes = True
+    nt = mat.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    set_input(bsdf, "Roughness", 0.09)
+    set_input(bsdf, ["Specular IOR Level", "Specular"], 0.7)
+    set_input(bsdf, "IOR", 1.38)
+
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    comb = nt.nodes.new("ShaderNodeCombineXYZ")   # drop Y: the eye looks along it
+    length = nt.nodes.new("ShaderNodeVectorMath")
+    length.operation = "LENGTH"
+    norm = nt.nodes.new("ShaderNodeMath")
+    norm.operation = "DIVIDE"
+    norm.inputs[1].default_value = 0.014          # eyeball radius, local units
+
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    cr = ramp.color_ramp
+    cr.elements[0].position = 0.00
+    cr.elements[0].color = (0.008, 0.008, 0.010, 1.0)          # pupil
+    cr.elements[1].position = 0.30
+    cr.elements[1].color = (0.008, 0.008, 0.010, 1.0)
+    for pos, col in ((0.42, hex_rgba("2A1C12")),               # iris — dark brown
+                     (0.62, hex_rgba("3E2A1A")),
+                     (0.70, (0.05, 0.045, 0.04, 1.0)),         # limbal ring
+                     (0.78, hex_rgba("D8D2C8")),               # sclera
+                     (1.00, hex_rgba("CFC8BC"))):
+        cr.elements.new(pos).color = col
+
+    nt.links.new(coord.outputs["Object"], sep.inputs["Vector"])
+    nt.links.new(sep.outputs["X"], comb.inputs["X"])
+    nt.links.new(sep.outputs["Z"], comb.inputs["Z"])
+    nt.links.new(comb.outputs["Vector"], length.inputs[0])
+    nt.links.new(length.outputs["Value"], norm.inputs[0])
+    nt.links.new(norm.outputs["Value"], ramp.inputs["Fac"])
+    nt.links.new(ramp.outputs["Color"], bsdf.inputs["Base Color"])
+    return mat
+
+
+def _shrink_to(ob, target, offset):
+    """Conform a shell to the body surface at a fixed offset.
+
+    Placing hair and eyebrows from measured fractions kept leaving them
+    hovering off the face — the skull is not a sphere and the brow ridge is
+    not where arithmetic says it is. Shrinkwrap asks the mesh instead.
+    """
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    m = ob.modifiers.new("Shrinkwrap", "SHRINKWRAP")
+    m.target = target
+    m.wrap_method = "NEAREST_SURFACEPOINT"
+    m.offset = offset
+    bpy.ops.object.modifier_apply(modifier=m.name)
     return ob
 
 
+def head_sphere(body, H):
+    """Measure the posed skull: centre and radius, from the mesh itself.
+
+    Hair and hood were being placed from hand-guessed fractions of the figure
+    height, which put the hair shell in the wrong spot entirely. The pose moves
+    the head, so the only reliable source is the geometry after posing.
+    """
+    top = max((body.matrix_world @ v.co).z for v in body.data.vertices)
+    head = [body.matrix_world @ v.co for v in body.data.vertices
+            if (body.matrix_world @ v.co).z > top - 0.085 * H]
+    n = len(head)
+    ctr = Vector((sum(v.x for v in head) / n,
+                  sum(v.y for v in head) / n,
+                  sum(v.z for v in head) / n))
+    # 70th percentile, not max: the jaw and ears are outliers that were
+    # inflating the "skull radius" to nearly twice its real size.
+    dists = sorted((v - ctr).length for v in head)
+    radius = dists[int(len(dists) * 0.70)]
+    print(f"[asteroid] skull centre {tuple(round(c, 3) for c in ctr)} r={radius:.3f}")
+    return ctr, radius
+
+
+def build_hair(H, body, ctr, radius):
+    """Thick dark hair over the scalp.
+
+    A bald head under a hood was the last thing making the figure read as a
+    mannequin. The hairline is azimuth-dependent — high across the forehead,
+    dropping down the back and sides — because a uniform cap looks like a
+    swim hat. Surface noise breaks the shell into something with bulk.
+    """
+    mat = bpy.data.materials.new("Hair")
+    mat.use_nodes = True
+    nt = mat.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    set_input(bsdf, "Base Color", hex_rgba(HAIR))
+    set_input(bsdf, "Roughness", 0.58)
+    set_input(bsdf, ["Sheen Weight", "Sheen"], 0.10)
+    set_input(bsdf, ["Specular IOR Level", "Specular"], 0.22)
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    strand = nt.nodes.new("ShaderNodeTexNoise")
+    strand.inputs["Scale"].default_value = 210.0
+    strand.inputs["Detail"].default_value = 8.0
+    bump = nt.nodes.new("ShaderNodeBump")
+    bump.inputs["Strength"].default_value = 0.35
+    nt.links.new(coord.outputs["Object"], strand.inputs["Vector"])
+    nt.links.new(strand.outputs["Fac"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+
+    RAD, VSEG = 40, 20
+    cx, cy, cz = ctr.x, ctr.y, ctr.z
+    base_r = radius * 1.05                     # shrinkwrap pulls it back in
+    P_FRONT, P_BACK = 1.02, 1.80               # polar reach, forehead vs nape
+
+    rings = []
+    for i in range(VSEG, -1, -1):
+        u = 0.07 + 0.93 * (i / VSEG)     # never reaches the degenerate pole
+        ring = []
+        for j in range(RAD):
+            th = 2 * math.pi * j / RAD
+            # -sin(th) is +1 toward the face, -1 toward the back of the head
+            front = 0.5 + 0.5 * (-math.sin(th))
+            p = u * (P_BACK - (P_BACK - P_FRONT) * front)
+            bulk = (0.0055 * math.sin(th * 5 + p * 3.1)
+                    + 0.0032 * math.sin(th * 11 - p * 4.7)
+                    + 0.0026 * math.sin(p * 7.0 + 1.3))
+            r = base_r + bulk * H
+            sp, cp = math.sin(p), math.cos(p)
+            ring.append((cx + math.cos(th) * r * sp,
+                         cy + math.sin(th) * r * sp,
+                         cz + cp * r))
+        rings.append(ring)
+
+    hair = _mesh_from_rings("Hair", rings, mat, closed=True, cap_last=True,
+                            thickness=H * 0.004)
+    _shrink_to(hair, body, H * 0.006)
+
+    # bulk goes on AFTER conforming, otherwise shrinkwrap flattens it away
+    tex = bpy.data.textures.new("hair_bulk", type="CLOUDS")
+    tex.noise_scale = 0.035
+    d = hair.modifiers.new("Bulk", "DISPLACE")
+    d.texture = tex
+    d.strength = H * 0.010
+    d.mid_level = 0.4
+    bpy.context.view_layer.objects.active = hair
+    bpy.ops.object.modifier_apply(modifier="Bulk")
+    return hair
+
+
+def build_brows(H, body, eye_locs):
+    """Eyebrows, placed off the solved eye positions.
+
+    A bare brow ridge is one of the loudest "this is a 3D model" tells — the
+    face reads as a mannequin without them. Cheap geometry, large payoff.
+    """
+    mat = bpy.data.materials.new("Brow")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    set_input(bsdf, "Base Color", hex_rgba(HAIR))
+    set_input(bsdf, "Roughness", 0.74)
+
+    brows = []
+    for i, loc in enumerate(eye_locs):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=18, ring_count=10, radius=1.0)
+        b = bpy.context.active_object
+        b.name = f"brow_{i}"
+        b.scale = (H * 0.019, H * 0.0062, H * 0.0040)
+        # up from the eye and a touch forward, angled out toward the temple
+        b.location = (loc.x * 1.04, loc.y - H * 0.0035, loc.z + H * 0.0125)
+        b.rotation_euler = (math.radians(6), 0, math.radians(-11 if loc.x > 0 else 11))
+        b.data.materials.append(mat)
+        bpy.ops.object.shade_smooth()
+        _shrink_to(b, body, H * 0.0016)
+        brows.append(b)
+    return brows
+
+
+def import_human(height):
+    """Load the CC0 body plus its eyeballs, at full sculpted detail."""
+    if not os.path.exists(HUMAN_BLEND):
+        raise SystemExit(
+            f"[asteroid] missing {HUMAN_BLEND}\n"
+            "  run scripts/blender/fetch-human-base.sh first"
+        )
+    want = (HUMAN_OBJECT,) + HUMAN_EYES
+    with bpy.data.libraries.load(HUMAN_BLEND, link=False) as (src, dst):
+        missing = [n for n in want if n not in src.objects]
+        if missing:
+            raise SystemExit(f"[asteroid] not in bundle: {missing}")
+        dst.objects = list(want)
+
+    body, eyes = None, []
+    for o in dst.objects:
+        bpy.context.collection.objects.link(o)
+        if o.name == HUMAN_OBJECT:
+            body = o
+        else:
+            eyes.append(o)
+
+    # The bundle's multires carries the sculpt. Rendering it at level 1 — which
+    # earlier passes did — throws away most of the face.
+    for m in body.modifiers:
+        if m.type == "MULTIRES":
+            top = getattr(m, "total_levels", 0)
+            m.levels = m.sculpt_levels = top
+            m.render_levels = top
+            print(f"[asteroid] multires level {top}")
+
+    body.data.materials.clear()
+    body.data.materials.append(skin_material())
+
+    # Bake each eye's parent-relative placement, then fold them into the body so
+    # one mesh rigs, poses and joins as a unit.
+    emat = eye_material()
+    # view_layer.update() on both sides is load-bearing: matrix_world is lazily
+    # evaluated, so reading it before the depsgraph has run returns a stale
+    # identity and both eyes end up at the origin.
+    bpy.context.view_layer.update()
+    for e in eyes:
+        e.data.materials.clear()
+        e.data.materials.append(emat)
+        mw = e.matrix_world.copy()
+        e.parent = None
+        e.matrix_world = mw
+    bpy.context.view_layer.update()
+
+    # The bundle parks the body at x=-2.2643. Moving it to the origin without
+    # carrying the eyes with it strands them ~2.3 units away from the head, so
+    # every eye offset is taken relative to the body's original position.
+    k = height / HUMAN_REST_H
+    off = body.location.copy()
+    for e in eyes:
+        e.location = (e.location - off) * k
+        e.scale = (k, k, k)
+        bpy.ops.object.select_all(action="DESELECT")
+        e.select_set(True)
+        bpy.context.view_layer.objects.active = e
+        # Scale applied, location NOT: each eyeball keeps its own origin so its
+        # object space stays centred on the eye, which is what draws the iris.
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+
+    body.location = (0, 0, 0)
+    body.scale = (k, k, k)
+    bpy.ops.object.select_all(action="DESELECT")
+    body.select_set(True)
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    for e in eyes:
+        print(f"[asteroid] {e.name} at {tuple(round(v, 3) for v in e.location)}")
+    return body, eyes
+
+
+def rig_and_pose(body, eyes, height):
+    """Build an armature, bind with automatic weights, pose it, then bake the
+    result into the mesh so downstream code sees a plain posed object."""
+    k = height / HUMAN_REST_H
+    bpy.ops.object.armature_add(enter_editmode=False, location=(0, 0, 0))
+    arm = bpy.context.active_object
+    arm.name = "RiderRig"
+
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    ebs = arm.data.edit_bones
+    for b in list(ebs):
+        ebs.remove(b)
+    for name, head, tail, parent, connect in BONES:
+        b = ebs.new(name)
+        b.head = Vector(head) * k
+        b.tail = Vector(tail) * k
+        if parent:
+            b.parent = ebs[parent]
+            b.use_connect = connect
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+    bpy.ops.object.select_all(action="DESELECT")
+    body.select_set(True)
+    for e in eyes:
+        e.select_set(True)
+    arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="POSE")
+    for name, (rx, ry, rz) in POSE.items():
+        pb = arm.pose.bones.get(name)
+        if not pb:
+            continue
+        pb.rotation_mode = "XYZ"
+        pb.rotation_euler = (math.radians(rx), math.radians(ry), math.radians(rz))
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+    # Bake the pose down and drop the rig — a plain mesh survives joining and
+    # re-parenting without surprises.
+    for o in [body] + eyes:
+        bpy.ops.object.select_all(action="DESELECT")
+        o.select_set(True)
+        bpy.context.view_layer.objects.active = o
+        for m in list(o.modifiers):
+            try:
+                bpy.ops.object.modifier_apply(modifier=m.name)
+            except RuntimeError as exc:
+                print(f"[asteroid] could not apply {m.name}: {exc}")
+        o.parent = None
+        bpy.ops.object.shade_smooth()
+    bpy.data.objects.remove(arm, do_unlink=True)
+    print(f"[asteroid] human verts = {len(body.data.vertices)}")
+    return body
+
+
 def build_rider(mat, cloak_mat, height=RIDER_H):
-    """Figure on human proportions — ~7.5 heads tall, shoulders at 0.80H, hips
-    at 0.47H — with a robe over the top.
+    """The figure: a sculpted CC0 human body, rigged, posed, and dressed.
 
-    Two earlier passes failed here and both lessons are baked in. A sphere
-    torso with a head a third its height read as an insect, so the proportions
-    are now real. And Catmull-Clark subdivision shrank each disconnected
-    primitive toward its own centre, detaching the limbs into floating pills —
-    so the parts are unioned with a voxel remesh instead.
+    Everything before this was primitives — cones and spheres unioned with a
+    voxel remesh. It got the silhouette right and never stopped looking like a
+    toy, because a featureless ball has no face and a tapered cone has no hand.
+    No amount of tuning fixes that; only real topology does.
 
-    Legs stay planted and only the upper body leans; a whole-body lean lifted
-    the feet off the rock.
+    The clothing stays procedural. Swept geometry gives predictable, repeatable
+    folds, which a cloth solver did not — and it sits over real anatomy now, so
+    it drapes on something with shoulders.
     """
     H = height
-    lean = math.radians(15)
-    cl, sl = math.cos(lean), math.sin(lean)
-    HIP_Z = 0.46
+    body, eyes = import_human(H)
+    rig_and_pose(body, eyes, H)
 
-    def P(x, y, z):
-        """Planted — legs and feet, no lean."""
-        return (x * H, y * H, z * H)
-
-    def L(x, y, z):
-        """Leaned forward about the hip pivot — torso, head, arms."""
-        x, y, z = x * H, y * H, z * H
-        dz = z - HIP_Z * H
-        return (x, y * cl - dz * sl, HIP_Z * H + y * sl + dz * cl)
-
-    parts = []
-
-    # ── legs: hip → knee → foot, wide stance, front leg forward
-    parts.append(_limb("thigh_f", P(0.085, 0.02, 0.46), P(0.14, 0.20, 0.25), H*0.062, H*0.048, mat))
-    parts.append(_limb("shin_f",  P(0.14, 0.20, 0.25), P(0.18, 0.32, 0.03), H*0.048, H*0.030, mat))
-    parts.append(_limb("thigh_b", P(-0.085, -0.02, 0.46), P(-0.15, -0.16, 0.24), H*0.062, H*0.048, mat))
-    parts.append(_limb("shin_b",  P(-0.15, -0.16, 0.24), P(-0.19, -0.26, 0.03), H*0.048, H*0.030, mat))
-
-    # boots — stops the legs ending in points
-    for nm, pos, rot in (("boot_f", P(0.18, 0.33, 0.022), 0.35),
-                         ("boot_b", P(-0.19, -0.27, 0.022), -0.28)):
-        bpy.ops.mesh.primitive_cube_add(size=1.0, location=pos)
-        ft = bpy.context.active_object
-        ft.name = nm
-        ft.scale = (H * 0.058, H * 0.092, H * 0.026)
-        ft.rotation_euler = (0, 0, rot)
-        ft.data.materials.append(mat)
-        parts.append(ft)
-
-    # ── torso, widening to the shoulders, flattened front-to-back
-    torso = _limb("torso", L(0, 0, 0.46), L(0, 0.05, 0.80), H * 0.095, H * 0.112, mat)
-    torso.scale = (1.0, 0.66, 1.0)
-    parts.append(torso)
-    parts.append(_limb("neck", L(0, 0.055, 0.78), L(0, 0.075, 0.88), H*0.036, H*0.033, mat))
-
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=20, ring_count=14, radius=H * 0.068,
-                                         location=L(0, 0.085, 0.935))
-    head = bpy.context.active_object
-    head.name = "head"
-    head.scale = (0.92, 1.0, 1.12)
-    head.data.materials.append(mat)
-    bpy.ops.object.shade_smooth()
-    parts.append(head)
-
-    # ── arms: one thrown forward, one trailing. Asymmetry reads as motion.
-    parts.append(_limb("uarm_f", L(0.085, 0.05, 0.78), L(0.26, 0.19, 0.73), H*0.048, H*0.036, mat))
-    parts.append(_limb("farm_f", L(0.26, 0.19, 0.73), L(0.35, 0.33, 0.80), H*0.036, H*0.025, mat))
-    parts.append(_limb("uarm_b", L(-0.085, 0.04, 0.78), L(-0.25, -0.09, 0.71), H*0.048, H*0.036, mat))
-    parts.append(_limb("farm_b", L(-0.25, -0.09, 0.71), L(-0.31, -0.20, 0.63), H*0.036, H*0.025, mat))
-
-    for p in parts:
-        p.select_set(True)
-    bpy.context.view_layer.objects.active = parts[0]
-    bpy.ops.object.join()
-    rider = bpy.context.active_object
-    rider.name = "Body"
-
-    rm = rider.modifiers.new("Remesh", "REMESH")
-    rm.mode = "VOXEL"
-    rm.voxel_size = H * 0.011
-    rm.use_smooth_shade = True
-    bpy.ops.object.modifier_apply(modifier="Remesh")
-    sm = rider.modifiers.new("Smooth", "SMOOTH")
-    sm.factor = 0.5
-    sm.iterations = 8
-    bpy.ops.object.modifier_apply(modifier="Smooth")
-    bpy.ops.object.shade_smooth()
-
-    # clothing goes on last, over the top
+    brows = build_brows(H, body, [e.location.copy() for e in eyes])
+    hair = build_hair(H, body, *head_sphere(body, H))
     cape = build_cape(cloak_mat, H)
-    tunic = build_tunic(cloak_mat, H, L)
-    hood = build_hood(cloak_mat, H, L)
-    for ob in (rider, cape, tunic, hood):
+    tunic = build_tunic(cloak_mat, H)
+    hood = build_hood(cloak_mat, H)
+
+    bpy.ops.object.select_all(action="DESELECT")
+    for ob in [body, cape, tunic, hood, hair] + brows:
         ob.select_set(True)
-    bpy.context.view_layer.objects.active = rider
+    bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
     rider = bpy.context.active_object
     rider.name = "Rider"
 
-    # Turn to face the camera. Everything above is built travelling toward +Y,
-    # but both cameras sit at -Y, so without this every render is of the
-    # figure's back — looking straight up the open hem of the robe.
-    rider.rotation_euler = (0, 0, math.pi)
-    bpy.ops.object.transform_apply(rotation=True)
+    # Eyes stay separate objects (see import_human) but must travel with the
+    # figure, so parent them at the object level.
+    for e in eyes:
+        e.parent = rider
+        e.matrix_parent_inverse = rider.matrix_world.inverted()
 
     print(f"[asteroid] rider verts = {len(rider.data.vertices)}")
     return rider
@@ -648,7 +988,7 @@ def setup_lighting():
     add_light("rim", "AREA", (-5.2, 3.2, 3.0), hex_rgb(VIOLET_PALE), 4400, size=1.4)
     # Second, tighter violet kicker aimed at the rider so the figure separates
     # from the rock behind it instead of merging into the same value.
-    add_light("kick", "AREA", (-3.0, -1.4, 3.4), hex_rgb(VIOLET_PALE), 560, size=1.1)
+    add_light("kick", "AREA", (-3.0, -1.4, 3.4), hex_rgb(VIOLET_PALE), 300, size=1.1)
     # Fill: very dim, keeps the shadow side from going to a dead hole.
     add_light("fill", "AREA", (-2.0, -3.4, 0.6), hex_rgb(VIOLET_SOFT), 55, size=8.0)
 
@@ -812,6 +1152,19 @@ def main():
     os.makedirs(out, exist_ok=True)
 
     cam = setup_camera()
+
+    if opts["mode"] == "face":
+        cam = bpy.context.scene.camera
+        top = max((rider.matrix_world @ Vector(c)).z for c in rider.bound_box)
+        head = Vector((0, 0, top - 0.075 * opts["rh"]))
+        cam.location = head + Vector((0.34, -0.92, 0.10)).normalized() * (0.40 * opts["rh"])
+        cam.rotation_mode = "QUATERNION"
+        cam.rotation_quaternion = (head - cam.location).to_track_quat("-Z", "Y")
+        cam.data.lens = 85
+        cam.data.dof.focus_distance = (head - cam.location).length
+        cam.data.dof.aperture_fstop = 2.2
+        render_to(os.path.join(out, "_face-preview.png"))
+        return
 
     if opts["mode"] == "rider":
         # Figure alone, upright, camera fitted to it. Building the asteroid at
