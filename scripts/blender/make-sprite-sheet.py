@@ -46,12 +46,18 @@ def main():
     frames = [im.crop(box) for im in frames]
     cw, ch = frames[0].size
 
-    cols = 6
+    # Keep the sheet close to square: a very wide or very tall atlas wastes
+    # more padding and some GPUs cap texture dimensions around 8192px.
+    import math as _m
+    cols = min(8, max(1, int(_m.ceil(_m.sqrt(len(frames) * ch / cw)))))
     rows = (len(frames) + cols - 1) // cols
     sheet = Image.new("RGBA", (cols * cw, rows * ch), (0, 0, 0, 0))
     for i, im in enumerate(frames):
         sheet.paste(im, ((i % cols) * cw, (i // cols) * ch))
 
+    if max(sheet.size) > 8192:
+        sys.exit(f"sheet {sheet.size} exceeds the 8192px texture limit — "
+                 "render fewer frames or a smaller --res")
     sheet.save(OUT_IMG, "WEBP", quality=QUALITY, method=6)
     size_kb = os.path.getsize(OUT_IMG) / 1024
 

@@ -21,7 +21,11 @@ import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 // Offscreen it stops stepping entirely, and under prefers-reduced-motion it
 // never starts — a single static frame stands in.
 
-const FRAME_MS = 105; // ~3.8s for a full rotation; an asteroid should loaf
+// Pace the loop by DURATION, not per-frame delay. Trading frame count for
+// resolution is a normal thing to want here, and hardcoding milliseconds per
+// frame would silently change the rotation speed every time that trade is made.
+const LOOP_MS = 3800; // one full tumble; an asteroid should loaf
+const FRAME_MS = LOOP_MS / S.frames;
 const TILT_PX = 16; // how far it leans toward the cursor
 
 export default function AsteroidRider({ className }: { className?: string }) {
@@ -151,6 +155,7 @@ export default function AsteroidRider({ className }: { className?: string }) {
             backgroundSize: `${S.cols * 100}% ${S.rows * 100}%`,
             backgroundRepeat: "no-repeat",
             aspectRatio: `${S.cellW} / ${S.cellH}`,
+            imageRendering: "auto",
           }}
         />
       </motion.div>
