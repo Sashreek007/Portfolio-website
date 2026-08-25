@@ -47,10 +47,19 @@ export default async function HomePage() {
         id="experience"
         className="section-hidden relative overflow-hidden px-[6vw] pt-24 pb-20"
       >
-        {/* Right-anchored into the gutter and bleeding off the edge, so it
-            never runs under the branch diagrams. Unlike the black hole this
-            needs no blend mode — the sprite carries real alpha. */}
-        <AsteroidRider className="pointer-events-none absolute z-0 top-1/2 -translate-y-1/2 -right-[34%] sm:-right-[20%] lg:-right-[7%] w-[260px] sm:w-[380px] lg:w-[500px] opacity-45 sm:opacity-65 lg:opacity-90" />
+        {/* Anchored to the CONTENT column, not the viewport.
+            A right offset in viewport percent keeps walking further out as the
+            screen grows — on a 32" display the asteroid had left the page
+            entirely. This rail matches ExperienceSection's max-w-[1000px], so
+            the asteroid stays beside the roles at any width and the gutter
+            just gets emptier around it.
+            Unlike the black hole this needs no blend mode: the sprite carries
+            real alpha. */}
+        <div className="pointer-events-none absolute inset-0 z-0 flex justify-center">
+          <div className="relative h-full w-full max-w-[1000px]">
+            <AsteroidRider className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-[58%] lg:translate-x-[64%] xl:translate-x-[76%] 2xl:translate-x-[88%] w-[240px] sm:w-[330px] lg:w-[400px] xl:w-[450px] 2xl:w-[500px] opacity-45 sm:opacity-65 lg:opacity-90" />
+          </div>
+        </div>
 
         <div className="relative z-10">
           <SectionKicker label="EXPERIENCE" meta="roles.md" />
