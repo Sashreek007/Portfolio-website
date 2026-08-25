@@ -588,28 +588,38 @@ def eye_material():
     set_input(bsdf, "IOR", 1.38)
 
     coord = nt.nodes.new("ShaderNodeTexCoord")
+    # Generated coordinates run 0..1 across the object's own bounding box, so
+    # the centre is 0.5 and the equator is 1.0 REGARDLESS of how the eyeball
+    # was scaled. Dividing by a hardcoded radius (0.014) broke the moment the
+    # figure was rescaled: the iris drifted off the visible aperture and the
+    # eye read as all pupil or all sclera.
+    centre = nt.nodes.new("ShaderNodeVectorMath")
+    centre.operation = "SUBTRACT"
+    centre.inputs[1].default_value = (0.5, 0.5, 0.5)
     sep = nt.nodes.new("ShaderNodeSeparateXYZ")
     comb = nt.nodes.new("ShaderNodeCombineXYZ")   # drop Y: the eye looks along it
     length = nt.nodes.new("ShaderNodeVectorMath")
     length.operation = "LENGTH"
     norm = nt.nodes.new("ShaderNodeMath")
-    norm.operation = "DIVIDE"
-    norm.inputs[1].default_value = 0.014          # eyeball radius, local units
+    norm.operation = "MULTIPLY"
+    norm.inputs[1].default_value = 2.0            # 0 at centre, 1 at the equator
 
     ramp = nt.nodes.new("ShaderNodeValToRGB")
     cr = ramp.color_ramp
     cr.elements[0].position = 0.00
-    cr.elements[0].color = (0.008, 0.008, 0.010, 1.0)          # pupil
-    cr.elements[1].position = 0.30
-    cr.elements[1].color = (0.008, 0.008, 0.010, 1.0)
-    for pos, col in ((0.42, hex_rgba("2A1C12")),               # iris — dark brown
-                     (0.62, hex_rgba("3E2A1A")),
-                     (0.70, (0.05, 0.045, 0.04, 1.0)),         # limbal ring
-                     (0.78, hex_rgba("D8D2C8")),               # sclera
-                     (1.00, hex_rgba("CFC8BC"))):
+    cr.elements[0].color = (0.006, 0.006, 0.008, 1.0)          # pupil
+    cr.elements[1].position = 0.15
+    cr.elements[1].color = (0.006, 0.006, 0.008, 1.0)
+    for pos, col in ((0.21, hex_rgba("2A1C12")),               # iris — dark brown
+                     (0.40, hex_rgba("46301C")),
+                     (0.49, hex_rgba("2E2014")),
+                     (0.53, (0.030, 0.026, 0.024, 1.0)),       # limbal ring
+                     (0.58, hex_rgba("D8D2C8")),               # sclera
+                     (1.00, hex_rgba("C9C2B6"))):
         cr.elements.new(pos).color = col
 
-    nt.links.new(coord.outputs["Object"], sep.inputs["Vector"])
+    nt.links.new(coord.outputs["Generated"], centre.inputs[0])
+    nt.links.new(centre.outputs["Vector"], sep.inputs["Vector"])
     nt.links.new(sep.outputs["X"], comb.inputs["X"])
     nt.links.new(sep.outputs["Z"], comb.inputs["Z"])
     nt.links.new(comb.outputs["Vector"], length.inputs[0])
@@ -670,25 +680,31 @@ def build_hair(H, body, ctr, radius):
     mat = bpy.data.materials.new("Hair")
     mat.use_nodes = True
     nt = mat.node_tree
-    bsdf = nt.nodes["Principled BSDF"]
-    set_input(bsdf, "Base Color", hex_rgba(HAIR))
-    set_input(bsdf, "Roughness", 0.58)
-    set_input(bsdf, ["Sheen Weight", "Sheen"], 0.10)
-    set_input(bsdf, ["Specular IOR Level", "Specular"], 0.22)
-    coord = nt.nodes.new("ShaderNodeTexCoord")
-    strand = nt.nodes.new("ShaderNodeTexNoise")
-    strand.inputs["Scale"].default_value = 210.0
-    strand.inputs["Detail"].default_value = 8.0
-    bump = nt.nodes.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.35
-    nt.links.new(coord.outputs["Object"], strand.inputs["Vector"])
-    nt.links.new(strand.outputs["Fac"], bump.inputs["Height"])
-    nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
 
-    RAD, VSEG = 40, 20
+    # Principled Hair is a strand shader — it models the cuticle and the
+    # medulla, so light travels along the fibre instead of bouncing off a
+    # surface. A surface shader on hair geometry looks like moulded plastic.
+    try:
+        bsdf = nt.nodes.new("ShaderNodeBsdfHairPrincipled")
+        for name, val in (("Melanin", 0.94), ("Melanin Redness", 0.35),
+                          ("Roughness", 0.28), ("Radial Roughness", 0.22),
+                          ("Random Color", 0.06), ("Random Roughness", 0.12)):
+            set_input(bsdf, name, val)
+    except RuntimeError:
+        bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled")
+        set_input(bsdf, "Base Color", hex_rgba(HAIR))
+        set_input(bsdf, "Roughness", 0.42)
+    nt.links.new(bsdf.outputs[0], out.inputs["Surface"])
+
+    RAD, VSEG = 44, 22
     cx, cy, cz = ctr.x, ctr.y, ctr.z
-    base_r = radius * 1.02                     # shrinkwrap pulls it back in
-    P_FRONT, P_BACK = 0.86, 1.24               # polar reach, forehead vs nape
+    # front azimuth, corrected for the yaw the pose applies to the head
+    yaw = math.radians(POSE.get("head", (0, 0, 0))[2] + POSE.get("neck", (0, 0, 0))[2])
+    phi = -math.pi / 2 + yaw
+    base_r = radius * 1.38                     # must start OUTSIDE the skull
+    P_FRONT, P_BACK = 1.00, 1.76               # polar reach, forehead vs nape
 
     rings = []
     for i in range(VSEG, -1, -1):
@@ -696,11 +712,11 @@ def build_hair(H, body, ctr, radius):
         ring = []
         for j in range(RAD):
             th = 2 * math.pi * j / RAD
-            # -sin(th) is +1 toward the face, -1 toward the back of the head
-            front = 0.5 + 0.5 * (-math.sin(th))
+            # +1 toward the face, -1 toward the back of the head
+            front = 0.5 + 0.5 * math.cos(th - phi)
             # a hairline that is a perfect band reads as a swim cap; break it
             ragged = 0.055 * math.sin(th * 6 + 0.8) + 0.030 * math.sin(th * 13)
-            p = u * (P_BACK - (P_BACK - P_FRONT) * front + ragged)
+            p = u * (P_BACK - (P_BACK - P_FRONT) * front ** 2.2 + ragged)
             bulk = (0.0060 * math.sin(th * 5 + p * 3.1)
                     + 0.0040 * math.sin(th * 11 - p * 4.7)
                     + 0.0028 * math.sin(th * 19 + p * 6.2)
@@ -714,7 +730,7 @@ def build_hair(H, body, ctr, radius):
 
     hair = _mesh_from_rings("Hair", rings, mat, closed=True, cap_last=True,
                             thickness=H * 0.004)
-    _shrink_to(hair, body, H * 0.006)
+    _shrink_to(hair, body, H * 0.005)
 
     # bulk goes on AFTER conforming, otherwise shrinkwrap flattens it away
     tex = bpy.data.textures.new("hair_bulk", type="CLOUDS")
@@ -725,33 +741,174 @@ def build_hair(H, body, ctr, radius):
     d.mid_level = 0.4
     bpy.context.view_layer.objects.active = hair
     bpy.ops.object.modifier_apply(modifier="Bulk")
+
+    # The shell alone is a helmet: noise on a surface is not hair, at any
+    # amplitude. It stays as the undercoat so the scalp is not bald between
+    # strands, and a particle system grows actual geometry off it — which is
+    # the only thing that reads as hair under a hard rim light.
+    # Two slots: the shell is a surface and needs a surface shader, while the
+    # strands need the hair BSDF. Sharing one slot rendered the scalp with a
+    # fibre shader, which is why gaps read as bare skin rather than dark hair.
+    under = bpy.data.materials.new("HairUnder")
+    under.use_nodes = True
+    ub = under.node_tree.nodes["Principled BSDF"]
+    set_input(ub, "Base Color", hex_rgba(HAIR))
+    set_input(ub, "Roughness", 0.66)
+    set_input(ub, ["Specular IOR Level", "Specular"], 0.18)
+    hair.data.materials.clear()
+    hair.data.materials.append(under)
+    hair.data.materials.append(mat)
+
+    hair.modifiers.new("Strands", "PARTICLE_SYSTEM")
+    st = hair.particle_systems[-1].settings
+    st.type = "HAIR"
+    st.use_advanced_hair = True
+    st.count = 5200
+    st.hair_length = H * 0.019
+    st.hair_step = 5
+    st.child_type = "INTERPOLATED"
+    st.child_percent = 60
+    st.rendered_child_count = 60
+    st.child_length = 0.92
+    st.child_length_threshold = 0.15
+    st.clump_factor = 0.78          # strands gather into locks
+    st.clump_shape = 0.42
+    st.roughness_1 = 0.010          # per-strand kink
+    st.roughness_1_size = 0.006
+    st.roughness_endpoint = 0.008
+    st.roughness_end_shape = 1.4
+    st.use_hair_bspline = True
+    # Straight radial strands read as a hedgehog. A shallow curl makes them
+    # lie in locks against the scalp and matches the reference texture.
+    st.kink = "CURL"
+    st.kink_amplitude = H * 0.0032
+    st.kink_frequency = 9.0
+    st.kink_shape = 0.25
+    st.radius_scale = 0.006
+    st.root_radius = 0.9
+    st.tip_radius = 0.05
+    st.material = 2          # 1-based: slot 2 is the hair BSDF
+    print(f"[asteroid] hair strands = {st.count} x {st.rendered_child_count} children")
     return hair
 
 
-def fabric_material(name, colour, roughness=0.66, sheen=0.35, weave=150.0):
-    """One fabric shader, parameterised. Sheen is what stops cloth reading as
-    painted vinyl; the weave bump carries the rest at close range."""
+def _seam_mask(nt, coord, z_scale, x_scale, width=0.045):
+    """Thin dark lines where panels meet, from two crossed wave textures.
+
+    Panel seams are what separate a garment from a shrink-wrapped shell. They
+    cost nothing in geometry: a wave texture gives evenly spaced bands, and a
+    tight colour ramp turns the band edges into lines a few pixels wide.
+    """
+    outs = []
+    for scale, direction in ((z_scale, "Z"), (x_scale, "X")):
+        w = nt.nodes.new("ShaderNodeTexWave")
+        w.wave_type = "BANDS"
+        try:
+            w.bands_direction = direction
+        except (TypeError, ValueError):
+            pass
+        w.inputs["Scale"].default_value = scale
+        w.inputs["Distortion"].default_value = 0.35
+        w.inputs["Detail"].default_value = 2.0
+        nt.links.new(coord.outputs["Object"], w.inputs["Vector"])
+
+        ramp = nt.nodes.new("ShaderNodeValToRGB")
+        cr = ramp.color_ramp
+        cr.interpolation = "B_SPLINE"
+        cr.elements[0].position = 0.5 - width
+        cr.elements[0].color = (1, 1, 1, 1)
+        cr.elements[1].position = 0.5
+        cr.elements[1].color = (0, 0, 0, 1)
+        e = cr.elements.new(0.5 + width)
+        e.color = (1, 1, 1, 1)
+        nt.links.new(w.outputs["Fac"], ramp.inputs["Fac"])
+        outs.append(ramp)
+
+    combine = nt.nodes.new("ShaderNodeMath")
+    combine.operation = "MINIMUM"        # dark wherever EITHER set has a seam
+    nt.links.new(outs[0].outputs["Color"], combine.inputs[0])
+    nt.links.new(outs[1].outputs["Color"], combine.inputs[1])
+    return combine
+
+
+def fabric_material(name, colour, roughness=0.66, sheen=0.35, weave=150.0,
+                    seams=(0.0, 0.0), trim=None):
+    """One fabric shader, parameterised.
+
+    Sheen stops cloth reading as painted vinyl; the weave bump carries close
+    range; the seams are what make it a garment rather than a body-shaped
+    surface. `trim` tints the seam grooves — piping in the accent colour.
+    """
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     nt = mat.node_tree
     bsdf = nt.nodes["Principled BSDF"]
-    set_input(bsdf, "Base Color", hex_rgba(colour))
     set_input(bsdf, "Metallic", 0.0)
-    set_input(bsdf, "Roughness", roughness)
     set_input(bsdf, ["Sheen Weight", "Sheen"], sheen)
     set_input(bsdf, "Sheen Tint", hex_rgba(VIOLET_PALE))
     set_input(bsdf, ["Specular IOR Level", "Specular"], 0.32)
 
     coord = nt.nodes.new("ShaderNodeTexCoord")
-    tex = nt.nodes.new("ShaderNodeTexNoise")
-    tex.inputs["Scale"].default_value = weave
-    tex.inputs["Detail"].default_value = 5.0
+    weave_tex = nt.nodes.new("ShaderNodeTexNoise")
+    weave_tex.inputs["Scale"].default_value = weave
+    weave_tex.inputs["Detail"].default_value = 5.0
     bump = nt.nodes.new("ShaderNodeBump")
     bump.inputs["Strength"].default_value = 0.16
-    nt.links.new(coord.outputs["Object"], tex.inputs["Vector"])
-    nt.links.new(tex.outputs["Fac"], bump.inputs["Height"])
-    nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+    nt.links.new(coord.outputs["Object"], weave_tex.inputs["Vector"])
+    nt.links.new(weave_tex.outputs["Fac"], bump.inputs["Height"])
+
+    if any(seams):
+        seam = _seam_mask(nt, coord, seams[0], seams[1])
+
+        # ShaderNodeMix carries a full set of sockets for EVERY data type and
+        # only enables the active one, so inputs["A"] resolves to the disabled
+        # float socket, not the colour. Indices are the only reliable handle:
+        # 0=Factor, 6=A(RGBA), 7=B(RGBA), output 2=Result(RGBA). Getting this
+        # wrong is silent — the seams simply never appeared.
+        base = nt.nodes.new("ShaderNodeMix")
+        base.data_type = "RGBA"
+        base.inputs[6].default_value = hex_rgba(trim or "0B0913")
+        base.inputs[7].default_value = hex_rgba(colour)
+        nt.links.new(seam.outputs["Value"], base.inputs[0])
+        nt.links.new(base.outputs[2], bsdf.inputs["Base Color"])
+
+        # the groove is a physical dent, not just a darker stripe
+        groove = nt.nodes.new("ShaderNodeBump")
+        groove.inputs["Strength"].default_value = 0.85
+        groove.inputs["Distance"].default_value = 0.004
+        nt.links.new(seam.outputs["Value"], groove.inputs["Height"])
+        nt.links.new(bump.outputs["Normal"], groove.inputs["Normal"])
+        nt.links.new(groove.outputs["Normal"], bsdf.inputs["Normal"])
+
+        rough = nt.nodes.new("ShaderNodeMix")
+        rough.data_type = "FLOAT"
+        rough.inputs[2].default_value = min(roughness + 0.18, 1.0)
+        rough.inputs[3].default_value = roughness
+        nt.links.new(seam.outputs["Value"], rough.inputs[0])
+        nt.links.new(rough.outputs[0], bsdf.inputs["Roughness"])
+    else:
+        set_input(bsdf, "Base Color", hex_rgba(colour))
+        set_input(bsdf, "Roughness", roughness)
+        nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
     return mat
+
+
+def build_collar(H, mat):
+    """Standing collar at the neck — the detail that reads as tailoring from
+    any distance, and it closes the gap between the jacket and the jaw."""
+    RAD, VSEG = 36, 5
+    rings = []
+    for i in range(VSEG + 1):
+        t = i / VSEG
+        z = (0.800 + 0.046 * t) * H
+        r = (0.074 + 0.016 * t) * H
+        ring = []
+        for j in range(RAD):
+            th = 2 * math.pi * j / RAD
+            rr = r + math.sin(th * 7) * 0.002 * H
+            ring.append((math.cos(th) * rr, math.sin(th) * rr * 0.82 + 0.004 * H, z))
+        rings.append(ring)
+    return _mesh_from_rings("Collar", rings, mat, closed=True, thickness=H * 0.005)
 
 
 def garment_from_groups(name, body, groups, H, swell, mat,
@@ -837,7 +994,7 @@ def garment_from_groups(name, body, groups, H, swell, mat,
 def build_belt(H, mat):
     """A waist band — the one piece that reads as tailoring rather than drape,
     and it breaks the torso/skirt boundary that otherwise looks like a seam."""
-    RAD, VSEG = 40, 4
+    RAD, VSEG = 44, 7
     rings = []
     for i in range(VSEG + 1):
         t = i / VSEG
@@ -845,8 +1002,8 @@ def build_belt(H, mat):
         ring = []
         for j in range(RAD):
             th = 2 * math.pi * j / RAD
-            r = (0.139 + 0.004 * math.sin(th * 9)) * H
-            ring.append((math.cos(th) * r, math.sin(th) * r * 0.64, z))
+            r = (0.131 + 0.003 * math.sin(th * 9)) * H
+            ring.append((math.cos(th) * r, math.sin(th) * r * 0.74, z))
         rings.append(ring)
     return _mesh_from_rings("Belt", rings, mat, closed=True, thickness=H * 0.005)
 
@@ -1039,9 +1196,14 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     hair = build_hair(H, body, *head_sphere(body, H))
 
     # Garments cut from the body's own geometry, so they fit the pose exactly.
-    cloth = fabric_material("Jacket", "23203A", roughness=0.70, sheen=0.35)
+    cloth = fabric_material("Suit", "393454", roughness=0.70, sheen=0.35,
+                            seams=(8.5, 5.5), trim="5A50B4")
+    limb = fabric_material("SuitLimb", "2E2A46", roughness=0.72, sheen=0.30,
+                           seams=(11.0, 7.0), trim="4A4195")
     leather = fabric_material("Leather", "15121C", roughness=0.46, sheen=0.10,
                               weave=90.0)
+    accent = fabric_material("Accent", "3C3489", roughness=0.40, sheen=0.5,
+                             weave=110.0)
     worn = [
         garment_from_groups("Jacket", body,
                             ("chest", "spine", "hips", "shoulder.L", "shoulder.R"),
@@ -1050,30 +1212,36 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
         garment_from_groups("Sleeves", body,
                             ("upper_arm.L", "upper_arm.R",
                              "forearm.L", "forearm.R"),
-                            H, 0.008, cloth, relax=6),
+                            H, 0.008, limb, relax=6),
+        garment_from_groups("Pauldrons", body,
+                            ("shoulder.L", "shoulder.R"),
+                            H, 0.020, accent, thickness=0.012,
+                            relax=5, remesh=0.010),
         garment_from_groups("Trousers", body,
                             ("thigh.L", "thigh.R", "shin.L", "shin.R"),
-                            H, 0.008, cloth, relax=6),
+                            H, 0.008, limb, relax=6),
         garment_from_groups("Boots", body,
                             ("shin.L", "shin.R", "foot.L", "foot.R"),
                             H, 0.013, leather, thickness=0.022,
                             relax=6, remesh=0.011),
         build_belt(H, leather),
+        build_collar(H, accent),
     ]
     worn = [w for w in worn if w]
     cape = build_cape(cloak_mat, H)
 
     bpy.ops.object.select_all(action="DESELECT")
-    for ob in [body, cape, hair] + worn + brows:
+    for ob in [body, cape] + worn + brows:
         ob.select_set(True)
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
     rider = bpy.context.active_object
     rider.name = "Rider"
 
-    # Eyes stay separate objects (see import_human) but must travel with the
-    # figure, so parent them at the object level.
-    for e in eyes:
+    # Eyes stay separate objects (see import_human) and the hair carries a
+    # particle system that bpy.ops.object.join() would discard, so both ride
+    # along as children instead.
+    for e in list(eyes) + [hair]:
         e.parent = rider
         e.matrix_parent_inverse = rider.matrix_world.inverted()
 
