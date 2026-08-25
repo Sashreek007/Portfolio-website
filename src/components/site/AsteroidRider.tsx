@@ -82,6 +82,9 @@ export default function AsteroidRider({ className }: { className?: string }) {
     const io = new IntersectionObserver(
       ([entry]) => {
         onScreen = entry.isIntersecting;
+        // Repaint the moment it comes into view rather than waiting up to a
+        // frame interval, so it never enters on a stale cell.
+        if (onScreen) show(frame);
       },
       { threshold: 0 }
     );
@@ -153,6 +156,15 @@ export default function AsteroidRider({ className }: { className?: string }) {
           style={{
             backgroundImage: "url(/asteroid/asteroid-sprite.webp)",
             backgroundSize: `${S.cols * 100}% ${S.rows * 100}%`,
+            // React owns frame 0. The stepping loop writes backgroundPosition
+            // imperatively (to avoid re-rendering 24 times a second), and an
+            // imperative write outlives a Fast Refresh — so after the sheet
+            // grid changed from 6x6 to 6x4, a stale "40% " from the old
+            // closure was still on the element. Offscreen the rAF loop is
+            // paused, so nothing ever corrected it and two cells showed at
+            // once. Declaring it here means any re-render resets it to a
+            // valid cell.
+            backgroundPosition: "0% 0%",
             backgroundRepeat: "no-repeat",
             aspectRatio: `${S.cellW} / ${S.cellH}`,
             imageRendering: "auto",
