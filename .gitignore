@@ -18,3 +18,10 @@ tsconfig.tsbuildinfo
 
 # iCloud sync exclusions (symlinked real dirs)
 *.nosync
+
+# Vendored CC0 source assets (Blender Studio Human Base Meshes, 48MB) —
+# fetched by scripts/blender/fetch-human-base.sh, not tracked.
+assets/vendor/
+
+# Blender iteration previews (face/rider close-ups), not shipped
+public/asteroid/_*

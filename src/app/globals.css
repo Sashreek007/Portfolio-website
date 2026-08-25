@@ -2065,3 +2065,33 @@
     left: -8px;
   }
 }
+
+/* ─── Asteroid drift ──────────────────────────────────────────────────
+   A slow float right→left and back again, easing hard at each extreme so
+   it reads as inertia rather than a slider running end to end.
+   `alternate` gives the return leg for free.
+
+   Deliberately CSS rather than JS: it is one composited transform on a
+   loop, costing nothing per frame. The element already runs a timer for
+   the sprite stepping, and there was no reason to put a second moving
+   part on the main thread. */
+@keyframes asteroid-drift {
+  from {
+    transform: translate3d(var(--ad-x), var(--ad-y), 0);
+  }
+  to {
+    transform: translate3d(calc(var(--ad-x) * -1), calc(var(--ad-y) * -1), 0);
+  }
+}
+.asteroid-drift {
+  --ad-x: 74px;
+  --ad-y: 18px;
+  animation: asteroid-drift 30s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .asteroid-drift {
+    animation: none;
+    transform: none;
+  }
+}

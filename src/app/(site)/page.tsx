@@ -6,6 +6,7 @@ import { type Project } from "@/components/site/ProjectCard";
 import CaseStudy from "@/components/site/CaseStudy";
 import ExperienceSection from "@/components/site/ExperienceSection";
 import BlackHole from "@/components/site/BlackHole";
+import AsteroidRider from "@/components/site/AsteroidRider";
 import TickerBand from "@/components/site/TickerBand";
 import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
@@ -38,9 +39,32 @@ export default async function HomePage() {
       <TickerBand items={tickerItems} />
 
       {/* ── Experience — roles as branch diagrams, ahead of the work ─────── */}
-      <section id="experience" className="section-hidden px-[6vw] pt-24 pb-20">
-        <SectionKicker label="EXPERIENCE" meta="roles.md" />
-        <ExperienceSection />
+      {/* Deliberately upstream of the black hole at #contact: the two space
+          objects are never on screen together, so there is only ever one of
+          them costing anything. overflow-hidden clips the asteroid's bleed
+          instead of letting it widen the page. */}
+      <section
+        id="experience"
+        className="section-hidden relative overflow-hidden px-[6vw] pt-24 pb-20"
+      >
+        {/* Anchored to the CONTENT column, not the viewport.
+            A right offset in viewport percent keeps walking further out as the
+            screen grows — on a 32" display the asteroid had left the page
+            entirely. This rail matches ExperienceSection's max-w-[1000px], so
+            the asteroid stays beside the roles at any width and the gutter
+            just gets emptier around it.
+            Unlike the black hole this needs no blend mode: the sprite carries
+            real alpha. */}
+        <div className="pointer-events-none absolute inset-0 z-0 flex justify-center">
+          <div className="relative h-full w-full max-w-[1000px]">
+            <AsteroidRider className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-[58%] lg:translate-x-[64%] xl:translate-x-[76%] 2xl:translate-x-[88%] w-[240px] sm:w-[330px] lg:w-[400px] xl:w-[450px] 2xl:w-[500px] opacity-45 sm:opacity-65 lg:opacity-90" />
+          </div>
+        </div>
+
+        <div className="relative z-10">
+          <SectionKicker label="EXPERIENCE" meta="roles.md" />
+          <ExperienceSection />
+        </div>
       </section>
 
       {divider}
