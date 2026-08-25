@@ -362,6 +362,13 @@ def _mesh_from_rings(name, rings, mat, closed, cap_last=False, thickness=0.0):
     sub = ob.modifiers.new("Subsurf", "SUBSURF")
     sub.levels = sub.render_levels = 1
     ob.data.materials.append(mat)
+
+    # Apply them here. join() keeps only the active object's modifiers and
+    # drops the rest without a word, so anything left unapplied vanishes the
+    # moment this mesh is joined into the figure.
+    bpy.context.view_layer.objects.active = ob
+    for m in list(ob.modifiers):
+        bpy.ops.object.modifier_apply(modifier=m.name)
     bpy.ops.object.shade_smooth()
     return ob
 
@@ -1246,6 +1253,10 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     ]
     worn = [w for w in worn if w]
     cape = build_cape(cloak_mat, H)
+    # Tag the cape's vertices so the ripple modifier can be limited to them
+    # once everything is one mesh.
+    vg = cape.vertex_groups.new(name="cape_ripple")
+    vg.add([v.index for v in cape.data.vertices], 1.0, "REPLACE")
 
     bpy.ops.object.select_all(action="DESELECT")
     for ob in [body, cape] + worn + brows:
@@ -1263,6 +1274,23 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
         e.matrix_parent_inverse = rider.matrix_world.inverted()
 
     print(f"[asteroid] vertex groups = {sorted(g.name for g in body.vertex_groups)}")
+    # Ripple driven by an empty used as texture coordinates: rotating that
+    # empty a full turn over the loop sweeps the noise across the cape and
+    # lands exactly back where it started, so the animation is seamless by
+    # construction rather than by tuning a wave speed.
+    ctl = bpy.data.objects.new("CapeRipple", None)
+    bpy.context.collection.objects.link(ctl)
+    ctl.parent = rider
+    tex = bpy.data.textures.new("cape_ripple", type="CLOUDS")
+    tex.noise_scale = 0.55
+    rip = rider.modifiers.new("CapeRipple", "DISPLACE")
+    rip.texture = tex
+    rip.texture_coords = "OBJECT"
+    rip.texture_coords_object = ctl
+    rip.vertex_group = "cape_ripple"
+    rip.mid_level = 0.5
+    rip.strength = H * 0.055
+
     rider["foot_z"] = foot_z
     print(f"[asteroid] rider verts = {len(rider.data.vertices)}  soles at z={foot_z:.4f}")
     return rider
@@ -1548,18 +1576,40 @@ def main():
         frame_object(cam, [ast, rider], margin=1.55)
         render_to(os.path.join(out, opts["out"] + ".png"))
     elif opts["mode"] == "sprite":
-        # Rotate the pair together so the rider stays planted while the rock
-        # turns under the camera.
+        # A seamless loop: the pair tumbles a full turn while the cape's
+        # ripple control makes a full turn of its own, so frame N lands
+        # exactly on frame 0 without any easing or tuning.
         frames_dir = os.path.join(out, "_frames")
         os.makedirs(frames_dir, exist_ok=True)
+        for stale in os.listdir(frames_dir):
+            if stale.endswith(".png"):
+                os.remove(os.path.join(frames_dir, stale))
+
         n = opts["frames"]
+        # Frame once, with margin for the widest point of the rotation — the
+        # cape sweeps a long way off-axis, so framing per-frame would make the
+        # subject pulse in scale across the loop.
+        frame_object(cam, [ast, rider], margin=1.72)
+
         pivot = bpy.data.objects.new("pivot", None)
         bpy.context.collection.objects.link(pivot)
-        ast.parent = pivot
-        rider.parent = pivot
+        bpy.context.view_layer.update()
+        for ob in (ast, rider):
+            mw = ob.matrix_world.copy()
+            ob.parent = pivot
+            ob.matrix_parent_inverse = pivot.matrix_world.inverted()
+            ob.matrix_world = mw
+
+        ripple = bpy.data.objects.get("CapeRipple")
         for i in range(n):
-            pivot.rotation_euler = (0, 0, 2 * math.pi * i / n)
+            t = i / n
+            pivot.rotation_euler = (0, 0, 2 * math.pi * t)
+            if ripple:
+                ripple.rotation_euler = (0.35 * math.sin(2 * math.pi * t),
+                                         0, 2 * math.pi * t)
+            bpy.context.view_layer.update()
             render_to(os.path.join(frames_dir, f"f{i:03d}.png"))
+        print(f"[asteroid] {n} frames in {frames_dir}")
     else:
         raise SystemExit(f"unknown mode {opts['mode']}")
 

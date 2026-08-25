@@ -6,6 +6,7 @@ import { type Project } from "@/components/site/ProjectCard";
 import CaseStudy from "@/components/site/CaseStudy";
 import ExperienceSection from "@/components/site/ExperienceSection";
 import BlackHole from "@/components/site/BlackHole";
+import AsteroidRider from "@/components/site/AsteroidRider";
 import TickerBand from "@/components/site/TickerBand";
 import RevealSections from "@/components/site/RevealSections";
 import Link from "next/link";
@@ -38,9 +39,23 @@ export default async function HomePage() {
       <TickerBand items={tickerItems} />
 
       {/* ── Experience — roles as branch diagrams, ahead of the work ─────── */}
-      <section id="experience" className="section-hidden px-[6vw] pt-24 pb-20">
-        <SectionKicker label="EXPERIENCE" meta="roles.md" />
-        <ExperienceSection />
+      {/* Deliberately upstream of the black hole at #contact: the two space
+          objects are never on screen together, so there is only ever one of
+          them costing anything. overflow-hidden clips the asteroid's bleed
+          instead of letting it widen the page. */}
+      <section
+        id="experience"
+        className="section-hidden relative overflow-hidden px-[6vw] pt-24 pb-20"
+      >
+        {/* Right-anchored into the gutter and bleeding off the edge, so it
+            never runs under the branch diagrams. Unlike the black hole this
+            needs no blend mode — the sprite carries real alpha. */}
+        <AsteroidRider className="pointer-events-none absolute z-0 top-1/2 -translate-y-1/2 -right-[34%] sm:-right-[20%] lg:-right-[7%] w-[260px] sm:w-[380px] lg:w-[500px] opacity-45 sm:opacity-65 lg:opacity-90" />
+
+        <div className="relative z-10">
+          <SectionKicker label="EXPERIENCE" meta="roles.md" />
+          <ExperienceSection />
+        </div>
       </section>
 
       {divider}
