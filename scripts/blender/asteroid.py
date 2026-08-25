@@ -688,9 +688,9 @@ def build_hair(H, body, ctr, radius):
     # surface. A surface shader on hair geometry looks like moulded plastic.
     try:
         bsdf = nt.nodes.new("ShaderNodeBsdfHairPrincipled")
-        for name, val in (("Melanin", 0.94), ("Melanin Redness", 0.35),
-                          ("Roughness", 0.28), ("Radial Roughness", 0.22),
-                          ("Random Color", 0.06), ("Random Roughness", 0.12)):
+        for name, val in (("Melanin", 0.985), ("Melanin Redness", 0.10),
+                          ("Roughness", 0.46), ("Radial Roughness", 0.38),
+                          ("Random Color", 0.03), ("Random Roughness", 0.10)):
             set_input(bsdf, name, val)
     except RuntimeError:
         bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled")
@@ -704,7 +704,7 @@ def build_hair(H, body, ctr, radius):
     yaw = math.radians(POSE.get("head", (0, 0, 0))[2] + POSE.get("neck", (0, 0, 0))[2])
     phi = -math.pi / 2 + yaw
     base_r = radius * 1.38                     # must start OUTSIDE the skull
-    P_FRONT, P_BACK = 1.00, 1.76               # polar reach, forehead vs nape
+    P_FRONT, P_BACK = 0.70, 1.80               # polar reach, forehead vs nape
 
     rings = []
     for i in range(VSEG, -1, -1):
@@ -737,7 +737,7 @@ def build_hair(H, body, ctr, radius):
     tex.noise_scale = 0.035
     d = hair.modifiers.new("Bulk", "DISPLACE")
     d.texture = tex
-    d.strength = H * 0.007
+    d.strength = H * 0.004
     d.mid_level = 0.4
     bpy.context.view_layer.objects.active = hair
     bpy.ops.object.modifier_apply(modifier="Bulk")
@@ -751,10 +751,27 @@ def build_hair(H, body, ctr, radius):
     # fibre shader, which is why gaps read as bare skin rather than dark hair.
     under = bpy.data.materials.new("HairUnder")
     under.use_nodes = True
-    ub = under.node_tree.nodes["Principled BSDF"]
-    set_input(ub, "Base Color", hex_rgba(HAIR))
-    set_input(ub, "Roughness", 0.66)
-    set_input(ub, ["Specular IOR Level", "Specular"], 0.18)
+    unt = under.node_tree
+    ub = unt.nodes["Principled BSDF"]
+    set_input(ub, "Base Color", hex_rgba("0F0A08"))
+    set_input(ub, "Roughness", 0.52)
+    set_input(ub, ["Specular IOR Level", "Specular"], 0.14)
+
+    ucoord = unt.nodes.new("ShaderNodeTexCoord")
+    umap = unt.nodes.new("ShaderNodeMapping")
+    # squash the noise hard along one axis so it streaks: isotropic noise reads
+    # as a moulded cap, streaked noise reads as strand direction
+    umap.inputs["Scale"].default_value = (1.0, 1.0, 16.0)
+    unoise = unt.nodes.new("ShaderNodeTexNoise")
+    unoise.inputs["Scale"].default_value = 42.0
+    unoise.inputs["Detail"].default_value = 9.0
+    unoise.inputs["Roughness"].default_value = 0.75
+    ubump = unt.nodes.new("ShaderNodeBump")
+    ubump.inputs["Strength"].default_value = 0.62
+    unt.links.new(ucoord.outputs["Object"], umap.inputs["Vector"])
+    unt.links.new(umap.outputs["Vector"], unoise.inputs["Vector"])
+    unt.links.new(unoise.outputs["Fac"], ubump.inputs["Height"])
+    unt.links.new(ubump.outputs["Normal"], ub.inputs["Normal"])
     hair.data.materials.clear()
     hair.data.materials.append(under)
     hair.data.materials.append(mat)
@@ -763,28 +780,28 @@ def build_hair(H, body, ctr, radius):
     st = hair.particle_systems[-1].settings
     st.type = "HAIR"
     st.use_advanced_hair = True
-    st.count = 5200
-    st.hair_length = H * 0.019
+    st.count = 7200
+    st.hair_length = H * 0.022
     st.hair_step = 5
     st.child_type = "INTERPOLATED"
     st.child_percent = 60
-    st.rendered_child_count = 60
+    st.rendered_child_count = 86
     st.child_length = 0.92
     st.child_length_threshold = 0.15
-    st.clump_factor = 0.78          # strands gather into locks
+    st.clump_factor = 0.72          # strands gather into locks
     st.clump_shape = 0.42
-    st.roughness_1 = 0.010          # per-strand kink
+    st.roughness_1 = 0.004          # per-strand kink
     st.roughness_1_size = 0.006
-    st.roughness_endpoint = 0.008
+    st.roughness_endpoint = 0.003
     st.roughness_end_shape = 1.4
     st.use_hair_bspline = True
     # Straight radial strands read as a hedgehog. A shallow curl makes them
     # lie in locks against the scalp and matches the reference texture.
     st.kink = "CURL"
-    st.kink_amplitude = H * 0.0032
-    st.kink_frequency = 9.0
+    st.kink_amplitude = H * 0.0016
+    st.kink_frequency = 11.0
     st.kink_shape = 0.25
-    st.radius_scale = 0.006
+    st.radius_scale = 0.004
     st.root_radius = 0.9
     st.tip_radius = 0.05
     st.material = 2          # 1-based: slot 2 is the hair BSDF
