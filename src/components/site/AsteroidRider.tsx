@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import {
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 
 // A figure riding a tumbling asteroid, rendered out of Blender as a sprite
@@ -39,11 +32,10 @@ import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 const LOOP_MS = 7200;
 const FRAME_MS = LOOP_MS / S.frames;
 const TILT_PX = 16; // how far it leans toward the cursor
-// Travel across the section as it passes, right to left. Scroll-linked rather
-// than time-linked so it reads as the page moving past a body in space, and so
-// it can never wander somewhere it was not meant to be.
-const DRIFT_PX = 130;
-const RISE_PX = 46;
+// The right-to-left float lives in CSS (.asteroid-drift in globals.css) rather
+// than here. It is a single composited transform on a loop, so it costs nothing
+// per frame — worth keeping off the JS side given the sprite stepping already
+// runs a timer on this element.
 
 export default function AsteroidRider({ className }: { className?: string }) {
   const reduced = useReducedMotion() ?? false;
@@ -60,17 +52,6 @@ export default function AsteroidRider({ className }: { className?: string }) {
   const near = useSpring(proximity, { stiffness: 70, damping: 24, mass: 0.6 });
   const scale = useTransform(near, [0, 1], [1, 1.035]);
 
-  // Heavy spring: high mass and damping give it inertia, so it lags the scroll
-  // slightly instead of tracking it rigidly. That lag is what reads as weight.
-  const { scrollYProgress } = useScroll({
-    target: hostRef,
-    offset: ["start end", "end start"],
-  });
-  const driftRaw = useTransform(scrollYProgress, [0, 1], [DRIFT_PX, -DRIFT_PX]);
-  const riseRaw = useTransform(scrollYProgress, [0, 1], [RISE_PX, -RISE_PX]);
-  const heavy = { stiffness: 26, damping: 24, mass: 1.4 };
-  const driftX = useSpring(driftRaw, heavy);
-  const driftY = useSpring(riseRaw, heavy);
 
   // ── frame stepping ────────────────────────────────────────────────
   useEffect(() => {
@@ -175,10 +156,7 @@ export default function AsteroidRider({ className }: { className?: string }) {
 
   return (
     <div ref={hostRef} aria-hidden className={className}>
-      <motion.div
-        className="w-full h-full"
-        style={reduced ? undefined : { x: driftX, y: driftY, willChange: "transform" }}
-      >
+      <div className={reduced ? "w-full h-full" : "asteroid-drift w-full h-full"}>
         <motion.div
           className="w-full h-full"
           style={reduced ? undefined : { x, y, scale, willChange: "transform" }}
@@ -204,7 +182,7 @@ export default function AsteroidRider({ className }: { className?: string }) {
           }}
           />
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 }
