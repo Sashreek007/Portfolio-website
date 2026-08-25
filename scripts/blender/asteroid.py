@@ -1608,9 +1608,16 @@ def import_human(height):
     return body, eyes
 
 
-def rig_and_pose(body, eyes, height):
+def rig_and_pose(body, eyes, height, pose=None, keep_rig=False):
     """Build an armature, bind with automatic weights, pose it, then bake the
-    result into the mesh so downstream code sees a plain posed object."""
+    result into the mesh so downstream code sees a plain posed object.
+
+    `pose` overrides the module POSE, so other scenes can reuse this rig with a
+    different one. `keep_rig` leaves the armature bound and unbaked, which is
+    what an animated scene needs — baking is only right when the pose is fixed
+    for every frame.
+    """
+    pose = POSE if pose is None else pose
     k = height / HUMAN_REST_H
     bpy.ops.object.armature_add(enter_editmode=False, location=(0, 0, 0))
     arm = bpy.context.active_object
@@ -1640,13 +1647,19 @@ def rig_and_pose(body, eyes, height):
 
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="POSE")
-    for name, (rx, ry, rz) in POSE.items():
+    for name, (rx, ry, rz) in pose.items():
         pb = arm.pose.bones.get(name)
         if not pb:
             continue
         pb.rotation_mode = "XYZ"
         pb.rotation_euler = (math.radians(rx), math.radians(ry), math.radians(rz))
     bpy.ops.object.mode_set(mode="OBJECT")
+
+    if keep_rig:
+        # An animated scene re-poses every frame, so the deform has to stay
+        # live. Baking here would freeze frame one into the mesh.
+        print(f"[asteroid] rig kept live ({len(arm.pose.bones)} bones)")
+        return arm
 
     # Bake the pose down and drop the rig — a plain mesh survives joining and
     # re-parenting without surprises.
