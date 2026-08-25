@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "motion/react";
 import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 
 // A figure riding a tumbling asteroid, rendered out of Blender as a sprite
@@ -24,9 +31,19 @@ import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 // Pace the loop by DURATION, not per-frame delay. Trading frame count for
 // resolution is a normal thing to want here, and hardcoding milliseconds per
 // frame would silently change the rotation speed every time that trade is made.
-const LOOP_MS = 3800; // one full tumble; an asteroid should loaf
+// One full tumble. Slow on purpose — a rock this size has no reason to hurry,
+// and the drift below carries the sense of motion so the rotation does not
+// have to. Note the floor this sits on: 24 frames over 7.2s is ~3.3 steps a
+// second, and going much slower starts to read as stuttering rather than
+// weight. Slower than this needs more frames, not a longer interval.
+const LOOP_MS = 7200;
 const FRAME_MS = LOOP_MS / S.frames;
 const TILT_PX = 16; // how far it leans toward the cursor
+// Travel across the section as it passes, right to left. Scroll-linked rather
+// than time-linked so it reads as the page moving past a body in space, and so
+// it can never wander somewhere it was not meant to be.
+const DRIFT_PX = 130;
+const RISE_PX = 46;
 
 export default function AsteroidRider({ className }: { className?: string }) {
   const reduced = useReducedMotion() ?? false;
@@ -42,6 +59,18 @@ export default function AsteroidRider({ className }: { className?: string }) {
   const y = useSpring(py, spring);
   const near = useSpring(proximity, { stiffness: 70, damping: 24, mass: 0.6 });
   const scale = useTransform(near, [0, 1], [1, 1.035]);
+
+  // Heavy spring: high mass and damping give it inertia, so it lags the scroll
+  // slightly instead of tracking it rigidly. That lag is what reads as weight.
+  const { scrollYProgress } = useScroll({
+    target: hostRef,
+    offset: ["start end", "end start"],
+  });
+  const driftRaw = useTransform(scrollYProgress, [0, 1], [DRIFT_PX, -DRIFT_PX]);
+  const riseRaw = useTransform(scrollYProgress, [0, 1], [RISE_PX, -RISE_PX]);
+  const heavy = { stiffness: 26, damping: 24, mass: 1.4 };
+  const driftX = useSpring(driftRaw, heavy);
+  const driftY = useSpring(riseRaw, heavy);
 
   // ── frame stepping ────────────────────────────────────────────────
   useEffect(() => {
@@ -148,8 +177,12 @@ export default function AsteroidRider({ className }: { className?: string }) {
     <div ref={hostRef} aria-hidden className={className}>
       <motion.div
         className="w-full h-full"
-        style={reduced ? undefined : { x, y, scale, willChange: "transform" }}
+        style={reduced ? undefined : { x: driftX, y: driftY, willChange: "transform" }}
       >
+        <motion.div
+          className="w-full h-full"
+          style={reduced ? undefined : { x, y, scale, willChange: "transform" }}
+        >
         <div
           ref={cellRef}
           className="w-full h-full"
@@ -169,7 +202,8 @@ export default function AsteroidRider({ className }: { className?: string }) {
             aspectRatio: `${S.cellW} / ${S.cellH}`,
             imageRendering: "auto",
           }}
-        />
+          />
+        </motion.div>
       </motion.div>
     </div>
   );
