@@ -417,35 +417,37 @@ def build_cape(mat, H):
     return _mesh_from_rings("Cape", rings, mat, closed=False, thickness=H * 0.008)
 
 
-def build_skirt(mat, H):
-    """Short closed robe over the torso and hips, ending mid-thigh.
+def build_coat(mat, H):
+    """Long coat, open down the front, hanging straight from the shoulders.
 
-    This is the part that answers "where are the clothes" — the cape reads from
-    behind, but from the front the figure needs something on it. Capped at the
-    hem so the low camera does not look up into a hollow shell.
+    The previous garment was a closed tube from the waist, flaring to below the
+    knee — which is a skirt, and on this figure it read as a frock. Two things
+    make a coat instead: it is OPEN at the front, so the trousers and boots
+    show through the gap and the eye reads legs rather than a hem; and it drops
+    nearly straight instead of flaring, so the silhouette is a column, not a
+    bell. The flare is reserved for the last fifth, at the hem.
     """
-    RAD, VSEG = 32, 16
+    RAD, VSEG = 42, 28
+    TH0, TH1 = -0.30 * math.pi, 1.30 * math.pi     # opening centred on -Y
+
     rings = []
     for i in range(VSEG + 1):
         t = i / VSEG
-        z = 0.63 - (0.63 - 0.24) * t          # waist → below the knee
-        # Starts at the waist now rather than the shoulders: the jacket covers
-        # the torso, so this only has to be the skirt of the robe. As a
-        # full-length tube it left a slit up the front where it met the body.
-        r = 0.142 + 0.068 * t ** 1.6
+        z = 0.80 - (0.80 - 0.30) * t               # shoulders → below the knee
+        r = 0.190 + 0.052 * t ** 2.4               # column, not a bell
         ring = []
         for j in range(RAD):
-            th = 2 * math.pi * j / RAD
-            # two harmonics, growing downward — a single radius reads as a
-            # lampshade no matter how it is proportioned
-            fold = (math.sin(th * 8 + t * 1.9) * 0.019 * (0.25 + t)
-                    + math.sin(th * 15 - t * 3.1) * 0.008 * (0.2 + t))
+            th = TH0 + (TH1 - TH0) * j / (RAD - 1)
+            fold = (math.sin(th * 7 + t * 1.4) * 0.014 * (0.30 + t)
+                    + math.sin(th * 13 - t * 2.3) * 0.006 * (0.25 + t))
             rr = r + fold
-            x, y = math.cos(th) * rr, math.sin(th) * rr * 0.92
-            ring.append((x * H, y * H, z * H))
+            hem = math.sin(th * 4 + 0.6) * 0.018 * t ** 3
+            ring.append((math.cos(th) * rr * H,
+                         math.sin(th) * rr * 0.80 * H,
+                         (z + hem) * H))
         rings.append(ring)
-    return _mesh_from_rings("Skirt", rings, mat, closed=True, cap_last=True,
-                            thickness=H * 0.007)
+
+    return _mesh_from_rings("Coat", rings, mat, closed=False, thickness=H * 0.007)
 
 
 def build_hood(mat, H):
@@ -685,8 +687,8 @@ def build_hair(H, body, ctr, radius):
 
     RAD, VSEG = 40, 20
     cx, cy, cz = ctr.x, ctr.y, ctr.z
-    base_r = radius * 1.05                     # shrinkwrap pulls it back in
-    P_FRONT, P_BACK = 0.98, 1.42               # polar reach, forehead vs nape
+    base_r = radius * 1.02                     # shrinkwrap pulls it back in
+    P_FRONT, P_BACK = 0.86, 1.24               # polar reach, forehead vs nape
 
     rings = []
     for i in range(VSEG, -1, -1):
@@ -696,7 +698,9 @@ def build_hair(H, body, ctr, radius):
             th = 2 * math.pi * j / RAD
             # -sin(th) is +1 toward the face, -1 toward the back of the head
             front = 0.5 + 0.5 * (-math.sin(th))
-            p = u * (P_BACK - (P_BACK - P_FRONT) * front)
+            # a hairline that is a perfect band reads as a swim cap; break it
+            ragged = 0.055 * math.sin(th * 6 + 0.8) + 0.030 * math.sin(th * 13)
+            p = u * (P_BACK - (P_BACK - P_FRONT) * front + ragged)
             bulk = (0.0060 * math.sin(th * 5 + p * 3.1)
                     + 0.0040 * math.sin(th * 11 - p * 4.7)
                     + 0.0028 * math.sin(th * 19 + p * 6.2)
@@ -717,7 +721,7 @@ def build_hair(H, body, ctr, radius):
     tex.noise_scale = 0.035
     d = hair.modifiers.new("Bulk", "DISPLACE")
     d.texture = tex
-    d.strength = H * 0.010
+    d.strength = H * 0.007
     d.mid_level = 0.4
     bpy.context.view_layer.objects.active = hair
     bpy.ops.object.modifier_apply(modifier="Bulk")
@@ -837,14 +841,14 @@ def build_belt(H, mat):
     rings = []
     for i in range(VSEG + 1):
         t = i / VSEG
-        z = (0.585 - 0.055 * t) * H
+        z = (0.575 - 0.042 * t) * H
         ring = []
         for j in range(RAD):
             th = 2 * math.pi * j / RAD
-            r = (0.150 + 0.004 * math.sin(th * 9)) * H
-            ring.append((math.cos(th) * r, math.sin(th) * r * 0.74, z))
+            r = (0.139 + 0.004 * math.sin(th * 9)) * H
+            ring.append((math.cos(th) * r, math.sin(th) * r * 0.64, z))
         rings.append(ring)
-    return _mesh_from_rings("Belt", rings, mat, closed=True, thickness=H * 0.006)
+    return _mesh_from_rings("Belt", rings, mat, closed=True, thickness=H * 0.005)
 
 
 def build_brows(H, body, eye_locs):
@@ -1041,12 +1045,15 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     worn = [
         garment_from_groups("Jacket", body,
                             ("chest", "spine", "hips", "shoulder.L", "shoulder.R"),
-                            H, 0.026, cloth, thickness=0.030,
-                            relax=10, remesh=0.018),
+                            H, 0.015, cloth, thickness=0.020,
+                            relax=6, remesh=0.012),
         garment_from_groups("Sleeves", body,
                             ("upper_arm.L", "upper_arm.R",
                              "forearm.L", "forearm.R"),
-                            H, 0.010, cloth, relax=8),
+                            H, 0.008, cloth, relax=6),
+        garment_from_groups("Trousers", body,
+                            ("thigh.L", "thigh.R", "shin.L", "shin.R"),
+                            H, 0.008, cloth, relax=6),
         garment_from_groups("Boots", body,
                             ("shin.L", "shin.R", "foot.L", "foot.R"),
                             H, 0.013, leather, thickness=0.022,
@@ -1055,10 +1062,9 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     ]
     worn = [w for w in worn if w]
     cape = build_cape(cloak_mat, H)
-    tunic = build_skirt(cloak_mat, H)
 
     bpy.ops.object.select_all(action="DESELECT")
-    for ob in [body, cape, tunic, hair] + worn + brows:
+    for ob in [body, cape, hair] + worn + brows:
         ob.select_set(True)
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
