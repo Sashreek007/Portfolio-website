@@ -28,7 +28,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 OUT = os.path.join(ROOT, "assets", "vendor", "face-reference.png")
 
 ROTATE = -90          # clockwise quarter turn
-CROP = (0.17, 0.10, 0.83, 0.79)   # l, t, r, b — crown to chin
+# Face only — no hair, no background. The wider crown-to-chin crop dragged the
+# wall behind him into the projection, and it painted onto the side of the head
+# as a pale patch. Anything outside this keeps the base mesh's skin.
+CROP = (0.245, 0.225, 0.755, 0.780)   # l, t, r, b
 # Radius matters more than it looks. At 0.18 the blur was close enough to
 # the scale of the features themselves that dividing by it flattened the nose
 # and brow along with the lighting, and the projected face came out as an even
@@ -37,6 +40,13 @@ CROP = (0.17, 0.10, 0.83, 0.79)   # l, t, r, b — crown to chin
 BLUR_FRAC = 0.42      # gaussian radius as a fraction of face width
 LIFT = 1.18           # gentle exposure lift after flattening
 CONTRAST = 1.30       # put back the local contrast the division costs
+# Beard and moustache are fine dark hair over skin — exactly the signal that
+# dividing by a blur costs most, because locally the hair IS the deviation from
+# the mean. An unsharp pass restores that edge energy, and the shadow curve
+# stops the remaining stubble from sitting at the same value as the skin.
+SHARPEN = (2, 115, 4)   # radius, percent, threshold
+SHADOW_GAMMA = 1.18     # >1 deepens the darks, leaving highlights alone
+CHROMA_BLUR = 9         # chroma-only denoise radius
 
 
 def main():
@@ -64,7 +74,21 @@ def main():
     flat = np.clip(flat, 0, 255).astype(np.uint8)
 
     out = Image.fromarray(flat)
+    # Chroma denoise BEFORE anything sharpens it. This was shot in low light
+    # and almost all of that noise lives in the colour channels; sharpening
+    # first amplified it into red speckle across the cheeks that read as a
+    # rash. Blurring Cb/Cr destroys the noise and costs nothing visible,
+    # because human vision resolves colour far more coarsely than luminance.
+    y, cb, cr = out.convert("YCbCr").split()
+    cb = cb.filter(ImageFilter.GaussianBlur(CHROMA_BLUR))
+    cr = cr.filter(ImageFilter.GaussianBlur(CHROMA_BLUR))
+    y = y.filter(ImageFilter.MedianFilter(3))
+    out = Image.merge("YCbCr", (y, cb, cr)).convert("RGB")
+
     out = ImageEnhance.Contrast(out).enhance(CONTRAST)
+    out = out.filter(ImageFilter.UnsharpMask(*SHARPEN))
+    lut = [min(255, int(255.0 * ((i / 255.0) ** SHADOW_GAMMA) + 0.5)) for i in range(256)]
+    out = out.point(lut * 3)
     # A light median knocks back sensor noise in the shadows without taking the
     # pores with it — this photo was shot in low light.
     out = out.filter(ImageFilter.MedianFilter(3))

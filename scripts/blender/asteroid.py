@@ -510,10 +510,45 @@ HAIR = "140F0C"          # near-black, with a warm cast in the highlights
 # Produced by scripts/blender/prep-face.py, which stands the photo upright,
 # divides out its baked-in lighting and crops it crown-to-chin.
 FACE_PHOTO = os.path.join(os.getcwd(), "assets", "vendor", "face-reference.png")
-FACE_W = 0.125          # projected width, in figure heights
+FACE_W = 0.098          # projected width, in figure heights
+# Where the eyes sit inside the cropped photo. CROP in prep-face.py runs
+# 0.225..0.780 down the source and his eyes are at 0.44, so they land 38.7%
+# down the crop — v = 0.613 counting up from the bottom. Anchoring on the eyes
+# rather than the skull centroid is what keeps the mouth off the chin: eyes are
+# a landmark the model and the photo genuinely share.
+PHOTO_EYE_V = 0.613
+FEATHER = 0.15          # fraction of the projection faded at its edges
+EYE_HOLE = (0.085, 0.155)   # UV radius: fully cut, fully restored
+# Facial-hair regions in projection UV: (centre_u, centre_v, radius_u,
+# radius_v, density).
+#
+# Derived anatomically rather than from the photo. Thresholding the photo's
+# luminance kept producing a thick horseshoe, because on a dark phone photo
+# skin and hair values overlap badly once the lighting has been divided out —
+# moustache 0.154 against cheek 0.272, with lips at 0.180 sitting between
+# them, and saturation separating none of it. Explicit regions are boring and
+# they work.
+BEARD_REGIONS = (
+    (0.500, 0.318, 0.112, 0.028, 0.85),   # moustache
+    (0.500, 0.098, 0.072, 0.040, 0.45),   # chin patch
+    (0.305, 0.160, 0.100, 0.062, 0.22),   # left jaw stubble
+    (0.695, 0.160, 0.100, 0.062, 0.22),   # right jaw stubble
+)
+BEARD_TOP_V = 0.40      # nothing above this in the photo is facial hair
+# Measured off the prepared texture rather than guessed: moustache 0.129,
+# jaw 0.120, cheek 0.273, forehead 0.337. The first range (0.10, 0.42) sat
+# above the skin values, so the whole lower face grew a beard. The texture
+# averages 0.201 overall, which is why an "obviously dark" threshold was not.
+BEARD_LUM = (0.06, 0.22)   # luminance mapped to full / no strand density
+# Lips are as dark as the moustache (0.180 vs 0.154) and saturation does not
+# separate them either — the flattened photo is uniformly warm, every region
+# landing between 0.55 and 0.67. So the mouth is excluded by position: an
+# ellipse in projection UV, centred on the lips.
+LIP_UV = (0.50, 0.215)
+LIP_R = (0.21, 0.052)
 FACE_OFF_X = 0.0        # nudge the projection across the face
 FACE_OFF_Z = 0.0        # ...and up or down it
-FACE_H_ADJ = 0.86       # the head is shorter than the photo crop implies
+FACE_H_ADJ = 0.85       # the head is shorter than the photo crop implies
 FACE_MIX = 0.97         # how strongly the photo overrides the base skin
 FACE_GAIN = 1.12        # the source is a low-light photo; lift it
 
@@ -575,8 +610,9 @@ def skin_material():
     bsdf = nt.nodes["Principled BSDF"]
     set_input(bsdf, "Base Color", hex_rgba(SKIN))
     set_input(bsdf, "Metallic", 0.0)
-    set_input(bsdf, "Roughness", 0.48)
-    set_input(bsdf, ["Subsurface Weight", "Subsurface"], 0.075)
+    set_input(bsdf, "Roughness", 0.62)
+    set_input(bsdf, ["Specular IOR Level", "Specular"], 0.22)
+    set_input(bsdf, ["Subsurface Weight", "Subsurface"], 0.055)
     set_input(bsdf, "Subsurface Radius", (0.012, 0.0042, 0.0028))
     set_input(bsdf, "Subsurface Scale", 0.010)
 
@@ -687,6 +723,142 @@ def head_sphere(body, H):
     radius = dists[int(len(dists) * 0.70)]
     print(f"[asteroid] skull centre {tuple(round(c, 3) for c in ctr)} r={radius:.3f}")
     return ctr, radius
+
+
+def _beard_weight(uu, vv, lum, iw, ih):
+    """Density for one point: an anatomical region, darkened by the photo.
+
+    Regions decide WHERE hair grows; the photo only modulates how thick it is
+    within them, so a patch of shadow can no longer sprout a beard.
+    """
+    best = 0.0
+    for cu, cv, ru, rv, dens in BEARD_REGIONS:
+        du = (uu - cu) / ru
+        dv = (vv - cv) / rv
+        d2 = du * du + dv * dv
+        if d2 < 1.0:
+            best = max(best, dens * (1.0 - d2) ** 0.6)
+    if best <= 0.0:
+        return 0.0
+    px = min(iw - 1, max(0, int(uu * iw)))
+    py = min(ih - 1, max(0, int(vv * ih)))
+    shade = (BEARD_LUM[1] - float(lum[py, px])) / (BEARD_LUM[1] - BEARD_LUM[0])
+    shade = min(1.0, max(0.35, shade))     # floor, so regions never go bald
+    return min(1.0, best * shade)
+
+
+def build_facial_hair(body, H, proj, face_w, face_h, img):
+    """Moustache and beard as real strands, grown where his actually are.
+
+    Painting facial hair from the photo alone never worked: at render scale the
+    photo's beard is a soft dark patch, so it read as a smudge rather than
+    hair. The scalp got particle strands and looked right; the face got paint
+    and did not. This closes that gap.
+
+    Density comes from the photo itself. Each vertex of a shell cut from the
+    lower face is projected into the photo, its luminance sampled, and the
+    darkness written to a vertex group — so strands grow along his actual
+    beard line instead of a shape I guessed at.
+    """
+    import numpy as np
+
+    iw, ih = img.size
+    buf = np.empty(iw * ih * 4, dtype=np.float32)
+    img.pixels.foreach_get(buf)
+    # Blender images are bottom-up, which matches v already
+    pix = buf.reshape(ih, iw, 4)
+    lum = pix[:, :, 0] * 0.299 + pix[:, :, 1] * 0.587 + pix[:, :, 2] * 0.114
+
+    bpy.ops.object.select_all(action="DESELECT")
+    body.select_set(True)
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.duplicate()
+    beard = bpy.context.active_object
+    beard.name = "FacialHair"
+
+    inv = proj.matrix_world.inverted()
+    face_dir = Vector((proj.matrix_world.to_3x3() @ Vector((0, -1, 0)))).normalized()
+
+    keep, weights = set(), {}
+    for vert in beard.data.vertices:
+        wp = beard.matrix_world @ vert.co
+        nrm = (beard.matrix_world.to_3x3() @ vert.normal).normalized()
+        if nrm.dot(face_dir) < 0.25:          # only the front of the face
+            continue
+        lp = inv @ wp
+        uu = lp.x / face_w + 0.5 + FACE_OFF_X
+        vv = lp.z / face_h + 0.5 + FACE_OFF_Z
+        if not (0.12 < uu < 0.88 and 0.02 < vv < BEARD_TOP_V):
+            continue
+        lx = (uu - LIP_UV[0]) / LIP_R[0]
+        ly = (vv - LIP_UV[1]) / LIP_R[1]
+        if lx * lx + ly * ly < 1.0:        # inside the mouth
+            continue
+        w = _beard_weight(uu, vv, lum, iw, ih)
+        if w > 0.02:
+            keep.add(vert.index)
+            weights[vert.index] = w
+
+    if len(keep) < 40:
+        print(f"[asteroid] facial hair: only {len(keep)} verts matched — skipped")
+        bpy.data.objects.remove(beard, do_unlink=True)
+        return None
+
+    bm = bmesh.new()
+    bm.from_mesh(beard.data)
+    bm.verts.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.index not in keep],
+                     context="VERTS")
+    bm.to_mesh(beard.data)
+    bm.free()
+
+    # the index map is rebuilt by the delete, so re-derive weights by position
+    vg = beard.vertex_groups.new(name="beard_density")
+    for vert in beard.data.vertices:
+        wp = beard.matrix_world @ vert.co
+        lp = inv @ wp
+        uu = lp.x / face_w + 0.5 + FACE_OFF_X
+        vv = lp.z / face_h + 0.5 + FACE_OFF_Z
+        vg.add([vert.index], _beard_weight(uu, vv, lum, iw, ih), "REPLACE")
+
+    mat = bpy.data.materials.new("BeardStrand")
+    mat.use_nodes = True
+    bnt = mat.node_tree
+    bnt.nodes.clear()
+    bout = bnt.nodes.new("ShaderNodeOutputMaterial")
+    try:
+        bb = bnt.nodes.new("ShaderNodeBsdfHairPrincipled")
+        for nm, val in (("Melanin", 0.97), ("Melanin Redness", 0.22),
+                        ("Roughness", 0.42), ("Radial Roughness", 0.34)):
+            set_input(bb, nm, val)
+    except RuntimeError:
+        bb = bnt.nodes.new("ShaderNodeBsdfPrincipled")
+        set_input(bb, "Base Color", hex_rgba(HAIR))
+    bnt.links.new(bb.outputs[0], bout.inputs["Surface"])
+    beard.data.materials.clear()
+    beard.data.materials.append(mat)
+
+    beard.modifiers.new("Stubble", "PARTICLE_SYSTEM")
+    st = beard.particle_systems[-1].settings
+    st.type = "HAIR"
+    st.use_advanced_hair = True
+    st.count = 6000
+    st.hair_length = H * 0.0022          # stubble, not a beard you could braid
+    st.hair_step = 3
+    st.child_type = "INTERPOLATED"
+    st.child_percent = 30
+    st.rendered_child_count = 16
+    st.child_length = 0.85
+    st.clump_factor = 0.18
+    st.roughness_1 = 0.006
+    st.roughness_endpoint = 0.004
+    st.use_hair_bspline = True
+    st.radius_scale = 0.00055
+    st.root_radius = 1.0
+    st.tip_radius = 0.02
+    beard.particle_systems[-1].vertex_group_density = "beard_density"
+    print(f"[asteroid] facial hair: {len(beard.data.vertices)} emitter verts")
+    return beard
 
 
 def build_hair(H, body, ctr, radius):
@@ -1073,7 +1245,7 @@ def build_brows(H, body, eye_locs):
     return brows
 
 
-def apply_face_projection(body, H, ctr):
+def apply_face_projection(body, H, ctr, eye_ctr, eye_worlds):
     """Front-project the prepared photo onto the face.
 
     The projector empty sits AT the measured skull centre. The first version
@@ -1102,16 +1274,27 @@ def apply_face_projection(body, H, ctr):
     bsdf = nt.nodes["Principled BSDF"]
 
     yaw = math.radians(POSE.get("head", (0, 0, 0))[2] + POSE.get("neck", (0, 0, 0))[2])
-    proj = bpy.data.objects.new("FaceProjector", None)
-    bpy.context.collection.objects.link(proj)
-    proj.location = ctr
-    proj.rotation_euler = (0.0, 0.0, yaw)
-
     face_w = FACE_W * H
     # Aspect from the photo, then squashed: mapped at the crop's own aspect the
     # features drifted progressively lower down the face and the mouth landed
     # on the chin. The model's head is shorter than the crop implies.
     face_h = face_w * (ih / iw) * FACE_H_ADJ
+
+    # Put the projector where the photo's eyes will land on the model's eyes.
+    # Centring it on the skull centroid instead left the mouth painted onto the
+    # chin, because the centroid is not a facial landmark.
+    proj = bpy.data.objects.new("FaceProjector", None)
+    bpy.context.collection.objects.link(proj)
+    # Anchor y on the eyes as well as x and z. Sitting at the skull's y while
+    # the eyes sit forward of it meant the head's yaw rotated that depth
+    # offset into a sideways shift, and the projection landed 9% off centre.
+    proj.location = Vector((eye_ctr.x, eye_ctr.y,
+                            eye_ctr.z - (PHOTO_EYE_V - 0.5) * face_h))
+    proj.rotation_euler = (0.0, 0.0, yaw)
+    # matrix_world is lazily evaluated. Reading it before the depsgraph runs
+    # returns identity, which put the eye-hole centres at v=8.2 — off the
+    # texture entirely. Same trap as the eyeballs earlier.
+    bpy.context.view_layer.update()
 
     coord = nt.nodes.new("ShaderNodeTexCoord")
     coord.object = proj
@@ -1151,6 +1334,71 @@ def apply_face_projection(body, H, ctr):
     facing.inputs["From Max"].default_value = 0.70
     facing.clamp = True
 
+    # CLIP alone gives a binary edge, and that rectangle was plainly visible
+    # running down the temple and across the forehead. Fade the projection out
+    # over its outer FEATHER so it dissolves into the base skin instead.
+    def _edge_fade(src):
+        centred = nt.nodes.new("ShaderNodeMath")
+        centred.operation = "MULTIPLY_ADD"
+        centred.inputs[1].default_value = 2.0
+        centred.inputs[2].default_value = -1.0
+        absn = nt.nodes.new("ShaderNodeMath"); absn.operation = "ABSOLUTE"
+        inv = nt.nodes.new("ShaderNodeMath"); inv.operation = "SUBTRACT"
+        inv.inputs[0].default_value = 1.0
+        ramp = nt.nodes.new("ShaderNodeMapRange")
+        ramp.inputs["From Min"].default_value = 0.0
+        ramp.inputs["From Max"].default_value = FEATHER
+        ramp.clamp = True
+        nt.links.new(src, centred.inputs[0])
+        nt.links.new(centred.outputs["Value"], absn.inputs[0])
+        nt.links.new(absn.outputs["Value"], inv.inputs[1])
+        nt.links.new(inv.outputs["Value"], ramp.inputs["Value"])
+        return ramp
+
+    def _eye_hole(eye_world):
+        """Cut a soft hole in the projection around one eye.
+
+        The photo has eyes painted in it and the model has actual eyeballs, so
+        projecting over the sockets renders both — a second, offset pair of
+        eyes on the lids. Geometry should own the eyes; the photo should only
+        ever touch skin.
+        """
+        local = proj.matrix_world.inverted() @ eye_world
+        eu = local.x / face_w + 0.5 + FACE_OFF_X
+        ev = local.z / face_h + 0.5 + FACE_OFF_Z
+        du = nt.nodes.new("ShaderNodeMath"); du.operation = "SUBTRACT"
+        du.inputs[1].default_value = eu
+        dv = nt.nodes.new("ShaderNodeMath"); dv.operation = "SUBTRACT"
+        dv.inputs[1].default_value = ev
+        vec = nt.nodes.new("ShaderNodeCombineXYZ")
+        dist = nt.nodes.new("ShaderNodeVectorMath"); dist.operation = "LENGTH"
+        hole = nt.nodes.new("ShaderNodeMapRange")
+        hole.inputs["From Min"].default_value = EYE_HOLE[0]
+        hole.inputs["From Max"].default_value = EYE_HOLE[1]
+        hole.clamp = True
+        nt.links.new(u.outputs["Value"], du.inputs[0])
+        nt.links.new(v.outputs["Value"], dv.inputs[0])
+        nt.links.new(du.outputs["Value"], vec.inputs["X"])
+        nt.links.new(dv.outputs["Value"], vec.inputs["Y"])
+        nt.links.new(vec.outputs["Vector"], dist.inputs[0])
+        nt.links.new(dist.outputs["Value"], hole.inputs["Value"])
+        print(f"[asteroid]   eye hole at uv=({eu:.3f},{ev:.3f})")
+        return hole
+
+    fu = _edge_fade(u.outputs["Value"])
+    fv = _edge_fade(v.outputs["Value"])
+    fade = nt.nodes.new("ShaderNodeMath"); fade.operation = "MULTIPLY"
+    nt.links.new(fu.outputs["Result"], fade.inputs[0])
+    nt.links.new(fv.outputs["Result"], fade.inputs[1])
+
+    for ew in eye_worlds:
+        h = _eye_hole(ew)
+        nxt = nt.nodes.new("ShaderNodeMath"); nxt.operation = "MULTIPLY"
+        nt.links.new(fade.outputs["Value"], nxt.inputs[0])
+        nt.links.new(h.outputs["Result"], nxt.inputs[1])
+        fade = nxt
+
+    edged = nt.nodes.new("ShaderNodeMath"); edged.operation = "MULTIPLY"
     both = nt.nodes.new("ShaderNodeMath"); both.operation = "MULTIPLY"
     amt = nt.nodes.new("ShaderNodeMath"); amt.operation = "MULTIPLY"
     amt.inputs[1].default_value = FACE_MIX
@@ -1173,7 +1421,9 @@ def apply_face_projection(body, H, ctr):
     L(face_dir.outputs["Vector"], dot.inputs[1])
     L(dot.outputs["Value"], facing.inputs["Value"])
     L(facing.outputs["Result"], both.inputs[0])
-    L(tex.outputs["Alpha"], both.inputs[1])
+    L(tex.outputs["Alpha"], edged.inputs[0])
+    L(fade.outputs["Value"], edged.inputs[1])
+    L(edged.outputs["Value"], both.inputs[1])
     L(both.outputs["Value"], amt.inputs[0])
     L(amt.outputs["Value"], blend.inputs[0])
     L(gain.outputs[2], blend.inputs[7])
@@ -1198,6 +1448,23 @@ def apply_face_projection(body, H, ctr):
     if prior:
         L(prior.outputs["Normal"], fbump.inputs["Normal"])
     L(fbump.outputs["Normal"], bsdf.inputs["Normal"])
+
+    # Hair scatters where skin reflects. Driving roughness off the photo's
+    # luminance makes the beard read as a different MATERIAL, not just a
+    # darker paint — which survives strong light far better than albedo does.
+    rough = nt.nodes.new("ShaderNodeMapRange")
+    rough.inputs["From Min"].default_value = 0.10
+    rough.inputs["From Max"].default_value = 0.70
+    rough.inputs["To Min"].default_value = 0.88
+    rough.inputs["To Max"].default_value = 0.52
+    rough.clamp = True
+    rmix = nt.nodes.new("ShaderNodeMix")
+    rmix.data_type = "FLOAT"
+    rmix.inputs[2].default_value = 0.62
+    L(lum.outputs["Val"], rough.inputs["Value"])
+    L(rough.outputs["Result"], rmix.inputs[3])
+    L(amt.outputs["Value"], rmix.inputs[0])
+    L(rmix.outputs[0], bsdf.inputs["Roughness"])
     if os.environ.get("FACE_DUMP"):
         print("[dump] --- skin material links ---")
         for lk in nt.links:
@@ -1249,7 +1516,7 @@ def apply_face_projection(body, H, ctr):
 
     print(f"[asteroid] face projected: photo {iw}x{ih}, "
           f"{face_w:.3f}x{face_h:.3f} at {tuple(round(c, 3) for c in ctr)}")
-    return proj
+    return proj, img, face_w, face_h
 
 
 def import_human(height):
@@ -1410,7 +1677,14 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
 
     brows = build_brows(H, body, [e.location.copy() for e in eyes])
     skull_ctr, skull_r = head_sphere(body, H)
-    face_proj = apply_face_projection(body, H, skull_ctr)
+    bpy.context.view_layer.update()
+    eye_ctr = sum((e.location for e in eyes), Vector()) / max(len(eyes), 1)
+    projected = apply_face_projection(body, H, skull_ctr, eye_ctr,
+                                      [e.location.copy() for e in eyes])
+    face_proj = beard = None
+    if projected:
+        face_proj, face_img, fw, fh = projected
+        beard = build_facial_hair(body, H, face_proj, fw, fh, face_img)
     hair = build_hair(H, body, skull_ctr, skull_r)
 
     # Garments cut from the body's own geometry, so they fit the pose exactly.
@@ -1463,7 +1737,7 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     # Eyes stay separate objects (see import_human) and the hair carries a
     # particle system that bpy.ops.object.join() would discard, so both ride
     # along as children instead.
-    for e in [o for o in (list(eyes) + [hair, face_proj]) if o]:
+    for e in [o for o in (list(eyes) + [hair, face_proj, beard]) if o]:
         e.parent = rider
         e.matrix_parent_inverse = rider.matrix_world.inverted()
 
@@ -1496,7 +1770,7 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     fill = bpy.context.active_object
     fill.name = "FaceFill"
     fill.data.color = hex_rgb("FFF3E2")
-    fill.data.energy = 34.0 * (H / 1.45) ** 2
+    fill.data.energy = 21.0 * (H / 1.45) ** 2
     fill.data.size = 0.55 * H
     fill.parent = rider
     fill.location = (-0.22 * H, -0.62 * H, 1.02 * H)
@@ -1787,7 +2061,7 @@ def main():
     print(f"[asteroid] rock dims = {tuple(round(v, 3) for v in ast.dimensions)}")
 
     if opts["mode"] == "still":
-        frame_object(cam, [ast, rider], margin=1.55)
+        frame_object(cam, [ast, rider], margin=1.66)
         render_to(os.path.join(out, opts["out"] + ".png"))
     elif opts["mode"] == "sprite":
         # A seamless loop: the pair tumbles a full turn while the cape's
