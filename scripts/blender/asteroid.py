@@ -507,10 +507,15 @@ HAIR = "140F0C"          # near-black, with a warm cast in the highlights
 # Optional face photo, front-projected onto the head for likeness. Drop a file
 # here and it is picked up automatically; absent, the figure keeps the base
 # mesh's own face and the render still works.
-FACE_PHOTO = os.path.join(os.getcwd(), "assets", "vendor", "face-reference.jpg")
-FACE_ROT_DEG = -90.0    # phone photos often arrive on their side
-FACE_SCALE = 0.185      # projection width, in figure heights
-FACE_MIX = 0.85         # how strongly the photo overrides the base skin
+# Produced by scripts/blender/prep-face.py, which stands the photo upright,
+# divides out its baked-in lighting and crops it crown-to-chin.
+FACE_PHOTO = os.path.join(os.getcwd(), "assets", "vendor", "face-reference.png")
+FACE_W = 0.125          # projected width, in figure heights
+FACE_OFF_X = 0.0        # nudge the projection across the face
+FACE_OFF_Z = 0.0        # ...and up or down it
+FACE_H_ADJ = 0.86       # the head is shorter than the photo crop implies
+FACE_MIX = 0.97         # how strongly the photo overrides the base skin
+FACE_GAIN = 1.12        # the source is a low-light photo; lift it
 
 # Joint positions measured off the rest mesh: arms hang at the sides with the
 # hands at z≈0.76, shoulders at z≈1.36. Rest-mesh metres, scaled at build time.
@@ -571,7 +576,7 @@ def skin_material():
     set_input(bsdf, "Base Color", hex_rgba(SKIN))
     set_input(bsdf, "Metallic", 0.0)
     set_input(bsdf, "Roughness", 0.48)
-    set_input(bsdf, ["Subsurface Weight", "Subsurface"], 0.16)
+    set_input(bsdf, ["Subsurface Weight", "Subsurface"], 0.075)
     set_input(bsdf, "Subsurface Radius", (0.012, 0.0042, 0.0028))
     set_input(bsdf, "Subsurface Scale", 0.010)
 
@@ -1068,52 +1073,71 @@ def build_brows(H, body, eye_locs):
     return brows
 
 
-def apply_face_projection(body, mat, H):
-    """Front-project a photo onto the face for likeness.
+def apply_face_projection(body, H, ctr):
+    """Front-project the prepared photo onto the face.
 
-    A single photo cannot wrap a head — it smears badly past roughly 45 degrees
-    off-axis — so the projection is masked twice: the image is clipped to its
-    own rectangle, and a dot product against the face direction fades it out as
-    the surface turns away. Everything outside keeps the base mesh's own skin,
-    which is why the mask matters more than the photo does.
+    The projector empty sits AT the measured skull centre. The first version
+    parented it to the body and left it at the origin — which is between the
+    feet — so the projection frustum was nowhere near the head.
 
-    Honest limit: this changes the face's COLOUR and its features-as-painted,
-    not its SHAPE. The skull underneath is still the CC0 base mesh. It buys
-    real recognisability at the size this renders; it is not a scan.
+    A single photo cannot wrap a head; it smears past roughly 45 degrees
+    off-axis. So it is masked twice: the image texture is CLIP, which returns
+    zero alpha outside its own rectangle, and a dot product against the face
+    direction fades it out as the surface turns away. Everything outside keeps
+    the base mesh's own skin.
+
+    Honest limit: this changes the face's colour and its features-as-painted,
+    not its shape. The skull underneath is still the CC0 base mesh.
     """
     if not os.path.exists(FACE_PHOTO):
         print(f"[asteroid] no face photo at {FACE_PHOTO} — using the base face")
         return None
+    if not body.data.materials:
+        return None
 
     img = bpy.data.images.load(FACE_PHOTO, check_existing=True)
-    print(f"[asteroid] face photo {img.size[0]}x{img.size[1]}")
-
-    # Empty parked in front of the face, defining the projection frustum. It
-    # inherits the head's yaw and pitch from the pose so the photo lands square
-    # on the face rather than at an angle to it.
-    yaw = math.radians(POSE.get("head", (0, 0, 0))[2] + POSE.get("neck", (0, 0, 0))[2])
-    pitch = math.radians(POSE.get("head", (0, 0, 0))[0])
-    proj = bpy.data.objects.new("FaceProjector", None)
-    bpy.context.collection.objects.link(proj)
-    proj.parent = body
-    proj.rotation_euler = (pitch, 0.0, yaw)
-
+    iw, ih = img.size
+    mat = body.data.materials[0]
     nt = mat.node_tree
     bsdf = nt.nodes["Principled BSDF"]
 
+    yaw = math.radians(POSE.get("head", (0, 0, 0))[2] + POSE.get("neck", (0, 0, 0))[2])
+    proj = bpy.data.objects.new("FaceProjector", None)
+    bpy.context.collection.objects.link(proj)
+    proj.location = ctr
+    proj.rotation_euler = (0.0, 0.0, yaw)
+
+    face_w = FACE_W * H
+    # Aspect from the photo, then squashed: mapped at the crop's own aspect the
+    # features drifted progressively lower down the face and the mouth landed
+    # on the chin. The model's head is shorter than the crop implies.
+    face_h = face_w * (ih / iw) * FACE_H_ADJ
+
     coord = nt.nodes.new("ShaderNodeTexCoord")
     coord.object = proj
-    mapping = nt.nodes.new("ShaderNodeMapping")
-    mapping.inputs["Rotation"].default_value = (0, math.radians(FACE_ROT_DEG), 0)
-    mapping.inputs["Scale"].default_value = (1.0 / (FACE_SCALE * H), 1.0,
-                                             1.0 / (FACE_SCALE * H))
-    mapping.inputs["Location"].default_value = (0.5, 0.0, 0.5)
+    print(f"[asteroid] texcoord.object = {coord.object.name if coord.object else None}")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+
+    # ShaderNodeTexImage reads U and V from the vector's X and Y, so the
+    # projector's X and Z have to be moved into those slots by hand — a
+    # Mapping rotation would work too but is far harder to read.
+    u = nt.nodes.new("ShaderNodeMath"); u.operation = "MULTIPLY_ADD"
+    u.inputs[1].default_value = 1.0 / face_w
+    u.inputs[2].default_value = 0.5 + FACE_OFF_X
+    v = nt.nodes.new("ShaderNodeMath"); v.operation = "MULTIPLY_ADD"
+    v.inputs[1].default_value = 1.0 / face_h
+    v.inputs[2].default_value = 0.5 + FACE_OFF_Z
+    uv = nt.nodes.new("ShaderNodeCombineXYZ")
 
     tex = nt.nodes.new("ShaderNodeTexImage")
     tex.image = img
-    # CLIP returns zero alpha outside the photo's rectangle, which is half the
-    # mask for free.
     tex.extension = "CLIP"
+
+    gain = nt.nodes.new("ShaderNodeMix")
+    gain.data_type = "RGBA"
+    gain.blend_type = "MULTIPLY"
+    gain.inputs[0].default_value = 1.0
+    gain.inputs[7].default_value = (FACE_GAIN, FACE_GAIN, FACE_GAIN, 1.0)
 
     geom = nt.nodes.new("ShaderNodeNewGeometry")
     face_dir = nt.nodes.new("ShaderNodeCombineXYZ")
@@ -1123,35 +1147,108 @@ def apply_face_projection(body, mat, H):
     dot = nt.nodes.new("ShaderNodeVectorMath")
     dot.operation = "DOT_PRODUCT"
     facing = nt.nodes.new("ShaderNodeMapRange")
-    facing.inputs["From Min"].default_value = 0.28
-    facing.inputs["From Max"].default_value = 0.72
+    facing.inputs["From Min"].default_value = 0.25
+    facing.inputs["From Max"].default_value = 0.70
     facing.clamp = True
 
-    combined = nt.nodes.new("ShaderNodeMath")
-    combined.operation = "MULTIPLY"
-    strength = nt.nodes.new("ShaderNodeMath")
-    strength.operation = "MULTIPLY"
-    strength.inputs[1].default_value = FACE_MIX
+    both = nt.nodes.new("ShaderNodeMath"); both.operation = "MULTIPLY"
+    amt = nt.nodes.new("ShaderNodeMath"); amt.operation = "MULTIPLY"
+    amt.inputs[1].default_value = FACE_MIX
 
     blend = nt.nodes.new("ShaderNodeMix")
     blend.data_type = "RGBA"
-    # Indices, not names: ShaderNodeMix keeps a socket set per data type and
-    # enables only the active one, so inputs["A"] is the disabled float socket.
+    # indices, not names — ShaderNodeMix keeps a socket set per data type and
+    # enables only the active one, so inputs["A"] is a disabled float socket
     blend.inputs[6].default_value = hex_rgba(SKIN)
 
     L = nt.links.new
-    L(coord.outputs["Object"], mapping.inputs["Vector"])
-    L(mapping.outputs["Vector"], tex.inputs["Vector"])
+    L(coord.outputs["Object"], sep.inputs["Vector"])
+    L(sep.outputs["X"], u.inputs[0])
+    L(sep.outputs["Z"], v.inputs[0])
+    L(u.outputs["Value"], uv.inputs["X"])
+    L(v.outputs["Value"], uv.inputs["Y"])
+    L(uv.outputs["Vector"], tex.inputs["Vector"])
+    L(tex.outputs["Color"], gain.inputs[6])
     L(geom.outputs["Normal"], dot.inputs[0])
     L(face_dir.outputs["Vector"], dot.inputs[1])
     L(dot.outputs["Value"], facing.inputs["Value"])
-    L(facing.outputs["Result"], combined.inputs[0])
-    L(tex.outputs["Alpha"], combined.inputs[1])
-    L(combined.outputs["Value"], strength.inputs[0])
-    L(strength.outputs["Value"], blend.inputs[0])
-    L(tex.outputs["Color"], blend.inputs[7])
+    L(facing.outputs["Result"], both.inputs[0])
+    L(tex.outputs["Alpha"], both.inputs[1])
+    L(both.outputs["Value"], amt.inputs[0])
+    L(amt.outputs["Value"], blend.inputs[0])
+    L(gain.outputs[2], blend.inputs[7])
     L(blend.outputs[2], bsdf.inputs["Base Color"])
-    print("[asteroid] face projection applied")
+
+    # Colour alone leaves the features painted on a blank head. Driving a bump
+    # from the photo's luminance gives the brow, nose and lips actual relief,
+    # so they still read when the key light rakes across them. Chained after
+    # the pore bump rather than replacing it.
+    lum = nt.nodes.new("ShaderNodeRGBToBW")
+    fbump = nt.nodes.new("ShaderNodeBump")
+    fbump.inputs["Strength"].default_value = 0.30
+    fbump.inputs["Distance"].default_value = 0.004
+    prior = None
+    for link in list(nt.links):
+        if link.to_node == bsdf and link.to_socket.name == "Normal":
+            prior = link.from_node
+            nt.links.remove(link)
+            break
+    L(tex.outputs["Color"], lum.inputs["Color"])
+    L(lum.outputs["Val"], fbump.inputs["Height"])
+    if prior:
+        L(prior.outputs["Normal"], fbump.inputs["Normal"])
+    L(fbump.outputs["Normal"], bsdf.inputs["Normal"])
+    if os.environ.get("FACE_DUMP"):
+        print("[dump] --- skin material links ---")
+        for lk in nt.links:
+            print(f"[dump] {lk.from_node.bl_idname}.{lk.from_socket.name}"
+                  f"  ->  {lk.to_node.bl_idname}.{lk.to_socket.name}")
+        print(f"[dump] tex.image={tex.image.name if tex.image else None} "
+              f"size={tuple(tex.image.size) if tex.image else None} "
+              f"has_data={tex.image.has_data if tex.image else None} "
+              f"filepath={tex.image.filepath if tex.image else None}")
+        print(f"[dump] tex.extension={tex.extension} interp={tex.interpolation}")
+        print(f"[dump] material on body: {[m.name for m in body.data.materials]}")
+
+    dbg = os.environ.get("FACE_DEBUG")
+    if dbg == "uv":
+        L(uv.outputs["Vector"], bsdf.inputs["Base Color"])
+        print("[asteroid] FACE_DEBUG: uv -> base color")
+    elif dbg == "tex":
+        L(tex.outputs["Color"], bsdf.inputs["Base Color"])
+        print("[asteroid] FACE_DEBUG: raw texture -> base color")
+    elif dbg == "emit":
+        # take lighting out of the question entirely
+        em = nt.nodes.new("ShaderNodeEmission")
+        em.inputs["Strength"].default_value = 1.0
+        out_node = next(n for n in nt.nodes
+                        if n.bl_idname == "ShaderNodeOutputMaterial")
+        for lk in list(nt.links):
+            if lk.to_node == out_node:
+                nt.links.remove(lk)
+        L(tex.outputs["Color"], em.inputs["Color"])
+        L(em.outputs["Emission"], out_node.inputs["Surface"])
+        print("[asteroid] FACE_DEBUG: texture -> emission")
+    if os.environ.get("FACE_DEBUG"):
+        bpy.context.view_layer.update()
+        inv = proj.matrix_world.inverted()
+        top = max((body.matrix_world @ v.co).z for v in body.data.vertices)
+        probes = {
+            "skull centre": ctr,
+            "crown": Vector((ctr.x, ctr.y, top)),
+            "chin-ish": Vector((ctr.x, ctr.y, ctr.z - 0.09 * H)),
+            "left cheek": Vector((ctr.x - 0.05 * H, ctr.y, ctr.z)),
+        }
+        for name, wp in probes.items():
+            lp = inv @ Vector(wp)
+            uu = lp.x / face_w + 0.5 + FACE_OFF_X
+            vv = lp.z / face_h + 0.5 + FACE_OFF_Z
+            inside = 0.0 <= uu <= 1.0 and 0.0 <= vv <= 1.0
+            print(f"[probe] {name:14s} local={tuple(round(c,3) for c in lp)} "
+                  f"uv=({uu:.3f},{vv:.3f}) {'IN' if inside else 'OUT'}")
+
+    print(f"[asteroid] face projected: photo {iw}x{ih}, "
+          f"{face_w:.3f}x{face_h:.3f} at {tuple(round(c, 3) for c in ctr)}")
     return proj
 
 
@@ -1186,10 +1283,8 @@ def import_human(height):
             m.render_levels = top
             print(f"[asteroid] multires level {top}")
 
-    skin = skin_material()
     body.data.materials.clear()
-    body.data.materials.append(skin)
-    apply_face_projection(body, skin, height)
+    body.data.materials.append(skin_material())
 
     # Bake each eye's parent-relative placement, then fold them into the body so
     # one mesh rigs, poses and joins as a unit.
@@ -1314,7 +1409,9 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     foot_z = min((body.matrix_world @ v.co).z for v in body.data.vertices)
 
     brows = build_brows(H, body, [e.location.copy() for e in eyes])
-    hair = build_hair(H, body, *head_sphere(body, H))
+    skull_ctr, skull_r = head_sphere(body, H)
+    face_proj = apply_face_projection(body, H, skull_ctr)
+    hair = build_hair(H, body, skull_ctr, skull_r)
 
     # Garments cut from the body's own geometry, so they fit the pose exactly.
     cloth = fabric_material("Suit", "393454", roughness=0.70, sheen=0.35,
@@ -1366,7 +1463,7 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     # Eyes stay separate objects (see import_human) and the hair carries a
     # particle system that bpy.ops.object.join() would discard, so both ride
     # along as children instead.
-    for e in list(eyes) + [hair]:
+    for e in [o for o in (list(eyes) + [hair, face_proj]) if o]:
         e.parent = rider
         e.matrix_parent_inverse = rider.matrix_world.inverted()
 
@@ -1387,6 +1484,26 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
     rip.vertex_group = "cape_ripple"
     rip.mid_level = 0.5
     rip.strength = H * 0.055
+
+    # A soft fill parented to the figure, in front of the face.
+    #
+    # The scene key is amber from below-right and the rim is behind-left, which
+    # is right for the rock but leaves the camera-facing side of the face in
+    # shadow — and a projected face that cannot be seen is worth nothing. This
+    # rides along with the rider so it stays on the face in every frame of the
+    # rotation, and it is small and dim enough not to disturb the asteroid.
+    bpy.ops.object.light_add(type="AREA", location=(0, 0, 0))
+    fill = bpy.context.active_object
+    fill.name = "FaceFill"
+    fill.data.color = hex_rgb("FFF3E2")
+    fill.data.energy = 34.0 * (H / 1.45) ** 2
+    fill.data.size = 0.55 * H
+    fill.parent = rider
+    fill.location = (-0.22 * H, -0.62 * H, 1.02 * H)
+    fill.rotation_mode = "QUATERNION"
+    fill.rotation_quaternion = (
+        Vector((0, 0, 0.94 * H)) - Vector(fill.location)
+    ).to_track_quat("-Z", "Y")
 
     rider["foot_z"] = foot_z
     print(f"[asteroid] rider verts = {len(rider.data.vertices)}  soles at z={foot_z:.4f}")
