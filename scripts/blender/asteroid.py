@@ -504,6 +504,14 @@ HUMAN_REST_H = 1.684        # measured height of the rest mesh, in metres
 SKIN = "8A6247"          # warm mid-brown, from the supplied reference
 HAIR = "140F0C"          # near-black, with a warm cast in the highlights
 
+# Optional face photo, front-projected onto the head for likeness. Drop a file
+# here and it is picked up automatically; absent, the figure keeps the base
+# mesh's own face and the render still works.
+FACE_PHOTO = os.path.join(os.getcwd(), "assets", "vendor", "face-reference.jpg")
+FACE_ROT_DEG = -90.0    # phone photos often arrive on their side
+FACE_SCALE = 0.185      # projection width, in figure heights
+FACE_MIX = 0.85         # how strongly the photo overrides the base skin
+
 # Joint positions measured off the rest mesh: arms hang at the sides with the
 # hands at z≈0.76, shoulders at z≈1.36. Rest-mesh metres, scaled at build time.
 BONES = [
@@ -1060,6 +1068,93 @@ def build_brows(H, body, eye_locs):
     return brows
 
 
+def apply_face_projection(body, mat, H):
+    """Front-project a photo onto the face for likeness.
+
+    A single photo cannot wrap a head — it smears badly past roughly 45 degrees
+    off-axis — so the projection is masked twice: the image is clipped to its
+    own rectangle, and a dot product against the face direction fades it out as
+    the surface turns away. Everything outside keeps the base mesh's own skin,
+    which is why the mask matters more than the photo does.
+
+    Honest limit: this changes the face's COLOUR and its features-as-painted,
+    not its SHAPE. The skull underneath is still the CC0 base mesh. It buys
+    real recognisability at the size this renders; it is not a scan.
+    """
+    if not os.path.exists(FACE_PHOTO):
+        print(f"[asteroid] no face photo at {FACE_PHOTO} — using the base face")
+        return None
+
+    img = bpy.data.images.load(FACE_PHOTO, check_existing=True)
+    print(f"[asteroid] face photo {img.size[0]}x{img.size[1]}")
+
+    # Empty parked in front of the face, defining the projection frustum. It
+    # inherits the head's yaw and pitch from the pose so the photo lands square
+    # on the face rather than at an angle to it.
+    yaw = math.radians(POSE.get("head", (0, 0, 0))[2] + POSE.get("neck", (0, 0, 0))[2])
+    pitch = math.radians(POSE.get("head", (0, 0, 0))[0])
+    proj = bpy.data.objects.new("FaceProjector", None)
+    bpy.context.collection.objects.link(proj)
+    proj.parent = body
+    proj.rotation_euler = (pitch, 0.0, yaw)
+
+    nt = mat.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    coord.object = proj
+    mapping = nt.nodes.new("ShaderNodeMapping")
+    mapping.inputs["Rotation"].default_value = (0, math.radians(FACE_ROT_DEG), 0)
+    mapping.inputs["Scale"].default_value = (1.0 / (FACE_SCALE * H), 1.0,
+                                             1.0 / (FACE_SCALE * H))
+    mapping.inputs["Location"].default_value = (0.5, 0.0, 0.5)
+
+    tex = nt.nodes.new("ShaderNodeTexImage")
+    tex.image = img
+    # CLIP returns zero alpha outside the photo's rectangle, which is half the
+    # mask for free.
+    tex.extension = "CLIP"
+
+    geom = nt.nodes.new("ShaderNodeNewGeometry")
+    face_dir = nt.nodes.new("ShaderNodeCombineXYZ")
+    face_dir.inputs["X"].default_value = -math.sin(yaw)
+    face_dir.inputs["Y"].default_value = -math.cos(yaw)
+    face_dir.inputs["Z"].default_value = 0.0
+    dot = nt.nodes.new("ShaderNodeVectorMath")
+    dot.operation = "DOT_PRODUCT"
+    facing = nt.nodes.new("ShaderNodeMapRange")
+    facing.inputs["From Min"].default_value = 0.28
+    facing.inputs["From Max"].default_value = 0.72
+    facing.clamp = True
+
+    combined = nt.nodes.new("ShaderNodeMath")
+    combined.operation = "MULTIPLY"
+    strength = nt.nodes.new("ShaderNodeMath")
+    strength.operation = "MULTIPLY"
+    strength.inputs[1].default_value = FACE_MIX
+
+    blend = nt.nodes.new("ShaderNodeMix")
+    blend.data_type = "RGBA"
+    # Indices, not names: ShaderNodeMix keeps a socket set per data type and
+    # enables only the active one, so inputs["A"] is the disabled float socket.
+    blend.inputs[6].default_value = hex_rgba(SKIN)
+
+    L = nt.links.new
+    L(coord.outputs["Object"], mapping.inputs["Vector"])
+    L(mapping.outputs["Vector"], tex.inputs["Vector"])
+    L(geom.outputs["Normal"], dot.inputs[0])
+    L(face_dir.outputs["Vector"], dot.inputs[1])
+    L(dot.outputs["Value"], facing.inputs["Value"])
+    L(facing.outputs["Result"], combined.inputs[0])
+    L(tex.outputs["Alpha"], combined.inputs[1])
+    L(combined.outputs["Value"], strength.inputs[0])
+    L(strength.outputs["Value"], blend.inputs[0])
+    L(tex.outputs["Color"], blend.inputs[7])
+    L(blend.outputs[2], bsdf.inputs["Base Color"])
+    print("[asteroid] face projection applied")
+    return proj
+
+
 def import_human(height):
     """Load the CC0 body plus its eyeballs, at full sculpted detail."""
     if not os.path.exists(HUMAN_BLEND):
@@ -1091,8 +1186,10 @@ def import_human(height):
             m.render_levels = top
             print(f"[asteroid] multires level {top}")
 
+    skin = skin_material()
     body.data.materials.clear()
-    body.data.materials.append(skin_material())
+    body.data.materials.append(skin)
+    apply_face_projection(body, skin, height)
 
     # Bake each eye's parent-relative placement, then fold them into the body so
     # one mesh rigs, poses and joins as a unit.
