@@ -417,7 +417,7 @@ def build_cape(mat, H):
     return _mesh_from_rings("Cape", rings, mat, closed=False, thickness=H * 0.008)
 
 
-def build_tunic(mat, H):
+def build_skirt(mat, H):
     """Short closed robe over the torso and hips, ending mid-thigh.
 
     This is the part that answers "where are the clothes" — the cape reads from
@@ -428,19 +428,23 @@ def build_tunic(mat, H):
     rings = []
     for i in range(VSEG + 1):
         t = i / VSEG
-        z = 0.81 - (0.81 - 0.34) * t          # real shoulders (0.81H) → mid-thigh
-        # chest → nipped waist → flare over the hips. Sized to clear the body
-        # underneath rather than to my old primitive proportions.
-        r = 0.128 - 0.026 * math.sin(math.pi * min(t / 0.45, 1.0)) + 0.030 * t ** 2.1
+        z = 0.63 - (0.63 - 0.24) * t          # waist → below the knee
+        # Starts at the waist now rather than the shoulders: the jacket covers
+        # the torso, so this only has to be the skirt of the robe. As a
+        # full-length tube it left a slit up the front where it met the body.
+        r = 0.142 + 0.068 * t ** 1.6
         ring = []
         for j in range(RAD):
             th = 2 * math.pi * j / RAD
-            fold = math.sin(th * 11 + t * 1.6) * 0.008 * (0.35 + t)
+            # two harmonics, growing downward — a single radius reads as a
+            # lampshade no matter how it is proportioned
+            fold = (math.sin(th * 8 + t * 1.9) * 0.019 * (0.25 + t)
+                    + math.sin(th * 15 - t * 3.1) * 0.008 * (0.2 + t))
             rr = r + fold
-            x, y = math.cos(th) * rr, math.sin(th) * rr * 0.72
+            x, y = math.cos(th) * rr, math.sin(th) * rr * 0.92
             ring.append((x * H, y * H, z * H))
         rings.append(ring)
-    return _mesh_from_rings("Tunic", rings, mat, closed=True, cap_last=True,
+    return _mesh_from_rings("Skirt", rings, mat, closed=True, cap_last=True,
                             thickness=H * 0.007)
 
 
@@ -458,7 +462,7 @@ def build_hood(mat, H):
     rings = []
     for i in range(VSEG + 1):
         t = i / VSEG
-        z = 1.005 - (1.005 - 0.775) * t             # crown → shoulders
+        z = 1.005 - (1.005 - 0.882) * t             # crown → jawline
         # tight at the crown, out to head width, then flaring onto the shoulders
         r = (0.024
              + 0.064 * math.sin(math.pi * 0.5 * min(t / 0.45, 1.0))
@@ -682,7 +686,7 @@ def build_hair(H, body, ctr, radius):
     RAD, VSEG = 40, 20
     cx, cy, cz = ctr.x, ctr.y, ctr.z
     base_r = radius * 1.05                     # shrinkwrap pulls it back in
-    P_FRONT, P_BACK = 1.02, 1.80               # polar reach, forehead vs nape
+    P_FRONT, P_BACK = 0.98, 1.42               # polar reach, forehead vs nape
 
     rings = []
     for i in range(VSEG, -1, -1):
@@ -693,8 +697,9 @@ def build_hair(H, body, ctr, radius):
             # -sin(th) is +1 toward the face, -1 toward the back of the head
             front = 0.5 + 0.5 * (-math.sin(th))
             p = u * (P_BACK - (P_BACK - P_FRONT) * front)
-            bulk = (0.0055 * math.sin(th * 5 + p * 3.1)
-                    + 0.0032 * math.sin(th * 11 - p * 4.7)
+            bulk = (0.0060 * math.sin(th * 5 + p * 3.1)
+                    + 0.0040 * math.sin(th * 11 - p * 4.7)
+                    + 0.0028 * math.sin(th * 19 + p * 6.2)
                     + 0.0026 * math.sin(p * 7.0 + 1.3))
             r = base_r + bulk * H
             sp, cp = math.sin(p), math.cos(p)
@@ -719,49 +724,127 @@ def build_hair(H, body, ctr, radius):
     return hair
 
 
-def build_boots(H, body):
-    """Boots, cut from a copy of the body's own lower legs.
-
-    Modelling footwear separately means guessing where the posed feet ended up.
-    Duplicating the leg geometry and pushing it out along its normals means the
-    boot fits by construction, whatever the pose did.
-    """
-    mat = bpy.data.materials.new("Boot")
+def fabric_material(name, colour, roughness=0.66, sheen=0.35, weave=150.0):
+    """One fabric shader, parameterised. Sheen is what stops cloth reading as
+    painted vinyl; the weave bump carries the rest at close range."""
+    mat = bpy.data.materials.new(name)
     mat.use_nodes = True
-    bsdf = mat.node_tree.nodes["Principled BSDF"]
-    set_input(bsdf, "Base Color", hex_rgba("1A1620"))
-    set_input(bsdf, "Roughness", 0.52)
-    set_input(bsdf, ["Specular IOR Level", "Specular"], 0.4)
+    nt = mat.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    set_input(bsdf, "Base Color", hex_rgba(colour))
+    set_input(bsdf, "Metallic", 0.0)
+    set_input(bsdf, "Roughness", roughness)
+    set_input(bsdf, ["Sheen Weight", "Sheen"], sheen)
+    set_input(bsdf, "Sheen Tint", hex_rgba(VIOLET_PALE))
+    set_input(bsdf, ["Specular IOR Level", "Specular"], 0.32)
 
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    tex = nt.nodes.new("ShaderNodeTexNoise")
+    tex.inputs["Scale"].default_value = weave
+    tex.inputs["Detail"].default_value = 5.0
+    bump = nt.nodes.new("ShaderNodeBump")
+    bump.inputs["Strength"].default_value = 0.16
+    nt.links.new(coord.outputs["Object"], tex.inputs["Vector"])
+    nt.links.new(tex.outputs["Fac"], bump.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+    return mat
+
+
+def garment_from_groups(name, body, groups, H, swell, mat,
+                        thickness=0.004, min_weight=0.30, relax=14, remesh=0.0):
+    """Cut a garment out of a copy of the body's own geometry.
+
+    Modelling clothing separately means guessing where the posed limbs ended
+    up, and every guess so far has left something hovering off the body. The
+    armature's automatic weights leave a vertex group per bone, and those
+    survive the pose bake — so "the sleeve" is literally "the arm, kept, and
+    pushed out along its normals". It fits by construction, in any pose.
+    """
     bpy.ops.object.select_all(action="DESELECT")
     body.select_set(True)
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.duplicate()
-    boots = bpy.context.active_object
-    boots.name = "Boots"
+    g = bpy.context.active_object
+    g.name = name
 
-    cutoff = 0.185 * H          # mid-calf
+    idx = {g.vertex_groups[n].index for n in groups if n in g.vertex_groups}
+    keep = set()
+    for v in g.data.vertices:
+        for ge in v.groups:
+            if ge.group in idx and ge.weight >= min_weight:
+                keep.add(v.index)
+                break
+
     bm = bmesh.new()
-    bm.from_mesh(boots.data)
-    doomed = [v for v in bm.verts if (boots.matrix_world @ v.co).z > cutoff]
+    bm.from_mesh(g.data)
+    bm.verts.ensure_lookup_table()
+    doomed = [v for v in bm.verts if v.index not in keep]
     bmesh.ops.delete(bm, geom=doomed, context="VERTS")
-    bm.to_mesh(boots.data)
+    bm.to_mesh(g.data)
     bm.free()
 
-    # A textureless Displace offsets every vertex along its own normal, which
-    # is exactly "same shape, slightly larger".
-    d = boots.modifiers.new("Swell", "DISPLACE")
-    d.mid_level = 0.0
-    d.strength = H * 0.008
-    bpy.context.view_layer.objects.active = boots
-    bpy.ops.object.modifier_apply(modifier="Swell")
-    sd = boots.modifiers.new("Solidify", "SOLIDIFY")
-    sd.thickness = H * 0.004
+    if not g.data.vertices:
+        bpy.data.objects.remove(g, do_unlink=True)
+        print(f"[asteroid] {name}: no vertices matched {groups}")
+        return None
 
-    boots.data.materials.clear()
-    boots.data.materials.append(mat)
+    # A textureless Displace offsets every vertex along its own normal —
+    # "same shape, worn over the top".
+    d = g.modifiers.new("Swell", "DISPLACE")
+    d.mid_level = 0.0
+    d.strength = H * swell
+    bpy.context.view_layer.objects.active = g
+    bpy.ops.object.modifier_apply(modifier="Swell")
+
+    # Offsetting along normals alone copies the anatomy exactly — every ab and
+    # pec came through and it read as a painted bodysuit. Smoothing alone did
+    # not fix it: a relax pass preserves the surface it started from, so the
+    # muscle definition survived 40 iterations. A voxel remesh resamples the
+    # volume outright and simply cannot represent detail below its voxel size,
+    # which is what finally turns anatomy into a garment.
+    # Solidify FIRST when remeshing. A voxel remesh samples a volume, and the
+    # garment at this point is an open shell far thinner than one voxel — the
+    # first attempt voxelised it down to 20 vertices. Give it real thickness
+    # (greater than the voxel size) and there is something left to resample.
+    sd = g.modifiers.new("Solidify", "SOLIDIFY")
+    sd.thickness = H * thickness
+    bpy.ops.object.modifier_apply(modifier="Solidify")
+
+    if remesh:
+        rm = g.modifiers.new("Remesh", "REMESH")
+        rm.mode = "VOXEL"
+        rm.voxel_size = H * remesh
+        rm.use_smooth_shade = True
+        bpy.ops.object.modifier_apply(modifier="Remesh")
+
+    if relax:
+        sm = g.modifiers.new("Relax", "SMOOTH")
+        sm.factor = 0.85
+        sm.iterations = relax
+        bpy.ops.object.modifier_apply(modifier="Relax")
+
+    g.data.materials.clear()
+    g.data.materials.append(mat)
     bpy.ops.object.shade_smooth()
-    return boots
+    print(f"[asteroid] {name}: {len(g.data.vertices)} verts")
+    return g
+
+
+def build_belt(H, mat):
+    """A waist band — the one piece that reads as tailoring rather than drape,
+    and it breaks the torso/skirt boundary that otherwise looks like a seam."""
+    RAD, VSEG = 40, 4
+    rings = []
+    for i in range(VSEG + 1):
+        t = i / VSEG
+        z = (0.585 - 0.055 * t) * H
+        ring = []
+        for j in range(RAD):
+            th = 2 * math.pi * j / RAD
+            r = (0.150 + 0.004 * math.sin(th * 9)) * H
+            ring.append((math.cos(th) * r, math.sin(th) * r * 0.74, z))
+        rings.append(ring)
+    return _mesh_from_rings("Belt", rings, mat, closed=True, thickness=H * 0.006)
 
 
 def build_brows(H, body, eye_locs):
@@ -950,13 +1033,32 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
 
     brows = build_brows(H, body, [e.location.copy() for e in eyes])
     hair = build_hair(H, body, *head_sphere(body, H))
-    boots = build_boots(H, body)
+
+    # Garments cut from the body's own geometry, so they fit the pose exactly.
+    cloth = fabric_material("Jacket", "23203A", roughness=0.70, sheen=0.35)
+    leather = fabric_material("Leather", "15121C", roughness=0.46, sheen=0.10,
+                              weave=90.0)
+    worn = [
+        garment_from_groups("Jacket", body,
+                            ("chest", "spine", "hips", "shoulder.L", "shoulder.R"),
+                            H, 0.026, cloth, thickness=0.030,
+                            relax=10, remesh=0.018),
+        garment_from_groups("Sleeves", body,
+                            ("upper_arm.L", "upper_arm.R",
+                             "forearm.L", "forearm.R"),
+                            H, 0.010, cloth, relax=8),
+        garment_from_groups("Boots", body,
+                            ("shin.L", "shin.R", "foot.L", "foot.R"),
+                            H, 0.013, leather, thickness=0.022,
+                            relax=6, remesh=0.011),
+        build_belt(H, leather),
+    ]
+    worn = [w for w in worn if w]
     cape = build_cape(cloak_mat, H)
-    tunic = build_tunic(cloak_mat, H)
-    hood = build_hood(cloak_mat, H)
+    tunic = build_skirt(cloak_mat, H)
 
     bpy.ops.object.select_all(action="DESELECT")
-    for ob in [body, cape, tunic, hood, hair, boots] + brows:
+    for ob in [body, cape, tunic, hair] + worn + brows:
         ob.select_set(True)
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
@@ -969,6 +1071,7 @@ def build_rider(mat, cloak_mat, height=RIDER_H):
         e.parent = rider
         e.matrix_parent_inverse = rider.matrix_world.inverted()
 
+    print(f"[asteroid] vertex groups = {sorted(g.name for g in body.vertex_groups)}")
     rider["foot_z"] = foot_z
     print(f"[asteroid] rider verts = {len(rider.data.vertices)}  soles at z={foot_z:.4f}")
     return rider
