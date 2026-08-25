@@ -55,9 +55,32 @@ export default async function HomePage() {
             just gets emptier around it.
             Unlike the black hole this needs no blend mode: the sprite carries
             real alpha. */}
-        <div className="pointer-events-none absolute inset-0 z-0 flex justify-center">
+        {/* px-[6vw] matches the section's own padding. Without it `inset-0`
+            spans the padding box — the full section width — so the rail was
+            wider than the text column and the asteroid hung off THAT instead.
+            Invisible at large widths, where max-w-[1000px] caps the rail
+            anyway; at 960px the rail was 960 against a 844px column and the
+            rock sat ~58px too far right, which is what clipped it. */}
+        <div className="pointer-events-none absolute inset-0 z-0 flex justify-center px-[6vw]">
           <div className="relative h-full w-full max-w-[1000px]">
-            <AsteroidRider className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-[58%] lg:translate-x-[64%] xl:translate-x-[76%] 2xl:translate-x-[88%] w-[240px] sm:w-[330px] lg:w-[400px] xl:w-[450px] 2xl:w-[500px] opacity-45 sm:opacity-65 lg:opacity-90" />
+            {/* Size and overhang are both continuous rather than stepped.
+                The overhang is derived from the gutter itself —
+                (100vw - column) / 2, where column is min(1000px, 88vw) because
+                the section pads 6vw a side — so the rock hangs exactly as far
+                as there is room and cannot clip at any width. Capped at 380px
+                so it stops drifting outward forever on very wide screens.
+
+                Stepped breakpoints were the first attempt and failed twice.
+                Obviously, by clipping when a translate sized for a 780px
+                gutter at 2560 ran off-screen at 1280 where the gutter is 140.
+                And silently: at 1920 both `2xl:` and `min-[1800px]:` match,
+                the named variant wins on rule order, and the large tier simply
+                never applied. Deriving from the viewport sidesteps variant
+                ordering entirely.
+
+                Hidden under md — there is no gutter there at all, and it would
+                only crowd the roles. */}
+            <AsteroidRider className="hidden md:block absolute top-1/2 right-0 -translate-y-1/2 w-[clamp(190px,26vw,500px)] translate-x-[min(380px,calc((100vw_-_min(1000px,88vw))_/_2))] opacity-40 lg:opacity-55 xl:opacity-75 2xl:opacity-90" />
           </div>
         </div>
 
