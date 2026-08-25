@@ -79,11 +79,21 @@ export default function BlackHole({ className }: { className?: string }) {
       if (v) v.playbackRate = 1;
     };
 
-    // only listen while the section is actually on screen
+    // Only listen while the section is actually on screen — and stop the
+    // decoder entirely while it is not. Browsers throttle offscreen video
+    // inconsistently, so a loop left running keeps costing battery on a page
+    // the visitor has already scrolled past. play() can reject if the pause
+    // lands mid-play (fast scroll past the section), which is harmless.
     const io = new IntersectionObserver(
       ([entry]) => {
         active = entry.isIntersecting;
-        if (!active) reset();
+        const v = videoRef.current;
+        if (active) {
+          v?.play().catch(() => {});
+        } else {
+          v?.pause();
+          reset();
+        }
       },
       { threshold: 0 }
     );
