@@ -568,8 +568,12 @@
 }
 /* See .media-frame above: the media itself no longer scales on hover. The
    frame's translateY lift is the cue. */
+/* No cursor override here. This title wraps a Link to the project page,
+   and a crosshair replaced the pointer that says so — the one element a
+   reader is most likely to click was the one not admitting it was
+   clickable. The targeting motif is already carried by the corner
+   crosshairs closing in on the media frame, which cost no affordance. */
 .case-title {
-  cursor: crosshair;
   transition: color 200ms ease;
 }
 .case-strip:hover .case-title { color: var(--violet-pale); }
