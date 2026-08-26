@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
+import { useReducedMotion } from "motion/react";
 import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 
 // A figure working at a desk on an asteroid — typing, pausing once a loop to
@@ -32,26 +32,15 @@ import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 // needs more frames, not a longer interval.
 const LOOP_MS = 9600;
 const FRAME_MS = LOOP_MS / S.frames;
-const TILT_PX = 16; // how far it leans toward the cursor
-// The right-to-left float lives in CSS (.asteroid-drift in globals.css) rather
-// than here. It is a single composited transform on a loop, so it costs nothing
-// per frame — worth keeping off the JS side given the sprite stepping already
-// runs a timer on this element.
+// The asteroid itself does not move. It used to drift on a 30s CSS loop and
+// lean toward the cursor; both are gone. The scene now reads as a fixed
+// vantage on a man at his desk, and the only motion in the frame is his —
+// which is the thing worth watching.
 
 export default function AsteroidRider({ className }: { className?: string }) {
   const reduced = useReducedMotion() ?? false;
   const hostRef = useRef<HTMLDivElement>(null);
   const cellRef = useRef<HTMLDivElement>(null);
-
-  // pointer lean, driven by motion values so nothing re-renders on mouse move
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const proximity = useMotionValue(0);
-  const spring = { stiffness: 60, damping: 22, mass: 0.8 };
-  const x = useSpring(px, spring);
-  const y = useSpring(py, spring);
-  const near = useSpring(proximity, { stiffness: 70, damping: 24, mass: 0.6 });
-  const scale = useTransform(near, [0, 1], [1, 1.035]);
 
 
   // ── frame stepping ────────────────────────────────────────────────
@@ -108,82 +97,27 @@ export default function AsteroidRider({ className }: { className?: string }) {
     };
   }, [reduced]);
 
-  // ── pointer lean ──────────────────────────────────────────────────
-  useEffect(() => {
-    if (reduced) return;
-    const host = hostRef.current;
-    if (!host) return;
-
-    let active = false;
-
-    const onMove = (e: PointerEvent) => {
-      if (!active) return;
-      const r = host.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      const dx = e.clientX - (r.left + r.width / 2);
-      const dy = e.clientY - (r.top + r.height / 2);
-      const dist = Math.hypot(dx, dy);
-      const reach = Math.max(r.width, r.height) * 0.9;
-      const t = Math.max(0, Math.min(1, 1 - dist / reach));
-      proximity.set(t);
-      const n = dist || 1;
-      px.set((dx / n) * TILT_PX * t);
-      py.set((dy / n) * TILT_PX * t);
-    };
-
-    const reset = () => {
-      proximity.set(0);
-      px.set(0);
-      py.set(0);
-    };
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        active = entry.isIntersecting;
-        if (!active) reset();
-      },
-      { threshold: 0 }
-    );
-    io.observe(host);
-
-    window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("pointerleave", reset, { passive: true });
-    return () => {
-      io.disconnect();
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerleave", reset);
-    };
-  }, [reduced, proximity, px, py]);
-
   return (
     <div ref={hostRef} aria-hidden className={className}>
-      <div className={reduced ? "w-full h-full" : "asteroid-drift w-full h-full"}>
-        <motion.div
-          className="w-full h-full"
-          style={reduced ? undefined : { x, y, scale, willChange: "transform" }}
-        >
-        <div
-          ref={cellRef}
-          className="w-full h-full"
-          style={{
-            backgroundImage: "url(/asteroid/asteroid-sprite.webp)",
-            backgroundSize: `${S.cols * 100}% ${S.rows * 100}%`,
-            // React owns frame 0. The stepping loop writes backgroundPosition
-            // imperatively (to avoid re-rendering 24 times a second), and an
-            // imperative write outlives a Fast Refresh — so after the sheet
-            // grid changed from 6x6 to 6x4, a stale "40% " from the old
-            // closure was still on the element. Offscreen the rAF loop is
-            // paused, so nothing ever corrected it and two cells showed at
-            // once. Declaring it here means any re-render resets it to a
-            // valid cell.
-            backgroundPosition: "0% 0%",
-            backgroundRepeat: "no-repeat",
-            aspectRatio: `${S.cellW} / ${S.cellH}`,
-            imageRendering: "auto",
-          }}
-          />
-        </motion.div>
-      </div>
+      <div
+        ref={cellRef}
+        className="w-full h-full"
+        style={{
+          backgroundImage: "url(/asteroid/asteroid-sprite.webp)",
+          backgroundSize: `${S.cols * 100}% ${S.rows * 100}%`,
+          // React owns frame 0. The stepping loop writes backgroundPosition
+          // imperatively (to avoid re-rendering 5 times a second), and an
+          // imperative write outlives a Fast Refresh — so after the sheet
+          // grid changed, a stale value from the old closure was still on
+          // the element. Offscreen the rAF loop is paused, so nothing ever
+          // corrected it and two cells showed at once. Declaring it here
+          // means any re-render resets it to a valid cell.
+          backgroundPosition: "0% 0%",
+          backgroundRepeat: "no-repeat",
+          aspectRatio: `${S.cellW} / ${S.cellH}`,
+          imageRendering: "auto",
+        }}
+      />
     </div>
   );
 }
