@@ -29,47 +29,149 @@ Modes: `still`, `sprite`, `rider` (figure alone), `face` (head close-up).
 `assets/vendor/` is gitignored. Run `scripts/blender/fetch-human-base.sh` on a
 fresh checkout (48MB CC0 bundle).
 
-## In progress — `desk.py` (NOT working yet)
+## In progress — `desk.py` v2: vendored figure + props (final sprite rendering)
 
-**This REPLACES the rider.** The caped-figure-on-a-tumbling-rock currently in
-`#experience` is being swapped out for this, not joined by it. Once the desk
-scene renders, the swap is: re-render the sheet from `desk.py`, regenerate
-`asteroidSprite.ts`, and point `AsteroidRider.tsx` at the new sheet — the
-component itself needs no change beyond that, since it only reads the grid
-metadata. Keep the rider script; it is the revert path.
+**This REPLACES the rider.** The swap: render `desk.py --mode sprite`, run
+`make-sprite-sheet.py _deskframes`, done — `AsteroidRider.tsx` only reads
+the grid metadata. Keep asteroid.py; it is the rider's revert path.
 
-Same figure and rock, seated at a desk in space: types on a laptop, pauses to
-drink coffee, purple suit, rock does not rotate.
+**The procedural figure/garment pipeline is GONE** (git history has it, and
+its hard-won fixes are in the gotchas below). After a day of fighting
+procedural tailoring the user called it: use pre-existing assets. Current
+architecture (2026-08-25):
 
-Done and verified:
-- Seated pose (`SEATED`), props (desk/chair/laptop/mug, procedural boxes),
-  purple suit with a carved V-neck so shirt and tie show, emissive laptop
-  screen as a practical light.
-- Animation curves (`pose_for_frame`) — typing as out-of-phase wrist
-  oscillation, plus a reach/lift/hold/lower/return sip cycle. **Loop verified
-  seamless**: frame N ≡ frame 0 on every bone.
-- Mug follows the hand via the same `lift` curve that drives the arm, so no
-  constraint to toggle and the handoff is exact at both ends.
+- **Figure**: Mixamo "Lewis" carrying Mixamo's seated "Typing" clip
+  (`assets/vendor/mixamo/Typing.fbx`, manual download — needs an Adobe
+  login; module docstring has the settings). Real clothes, fingers, mocap.
+  Bone prefix (`mixamorig4:`) varies per export — detected, never
+  hardcoded. `Sitting Idle.fbx` and `Sitting Drinking.fbx` are also
+  vendored for a future idle/sip splice — NOTE (user observation): the
+  Sitting Drinking clip STARTS STANDING; only the seated later portion is
+  usable, so trim before splicing.
+- **Skin recolour** (user direction: "whitish brown"): numpy over the
+  packed 4k diffuse. Skin and clothes share ONE texture, so it is a texel
+  mask — warm texels (R>G>B by margin) are skin; the teal shirt and
+  neutral slacks never match. Per-channel affine keeps the pore detail.
+- **Props**: Poly Haven CC0 (`fetch-props.sh`): metal_office_desk (drawers
+  toward the sitter; diffuse multiplied toward calm grey or it out-shines
+  the figure), dining_chair_02 (backrest is at the asset's LOCAL +y —
+  rot 0, a half-turn puts it in his lap), plastic_thermos as the coffee
+  mug (chunkier non-uniform scale or it reads as a bottle). The LAPTOP is
+  procedural: a MacBook-style unibody (user request; no quality CC0
+  MacBook exists) — beveled slabs, dark key well, trackpad, emissive
+  display facing him. Its lid sits at near-mirror geometry between the
+  face key and the camera: matte anodized (rough 0.68, metallic 0.7) or
+  it bounces the key light into the lens as a lavender sheet. Mouse is a
+  tipped squashed sphere with a scroll notch. The earlier classic_laptop
+  vendor asset is unused now.
+- **Assembly centring**: the desk is shifted toward the mug side, so the
+  root offset is COMPUTED (−desk_cx/2), splitting desk and figure centres
+  over the rock summit — a fixed nudge left desk legs hanging over space.
+- **Furniture is fitted to the ANIMATION**: desk top under the wrists'
+  MINIMUM over the whole loop (one mid-frame sample let deep keystrokes
+  pierce the laptop), chair seat under the measured hips, laptop a
+  fingertip-reach (~0.06H) beyond the wrists or fingers pierce the lid at
+  the hinge. Desk 0.80×-wide scale and mug/mouse spaced apart — every
+  tighter layout interpenetrated something (user caught each one; verify
+  CONTACT POINTS AT 4x ZOOM after every change, not full-frame).
+- **Rock stays procedural** (A.build_asteroid). A scanned Poly Haven moon
+  rock was tried and rejected — reads as a boulder ledge, not a tiny
+  planet.
+- Retro lid z-squashed ×0.72 and camera raised to direction
+  (0.40, -1.0, 0.60), or the lid curtains off the typing hands entirely.
+- **Loop** (48 cells, 9.6s at the component's 200ms step): a SPLICE —
+  typing → 3-cell crossfade → the seated slice of "Sitting Drinking"
+  (frames 222–366; the first ~120 frames are a WALK to the chair, skip
+  them) → crossfade → typing, whose tail crossfades onto its own start.
+  `schedule()` builds the per-cell plan; `PoseRig` samples either action
+  and blends. CRITICAL: the drink clip's hips carry the walk's ~2.3m
+  translation in the bone basis — `PoseRig.corr` (typing-hips ∘
+  drink-hips⁻¹ at the junctions) re-seats every drink sample, else he
+  teleports off the chair mid-loop.
+- **Mug pickup — THE CUP IS AUTHORED, THE HAND IS DRIVEN TO IT.** The
+  source clip drinks from an invisible cup at the LAP, so there is no desk
+  pickup to borrow. Every version that derived the cup's position from
+  wherever the hand ended up failed, and each failure was invisible at
+  normal zoom and obvious to the user:
+    * welded to the wrist → cup floating beside the fingers;
+    * pinned to the palm → cup at his EYES (the palm rides higher than the
+      wrist when the arm is raised);
+    * tilted toward the head → cup pressed against his FOREHEAD;
+    * cup moved to a hand that never reached → pure telekinesis.
+  Now the cup has exactly two authored places — its desk spot, and
+  rim-to-lips — and `aim_palm_at()` walks an IK target until his PALM
+  lands on the cup. Nothing about the cup depends on solver accuracy.
+- **Three gotchas inside that**, each cost a full round trip:
+    * Blender IK drives the bone's TAIL to the target, not its head, and
+      the palm is further along still — so solve, measure where the palm
+      actually landed, and walk the target by the error (2-3 passes).
+    * The thermos's origin is at its BASE (0% of its height), so "put the
+      cup at the palm" had him carrying it by the bottom with the body
+      above his fist. Grip band is 45% up the mesh's own local extent.
+    * The mug must be REACHABLE: at 0.245H outboard, shoulder-to-mug was
+      0.489H against a 0.379H arm, so the IK stretched and stopped short.
+      A grid search over the desk top (`place*.py` pattern in scratch)
+      against the finger envelope found the working spot.
+- **His mouth is measured off the FACE MESH** (`face_mouth_local`), kept in
+  head-bone space so it tracks the head dip. Nose = front-most
+  head-weighted vertex, chin = lowest, lips at 0.38 between. Guessing an
+  offset off the head bone is what put the cup at eye level twice.
+- **Desk height fits the FINGERTIPS, not the wrists.** The wrist version
+  assumed fingers hang ~0.066H below the wrist; this clip types with flat
+  hands, so the desk sat 6.5cm low and his hands floated over the keys for
+  the entire loop — hidden from camera by the laptop lid, caught only by
+  measuring.
+- **The mouse moves with his hand.** A static mouse under a hand that
+  slides several cm reads as swiping at a lump. `mouse_offset()` pulls it
+  under the palm when the hand is near and low, releases it otherwise;
+  offsets are precomputed per cell and smoothed with a CIRCULAR kernel so
+  the loop seam stays exact. Anchor it under the PALM, not the fingertips
+  (this clip stretches fingers ~0.11H forward of the wrist).
+- **Verification is numeric, not visual.** `--mode check` and the sprite
+  run assert per frame: cup in hand, rim at mouth during the sip, cup on
+  its desk spot at grab/put-down, and mouse step size. Several bugs
+  survived rounds of looking at renders; one check even agreed with a bug
+  because it measured against the same wrong point the code used (the
+  cup's origin), so it read a perfect 0.000 while the hand held the base.
+- **Watch for coordinate-frame mixing:** props are parented to the scene
+  root, so `ob.location` is pre-root while bones report world. Comparing
+  the two made the mouse's gating distance enormous and it never moved
+  (measured travel: exactly 0.0000H). Use `matrix_world` on both sides.
+- Face key light on the head bone (rig lights all aim at the rock's
+  belly); DOF focused on the head; camera at a higher angle than the
+  rider's (`frame_object(..., direction=(0.40, -1.0, 0.60))`) so the
+  desktop shows instead of the desk's back panel.
+- Shirt recoloured purple to match the site theme, in the same texel pass
+  as the skin: the shirt is the teal region (blue/green above red), the
+  only thing in the texture matching that test. Blue stays the luminance
+  anchor so every fold survives.
 
-**Where it stops:** every garment returns `no vertices matched`.
-`garment_from_groups` selects by vertex group, and those only exist after
-`parent_set(ARMATURE_AUTO)`. Order in `build_scene` is now
-import → bake multires → rig → cut → bind, which *should* be right, but the
-groups are still missing at cut time.
-
-Next thing to check: whether `bind_auto` actually succeeded on a 677k-vert
-body. Print `[g.name for g in body.vertex_groups]` immediately after it. If
-empty, ARMATURE_AUTO is failing silently at that density — bind BEFORE baking
-multires (bind at 10.5k verts, then bake), since weights survive the bake.
-
+Commands:
 ```bash
 /Applications/Blender.app/Contents/MacOS/Blender --background \
-  --python scripts/blender/desk.py -- --mode still --res 560 --samples 60
+  --python scripts/blender/desk.py -- --mode still --res 480 --samples 24
+... -- --mode check --res 480 --samples 24     # 5 loop landmarks
+... -- --mode sprite --frames 36 --res 900 --samples 170
+python3 scripts/blender/make-sprite-sheet.py _deskframes
 ```
 
 ## Gotchas that cost real time
 
 **Blender / bpy**
+- `reset_scene()` calls `read_factory_settings` — it WIPES all render config
+  made before it. desk.py originally did setup_render → build_scene(reset…)
+  and every render was factory EEVEE at 1920×1080: opaque alpha, no bloom,
+  --res and --samples silently ignored. Scene first, then render setup.
+- `ARMATURE_AUTO` bone heat fails silently on a 677k-vert mesh — no error,
+  no groups. Bind while the multires modifier is live (10.5k cage); weights
+  survive the bake.
+- Voxel remesh rebuilds topology and DROPS vertex groups. Any remeshed mesh
+  that must deform needs a weight transfer afterwards.
+- `bpy.ops.object.duplicate()` copies the modifier stack; a garment cut from
+  a rigged body inherits the live Armature and deforms twice once it gets
+  its own.
+- Shrinkwrapping a solidified mesh lands BOTH faces on the same offset
+  surface — flattens it. Shrinkwrap the open strip, then solidify.
 - `matrix_world` is lazily evaluated. Read it before the depsgraph runs and you
   get identity. Cost hours twice — stranded eyeballs at the origin, then eye
   holes at v=8.2. Call `bpy.context.view_layer.update()` first, always.

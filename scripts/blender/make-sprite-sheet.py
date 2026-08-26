@@ -1,8 +1,9 @@
 """
 Tile the rendered frames into one sprite sheet for the web.
 
-Run after `asteroid.py --mode sprite`:
-    python3 scripts/blender/make-sprite-sheet.py
+Run after a sprite render, passing the frames directory name:
+    python3 scripts/blender/make-sprite-sheet.py _deskframes   # desk.py
+    python3 scripts/blender/make-sprite-sheet.py               # asteroid.py
 
 Two things matter for the browser here. The sheet is cropped to the union of
 every frame's alpha bounding box, not to the render size — the subject never
@@ -18,7 +19,8 @@ import sys
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FRAMES = os.path.join(ROOT, "public", "asteroid", "_frames")
+FRAMES = os.path.join(ROOT, "public", "asteroid",
+                      sys.argv[1] if len(sys.argv) > 1 else "_frames")
 OUT_IMG = os.path.join(ROOT, "public", "asteroid", "asteroid-sprite.webp")
 OUT_META = os.path.join(ROOT, "src", "components", "site", "asteroidSprite.ts")
 QUALITY = 82

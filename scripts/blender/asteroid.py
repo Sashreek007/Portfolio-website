@@ -1051,7 +1051,7 @@ def _seam_mask(nt, coord, z_scale, x_scale, width=0.045):
 
 
 def fabric_material(name, colour, roughness=0.66, sheen=0.35, weave=150.0,
-                    seams=(0.0, 0.0), trim=None):
+                    seams=(0.0, 0.0), trim=None, bump=0.16):
     """One fabric shader, parameterised.
 
     Sheen stops cloth reading as painted vinyl; the weave bump carries close
@@ -1071,10 +1071,10 @@ def fabric_material(name, colour, roughness=0.66, sheen=0.35, weave=150.0,
     weave_tex = nt.nodes.new("ShaderNodeTexNoise")
     weave_tex.inputs["Scale"].default_value = weave
     weave_tex.inputs["Detail"].default_value = 5.0
-    bump = nt.nodes.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.16
+    bump_node = nt.nodes.new("ShaderNodeBump")
+    bump_node.inputs["Strength"].default_value = bump
     nt.links.new(coord.outputs["Object"], weave_tex.inputs["Vector"])
-    nt.links.new(weave_tex.outputs["Fac"], bump.inputs["Height"])
+    nt.links.new(weave_tex.outputs["Fac"], bump_node.inputs["Height"])
 
     if any(seams):
         seam = _seam_mask(nt, coord, seams[0], seams[1])
@@ -1096,7 +1096,7 @@ def fabric_material(name, colour, roughness=0.66, sheen=0.35, weave=150.0,
         groove.inputs["Strength"].default_value = 0.85
         groove.inputs["Distance"].default_value = 0.004
         nt.links.new(seam.outputs["Value"], groove.inputs["Height"])
-        nt.links.new(bump.outputs["Normal"], groove.inputs["Normal"])
+        nt.links.new(bump_node.outputs["Normal"], groove.inputs["Normal"])
         nt.links.new(groove.outputs["Normal"], bsdf.inputs["Normal"])
 
         rough = nt.nodes.new("ShaderNodeMix")
@@ -1108,7 +1108,7 @@ def fabric_material(name, colour, roughness=0.66, sheen=0.35, weave=150.0,
     else:
         set_input(bsdf, "Base Color", hex_rgba(colour))
         set_input(bsdf, "Roughness", roughness)
-        nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+        nt.links.new(bump_node.outputs["Normal"], bsdf.inputs["Normal"])
     return mat
 
 
@@ -1130,6 +1130,20 @@ def build_collar(H, mat):
     return _mesh_from_rings("Collar", rings, mat, closed=True, thickness=H * 0.005)
 
 
+def transfer_weights(src, dst):
+    """Copy src's vertex groups onto dst by nearest vertex, so a mesh that was
+    never cut from the body (or lost its groups to a remesh) can still follow
+    the body's armature."""
+    bpy.ops.object.select_all(action="DESELECT")
+    dst.select_set(True)
+    src.select_set(True)
+    bpy.context.view_layer.objects.active = src
+    bpy.ops.object.data_transfer(data_type="VGROUP_WEIGHTS",
+                                 vert_mapping="NEAREST",
+                                 layers_select_src="ALL",
+                                 layers_select_dst="NAME")
+
+
 def garment_from_groups(name, body, groups, H, swell, mat,
                         thickness=0.004, min_weight=0.30, relax=14, remesh=0.0):
     """Cut a garment out of a copy of the body's own geometry.
@@ -1146,6 +1160,10 @@ def garment_from_groups(name, body, groups, H, swell, mat,
     bpy.ops.object.duplicate()
     g = bpy.context.active_object
     g.name = name
+    # The copy inherits whatever modifiers the body carries — in an animated
+    # scene that includes a live Armature, and the garment gets its own
+    # binding later. Keeping the inherited one deforms the cloth twice.
+    g.modifiers.clear()
 
     idx = {g.vertex_groups[n].index for n in groups if n in g.vertex_groups}
     keep = set()
@@ -1196,6 +1214,13 @@ def garment_from_groups(name, body, groups, H, swell, mat,
         rm.voxel_size = H * remesh
         rm.use_smooth_shade = True
         bpy.ops.object.modifier_apply(modifier="Remesh")
+        # The remesh rebuilds topology and drops the vertex groups with it,
+        # and a garment without weights ignores its armature — it stays
+        # stranded in rest pose. Copy the weights back from the body.
+        transfer_weights(body, g)
+        bpy.ops.object.select_all(action="DESELECT")
+        g.select_set(True)
+        bpy.context.view_layer.objects.active = g
 
     if relax:
         sm = g.modifiers.new("Relax", "SMOOTH")
@@ -1899,10 +1924,12 @@ def setup_camera():
     return cam
 
 
-def frame_object(cam, objs, margin=1.3):
+def frame_object(cam, objs, margin=1.3, direction=(0.40, -1.0, 0.20)):
     """Point the camera at an object and back off far enough to fit it.
     Hand-placed preview cameras kept cropping the subject; deriving the
-    distance from the bounding box removes the guesswork."""
+    distance from the bounding box removes the guesswork. `direction` is
+    where the camera sits relative to the subject — the default is the
+    rider's low hero angle; the desk scene passes a higher one."""
     if not isinstance(objs, (list, tuple)):
         objs = [objs]
     bb = [o.matrix_world @ Vector(c) for o in objs for c in o.bound_box]
@@ -1910,7 +1937,7 @@ def frame_object(cam, objs, margin=1.3):
     extent = max((max(v[i] for v in bb) - min(v[i] for v in bb)) for i in range(3))
     fov = 2.0 * math.atan(18.0 / cam.data.lens)
     dist = (extent * margin) / (2.0 * math.tan(fov / 2.0))
-    direction = Vector((0.40, -1.0, 0.20)).normalized()
+    direction = Vector(direction).normalized()
     cam.location = ctr + direction * dist
     cam.rotation_mode = "QUATERNION"
     cam.rotation_quaternion = (ctr - cam.location).to_track_quat("-Z", "Y")

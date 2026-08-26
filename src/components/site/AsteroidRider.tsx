@@ -4,8 +4,10 @@ import { useEffect, useRef } from "react";
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 
-// A figure riding a tumbling asteroid, rendered out of Blender as a sprite
-// sheet (scripts/blender/asteroid.py, then make-sprite-sheet.py).
+// A figure working at a desk on an asteroid — typing, pausing once a loop to
+// drink his coffee — rendered out of Blender as a sprite sheet
+// (scripts/blender/desk.py, then make-sprite-sheet.py _deskframes). The
+// earlier caped-rider asset lives on in asteroid.py as the revert path.
 //
 // Deliberately NOT the black hole's approach. That one composites a video with
 // mix-blend-mode: screen, which costs a full blend pass over its area every
@@ -14,22 +16,21 @@ import { ASTEROID_SPRITE as S } from "./asteroidSprite";
 // video decoder. Stepping a sprite is one background-position write per frame
 // on the compositor's fast path.
 //
-// The loop is seamless by construction: the render rotates the asteroid a full
-// turn while the cape's ripple control makes a turn of its own, so the last
-// frame lands exactly on the first.
+// The loop is seamless by construction: every animation term in desk.py is an
+// integer number of cycles per loop, so the last frame lands exactly on the
+// first.
 //
 // Offscreen it stops stepping entirely, and under prefers-reduced-motion it
 // never starts — a single static frame stands in.
 
 // Pace the loop by DURATION, not per-frame delay. Trading frame count for
 // resolution is a normal thing to want here, and hardcoding milliseconds per
-// frame would silently change the rotation speed every time that trade is made.
-// One full tumble. Slow on purpose — a rock this size has no reason to hurry,
-// and the drift below carries the sense of motion so the rotation does not
-// have to. Note the floor this sits on: 24 frames over 7.2s is ~3.3 steps a
-// second, and going much slower starts to read as stuttering rather than
-// weight. Slower than this needs more frames, not a longer interval.
-const LOOP_MS = 7200;
+// frame would silently change the loop speed every time that trade is made.
+// One full work cycle: typing, a mouse gesture, and one sip of coffee —
+// 48 cells at 200ms. Note the floor this sits on: much under ~3.3 steps a
+// second starts to read as stuttering rather than calm. Slower than this
+// needs more frames, not a longer interval.
+const LOOP_MS = 9600;
 const FRAME_MS = LOOP_MS / S.frames;
 const TILT_PX = 16; // how far it leans toward the cursor
 // The right-to-left float lives in CSS (.asteroid-drift in globals.css) rather
