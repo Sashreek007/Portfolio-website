@@ -12,10 +12,11 @@
 //     load, then occasional strays — all parallel to one radiant
 //   · haikei-style layered-blob nebulae anchored to the two corners,
 //     heavily blurred, violet/amber at single-digit opacity
-//   · spatial scroll: wide tier-separated parallax (far crawls, near
-//     sweeps) + velocity motion-blur — fast scrolling smears near
-//     stars into streaks, reading as a fly-through rather than a
-//     sliding flat image
+//   · spatial scroll: the field is a PERSPECTIVE projection, not layered
+//     parallax — every star carries a depth, and scrolling walks the
+//     camera down +z so stars diverge from the vanishing point and sweep
+//     past. Motion blur follows each star's own radial path, so streaks
+//     lengthen toward the edges where perspective moves them fastest.
 // Canvas paints a static first frame, animates only while the tab is
 // visible, and everything respects reduced motion. Hidden on /blog.
 
@@ -57,15 +58,51 @@ type Star = {
   hue: 0 | 1 | 2; // 0 warm-white, 1 violet, 2 amber
 };
 
-const STARS: Star[] = (() => {
+// ── the field, in real perspective ───────────────────────────────────
+// Field stars carry a genuine depth and are projected, rather than being
+// flat points on three parallax tiers. Scrolling walks the camera down
+// +z, so stars diverge from the vanishing point — near ones sweeping
+// outward and past you, far ones barely stirring. Tiers could only ever
+// approximate that with three fixed speeds; the divergence is what reads
+// as actually moving through the field.
+//
+// Stored screen-relative rather than as world xyz: `sx, sy` is where the
+// star sits (normalised, centre-origin) at its spawn depth `d0`, so the
+// projection is just an outward scale by d0/d. That keeps the field
+// uniformly covering ANY viewport — a world-space box would have to be
+// re-fitted to each aspect ratio, and distant stars would bunch into the
+// middle leaving the corners bare.
+type FieldStar = {
+  sx: number; // −1..1 across the viewport at depth d0
+  sy: number;
+  d0: number; // spawn depth
+  r: number; // intrinsic radius
+  mag: number; // 0..1 intrinsic brightness
+  phase: number;
+  speed: number;
+  hue: 0 | 1 | 2;
+};
+
+const D_NEAR = 0.16; // sweeps past the camera here and recycles
+const D_FAR = 2.6;
+const D_SPAN = D_FAR - D_NEAR;
+// Depth travelled per pixel of scroll. Tuned so a mid-depth star drifts
+// at roughly the old near tier's rate: fast enough to feel like travel,
+// slow enough that it never pulls focus from the text.
+const DEPTH_PER_PX = 0.00075;
+
+const FIELD: FieldStar[] = (() => {
   const rng = mulberry32(11071996);
-  return Array.from({ length: 150 }, () => {
-    const tier = (rng() < 0.5 ? 0 : rng() < 0.75 ? 1 : 2) as 0 | 1 | 2;
+  return Array.from({ length: 190 }, () => {
+    const mag = rng();
     return {
-      x: rng(),
-      y: rng(),
-      r: 0.5 + tier * 0.45 + rng() * 0.5,
-      tier,
+      // spread past the edges so stars sweep in from off-screen rather
+      // than winking on at the border
+      sx: (rng() * 2 - 1) * 1.35,
+      sy: (rng() * 2 - 1) * 1.35,
+      d0: D_NEAR + rng() * D_SPAN,
+      r: 0.55 + mag * 0.9,
+      mag,
       phase: rng() * Math.PI * 2,
       speed: 0.25 + rng() * 0.6,
       hue: (rng() < 0.78 ? 0 : rng() < 0.6 ? 1 : 2) as 0 | 1 | 2,
@@ -120,11 +157,10 @@ const STAR_COLORS = [
   [239, 159, 39], // amber-bright
 ] as const;
 
-// scroll-parallax factors per depth tier (fraction of scroll distance).
-// Spread wide on purpose: depth reads through velocity CONTRAST — far
-// stars crawl, near stars sweep. The galactic band + dust use the
-// slowest factor (they are the farthest thing in the scene).
-const TIER_PARALLAX = [0.04, 0.11, 0.24] as const;
+// The galactic band stays on flat parallax at the slowest rate: it is the
+// farthest thing in the scene, so perspective would barely move it, and
+// its stars are composed ALONG a line — projecting them would pull that
+// lane apart as the camera advanced.
 const BAND_PARALLAX = 0.012;
 
 // ── prerendered layers (built once per resize, cheap to blit) ────────
@@ -552,6 +588,81 @@ export default function SpaceField() {
       }
     };
 
+    // Project a field star for a given camera depth. Returns null past the
+    // near plane. Shared by the draw and its motion-blur tail so the
+    // streak is exactly the path the star travelled, not an approximation
+    // of it.
+    const project = (s: FieldStar, camZ: number) => {
+      // wrap into [D_NEAR, D_FAR): an endless corridor of stars from a
+      // fixed set. Recycling happens at the far plane, where the star is
+      // sub-pixel and centred on the vanishing point, so it is invisible.
+      const d = D_NEAR + (((s.d0 - camZ - D_NEAR) % D_SPAN) + D_SPAN) % D_SPAN;
+      const scale = s.d0 / d;
+      return {
+        d,
+        scale,
+        x: w / 2 + s.sx * (w / 2) * scale,
+        y: h / 2 + s.sy * (h / 2) * scale,
+      };
+    };
+
+    const drawFieldStar = (s: FieldStar, t: number, camZ: number, camVel: number) => {
+      const p = project(s, camZ);
+      if (p.x < -60 || p.x > w + 60 || p.y < -60 || p.y > h + 60) return;
+
+      const [cr, cg, cb] = STAR_COLORS[s.hue];
+      // Brightness falls off with distance, and fades at BOTH ends of the
+      // corridor — in at the far plane, out as it sweeps past — so no star
+      // ever pops into or out of existence.
+      const near = Math.min(1, (p.d - D_NEAR) / 0.28);
+      const far = Math.min(1, (D_FAR - p.d) / 0.9);
+      const depthFade = Math.min(near, far);
+      const twinkle = reduced ? 0 : Math.sin(t * s.speed + s.phase) * 0.14;
+      let alpha = Math.max(
+        0,
+        (0.16 + s.mag * 0.42) * depthFade * Math.min(1.6, p.scale) + twinkle * depthFade
+      );
+      if (alpha < 0.012) return;
+      const radius = Math.min(2.9, s.r * Math.min(2.4, p.scale));
+
+      // Motion blur along the star's own radial path. Streaks lengthen
+      // toward the edges of the frame because that is where perspective
+      // moves a star fastest — the cue that sells this as travel rather
+      // than a pan.
+      if (camVel !== 0) {
+        const q = project(s, camZ - camVel);
+        const dx = p.x - q.x;
+        const dy = p.y - q.y;
+        const len = Math.hypot(dx, dy);
+        if (len > 1.6) {
+          const cap = Math.min(len, 42);
+          const k = cap / len;
+          alpha *= 9 / (9 + cap * 0.55);
+          ctx.strokeStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha})`;
+          ctx.lineWidth = radius * 1.7;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(p.x - dx * k, p.y - dy * k);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+          return;
+        }
+      }
+
+      ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      // the closest, brightest few get a halo — they read as the stars
+      // you are about to pass
+      if (s.mag > 0.72 && p.scale > 1.15) {
+        ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${alpha * 0.16})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius * 3.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
     const drawSpikeStar = (
       sp: (typeof SPIKE_STARS)[number],
       t: number,
@@ -658,8 +769,12 @@ export default function SpaceField() {
           GALAXY_SIZE
         );
       }
-      for (const s of STARS)
-        drawStar(s, 0.25 + s.tier * 0.22, t, scroll, vel, TIER_PARALLAX[s.tier], true);
+      // camera walks down +z with the scroll; velocity drives the streaks
+      const camZ = scroll * DEPTH_PER_PX;
+      const camVel = reduced
+        ? 0
+        : Math.max(-0.05, Math.min(0.05, vel * DEPTH_PER_PX * 0.06));
+      for (const s of FIELD) drawFieldStar(s, t, camZ, camVel);
       for (const s of BAND_STARS)
         drawStar(s, 0.12 + s.tier * 0.12, t, scroll, vel, BAND_PARALLAX, false);
       for (const sp of SPIKE_STARS) drawSpikeStar(sp, t, scroll);
