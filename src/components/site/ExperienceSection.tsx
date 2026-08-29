@@ -1,4 +1,5 @@
 import { EXPERIENCE, type Role } from "@/lib/experience";
+import CertificationStrip from "./CertificationStrip";
 
 // Experience as a wiring diagram rather than a list of cards: one spine per
 // role, with each bullet branching off it. It echoes the hero schematic and
@@ -116,6 +117,11 @@ export default function ExperienceSection() {
       {EXPERIENCE.map((role, i) => (
         <RoleEntry key={role.org + role.title} role={role} index={i} />
       ))}
+
+      {/* Credentials sit under the roles rather than beside them: a
+          certificate is not a role, so it gets its own rule and its own
+          grammar instead of a fourth branch off someone's spine. */}
+      <CertificationStrip />
     </div>
   );
 }
